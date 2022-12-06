@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { parseConfig } from "./config/parse-config";
 import { reactGtkPlugin } from "./esbuild-plugin/react-gtk-plugin";
+export type { Config } from "./config/config-schema";
 
 const isObject = (o: unknown): o is object =>
   typeof o === "object" && o != null;
