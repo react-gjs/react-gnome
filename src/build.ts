@@ -63,6 +63,13 @@ const WatchArgument = Argument.define({
   dataType: "boolean",
 });
 
+const BuildModeArgument = Argument.define({
+  flagChar: "-m",
+  keyword: "--mode",
+  dataType: "string",
+  description: "The build mode, either 'development' or 'production'.",
+});
+
 export async function build() {
   configure((main) => {
     main.setDisplayName("react-gtk");
@@ -70,11 +77,13 @@ export async function build() {
 
     main.addSubCommand("build", () => {
       const watch = new WatchArgument();
+      const mode = new BuildModeArgument();
 
       return {
         commandDescription: "Build and bundle the app into a single file.",
         async run() {
           try {
+            const isDev = mode.value === "development";
             const cwd = process.cwd();
             const cwdFiles = fs.readdirSync(cwd);
 
@@ -86,7 +95,9 @@ export async function build() {
               throw new Error("No config file found.");
             }
 
-            const config = await parseConfig(path.join(cwd, filename));
+            const config = await parseConfig(path.join(cwd, filename), {
+              mode: isDev ? "development" : "production",
+            });
 
             if (watch.value) {
               console.log(chalk.blueBright("Building in watch mode..."));
@@ -101,8 +112,8 @@ export async function build() {
               outfile: path.resolve(cwd, config.outDir, "index.js"),
               plugins: getPlugins("build", config, watch),
               external: config.externalPackages,
-              minify: config.minify,
-              treeShaking: config.treeShake,
+              minify: config.minify ?? (isDev ? false : true),
+              treeShaking: config.treeShake ?? (isDev ? false : true),
               jsx: "transform",
               keepNames: true,
               bundle: true,
@@ -121,11 +132,13 @@ export async function build() {
 
     main.addSubCommand("start", () => {
       const watch = new WatchArgument();
+      const mode = new BuildModeArgument();
 
       return {
         commandDescription: "Build, bundle and open the app.",
         async run() {
           try {
+            const isDev = mode.value === "development";
             const cwd = process.cwd();
             const cwdFiles = fs.readdirSync(cwd);
 
@@ -137,7 +150,9 @@ export async function build() {
               throw new Error("No config file found.");
             }
 
-            const config = await parseConfig(path.join(cwd, filename));
+            const config = await parseConfig(path.join(cwd, filename), {
+              mode: isDev ? "development" : "production",
+            });
 
             if (watch.value) {
               console.log(chalk.blueBright("Starting in watch mode."));
@@ -152,8 +167,8 @@ export async function build() {
               outfile: path.resolve(cwd, config.outDir, "index.js"),
               plugins: getPlugins("start", config, watch),
               external: config.externalPackages,
-              minify: config.minify,
-              treeShaking: config.treeShake,
+              minify: config.minify ?? (isDev ? false : true),
+              treeShaking: config.treeShake ?? (isDev ? false : true),
               jsx: "transform",
               keepNames: true,
               bundle: true,

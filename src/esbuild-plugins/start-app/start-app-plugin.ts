@@ -26,7 +26,7 @@ export const startAppPlugin = (directory: string) => {
         };
 
         const onExit = () => {
-          process.exit();
+          process.kill(process.pid, "SIGINT");
         };
 
         child.stdout?.on("data", onChildOutput);
