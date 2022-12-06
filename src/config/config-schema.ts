@@ -6,6 +6,30 @@ export const ConfigSchema = DataType.RecordOf({
   outDir: DataType.String,
   externalPackages: OptionalField(DataType.ArrayOf(DataType.String)),
   minify: OptionalField(DataType.Boolean),
+  giVersions: OptionalField(
+    DataType.RecordOf({
+      Gtk: OptionalField(DataType.Literal("3.0")),
+      Gdk: OptionalField(DataType.String),
+      Gio: OptionalField(DataType.String),
+      GLib: OptionalField(DataType.String),
+      GObject: OptionalField(DataType.String),
+      Pango: OptionalField(DataType.String),
+      Atk: OptionalField(DataType.String),
+      Cairo: OptionalField(DataType.String),
+      GModule: OptionalField(DataType.String),
+      GdkPixbuf: OptionalField(DataType.String),
+      Cally: OptionalField(DataType.String),
+      Clutter: OptionalField(DataType.String),
+      ClutterX11: OptionalField(DataType.String),
+      Cogl: OptionalField(DataType.String),
+      Graphene: OptionalField(DataType.String),
+      Gst: OptionalField(DataType.String),
+      HarfBuzz: OptionalField(DataType.String),
+      Soup: OptionalField(DataType.String),
+      cairo: OptionalField(DataType.String),
+      xlib: OptionalField(DataType.String),
+    })
+  ),
 });
 
 ConfigSchema.recordOf.entrypoint.setDescription(
@@ -25,3 +49,5 @@ ConfigSchema.recordOf.minify.type.setDescription(
 );
 
 export type Config = GetDataType<typeof ConfigSchema>;
+
+export type GiVersions = Config["giVersions"];

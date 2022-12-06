@@ -1,14 +1,29 @@
 #!/bin/bash
 
 PKG_JSON_MODULE=$(node -p "require('./package.json').type")
+HERE="$0"
+HERE_DIR=$(dirname -- "$HERE")
+
+STOP=0
+while [ "$STOP" -ne 1 ]; do
+    N=$(readlink "$HERE")
+    if [ "$N" = "" ]; then
+        STOP=1
+    else
+        HERE="$N"
+    fi
+done
+
+HERE=$(dirname -- "$HERE")
+HERE="$HERE_DIR/$HERE"
 
 if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
-    node ./node_modules/react-gtk/bin/react-gtk.cjs "$@"
+    node "$HERE"/react-gtk.cjs "$@"
 else
     if [ "$PKG_JSON_MODULE" = "module" ]; then
-        node ./node_modules/react-gtk/bin/react-gtk.mjs "$@"
+        node "$HERE"/react-gtk.mjs "$@"
     else
-        node ./node_modules/react-gtk/bin/react-gtk.js "$@"
+        node "$HERE"/react-gtk.js "$@"
     fi
 
 fi
