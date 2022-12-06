@@ -32,10 +32,11 @@ export async function build() {
       format: "esm",
       entryPoints: [path.resolve(cwd, config.entrypoint)],
       outfile: path.resolve(cwd, config.outDir, "index.js"),
-      plugins: [reactGtkPlugin(config)],
+      plugins: [reactGtkPlugin(config), ...(config.esbuildPlugins ?? [])],
       external: config.externalPackages,
       minify: config.minify,
       jsx: "transform",
+      keepNames: true,
       bundle: true,
       watch,
     });

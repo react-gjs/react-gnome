@@ -8,17 +8,17 @@ export const reactGtkPlugin = (config: Config) => {
     name: "react-gtk-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
       build.onResolve({ filter: /^gi?:\/\// }, (args) => ({
-        path: args.path.replace(/^gi?:\/\//, ""),
+        path: args.path.replace(/^gi?:/, ""),
         namespace: "gi",
       }));
 
       build.onResolve({ filter: /.*/, namespace: "gi" }, (args) => ({
-        path: args.path.replace(/^gi?:\/\//, ""),
+        path: args.path.replace(/^gi?:/, ""),
         namespace: "gi",
       }));
 
       build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
-        const name = args.path.replace(/(^gi:\/\/)|(\?.+)/g, "");
+        const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(\?.+)/g, "");
         return {
           contents: `export default ${name};`,
         };

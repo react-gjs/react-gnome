@@ -1,11 +1,19 @@
 import type { GetDataType } from "dilswer";
 import { DataType, OptionalField } from "dilswer";
+import type esbuild from "esbuild";
+
+export const EsbuildPluginDataType = DataType.Custom(
+  (v): v is esbuild.Plugin => {
+    return typeof v === "object" && v != null;
+  }
+);
 
 export const ConfigSchema = DataType.RecordOf({
   entrypoint: DataType.String,
   outDir: DataType.String,
   externalPackages: OptionalField(DataType.ArrayOf(DataType.String)),
   minify: OptionalField(DataType.Boolean),
+  esbuildPlugins: OptionalField(DataType.ArrayOf(EsbuildPluginDataType)),
   giVersions: OptionalField(
     DataType.RecordOf({
       Gtk: OptionalField(DataType.Literal("3.0")),
@@ -46,6 +54,14 @@ ConfigSchema.recordOf.externalPackages.type.setDescription(
 
 ConfigSchema.recordOf.minify.type.setDescription(
   "Whether the generated bundle should be minified.\n\nThis is useful for production builds."
+);
+
+ConfigSchema.recordOf.esbuildPlugins.type.setDescription(
+  "Esbuild plugins. Plugins can only be added via a JavaScript config file. If you are using a JSON config file and want to add a plugin, you will need to create a `react-gtk.config.js` file and use that instead."
+);
+
+ConfigSchema.recordOf.giVersions.type.setDescription(
+  "The versions of the builtin libraries from the `gi://` namespace, that should be used in the generated bundle."
 );
 
 export type Config = GetDataType<typeof ConfigSchema>;

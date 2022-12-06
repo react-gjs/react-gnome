@@ -27,6 +27,18 @@ async function main() {
 
     const configJsonSchema = toJsonSchema(ConfigSchema, {
       additionalProperties: false,
+      customParser: {
+        Custom() {
+          // EsBuild Plugin
+          return {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+            },
+            additionalProperties: false,
+          };
+        },
+      },
     });
 
     await fs.writeFile(
