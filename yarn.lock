@@ -1825,6 +1825,15 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
+"clify.js@ncpa0cpl/clify.js#0.0.1":
+  version: 1.0.3
+  resolution: "clify.js@https://github.com/ncpa0cpl/clify.js.git#commit=2da0d643c79bf75ae1ba7de4bc469ca2d25f88f0"
+  dependencies:
+    chalk: ^4.1.2
+  checksum: 24439d7328d7782a2dce275efe18edfd7150a233f09ffb9434507f036932c76e284b6e63f822f4c99a9860b4f7f72c5aff0f84c21d457b2900b1f8fe795c7ad4
+  languageName: node
+  linkType: hard
+
 "cliui@npm:^8.0.1":
   version: 8.0.1
   resolution: "cliui@npm:8.0.1"
@@ -5077,6 +5086,7 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     "@types/jest": ^29.2.4
     "@typescript-eslint/eslint-plugin": ^5.45.1
     "@typescript-eslint/parser": ^5.45.1
+    clify.js: "ncpa0cpl/clify.js#0.0.1"
     dilswer: ^1.4.1
     esbuild: ^0.15.18
     eslint: ^8.29.0
@@ -5088,6 +5098,8 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     prettier: ^2.8.0
     prettier-plugin-jsdoc: ^0.4.2
     typescript: ^4.9.3
+  bin:
+    react-gtk: ./bin/react-gtk.sh
   languageName: unknown
   linkType: soft
 

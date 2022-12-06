@@ -2,13 +2,13 @@
   "name": "react-gtk",
   "packageManager": "yarn@3.2.4",
   "bin": "./bin/react-gtk.sh",
-  "main": "./dist/legacy/build.js",
-  "types": "./dist/types/build.d.ts",
+  "main": "./dist/legacy/index.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/build.d.ts",
-      "import": "./dist/esm/build.mjs",
-      "require": "./dist/cjs/build.cjs"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs"
     }
   },
   "devDependencies": {
@@ -50,6 +50,7 @@
     "email": ""
   },
   "dependencies": {
+    "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "^1.4.1",
     "esbuild": "^0.15.18"
   }

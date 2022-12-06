@@ -13,6 +13,7 @@ export const ConfigSchema = DataType.RecordOf({
   outDir: DataType.String,
   externalPackages: OptionalField(DataType.ArrayOf(DataType.String)),
   minify: OptionalField(DataType.Boolean),
+  treeShake: OptionalField(DataType.Boolean),
   esbuildPlugins: OptionalField(DataType.ArrayOf(EsbuildPluginDataType)),
   giVersions: OptionalField(
     DataType.RecordOf({
