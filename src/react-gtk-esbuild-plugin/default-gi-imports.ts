@@ -32,7 +32,7 @@ const xlib = new GiImport("xlib");
 
 export const getDefaultGiImports = (versions: GiVersions = {}) =>
   [
-    Gtk.get(versions.Gtk),
+    Gtk.get(versions.Gtk ?? "3.0"),
     Gdk.get(versions.Gdk),
     Gio.get(versions.Gio),
     GLib.get(versions.GLib),

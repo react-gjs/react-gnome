@@ -50,6 +50,7 @@
     "email": ""
   },
   "dependencies": {
+    "chalk": "^4.1.2",
     "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "^1.4.1",
     "esbuild": "^0.15.18"

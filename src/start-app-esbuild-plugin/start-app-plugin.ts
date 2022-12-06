@@ -17,14 +17,27 @@ export const startAppPlugin = (directory: string) => {
           cwd: directory,
         });
 
+        const onChildOutput = (data: any) => {
+          console.log(data.toString());
+        };
+
+        const onChildError = (data: any) => {
+          console.error(data.toString());
+        };
+
         const onExit = () => {
           process.exit();
         };
 
+        child.stdout?.on("data", onChildOutput);
+        child.stderr?.on("data", onChildError);
         child.on("exit", onExit);
 
         cleanup = () => {
+          child.stdout?.off("data", onChildOutput);
+          child.stderr?.off("data", onChildError);
           child.off("exit", onExit);
+
           child.kill();
         };
       });

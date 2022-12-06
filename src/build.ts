@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { Argument, configure } from "clify.js";
 import type { ValidationError } from "dilswer/dist/types/validation-algorithms/validation-error/validation-error";
 import esbuild from "esbuild";
@@ -12,6 +13,24 @@ const isObject = (o: unknown): o is object =>
 
 const isValidationError = (e: unknown): e is ValidationError => {
   return (isObject(e) && e instanceof Error && "fieldPath" in e) || false;
+};
+
+const handleBuildError = (e: unknown) => {
+  if (isValidationError(e)) {
+    console.error(
+      chalk.redBright(
+        `Config file is invalid. Property "${chalk.yellowBright(
+          e.fieldPath
+        )}" is incorrect.`
+      )
+    );
+  } else if (isObject(e) && e instanceof Error) {
+    console.error("Build failed due to an error: ", chalk.redBright(e.message));
+  } else {
+    console.error(chalk.redBright("Build failed due to an unknown error."));
+  }
+
+  process.exit(1);
 };
 
 const WatchArgument = Argument.define({
@@ -45,6 +64,12 @@ export async function build() {
 
             const config = await parseConfig(path.join(cwd, filename));
 
+            if (watch.value) {
+              console.log(chalk.blueBright("Building in watch mode..."));
+            } else {
+              console.log(chalk.blueBright("Building..."));
+            }
+
             await esbuild.build({
               target: "es6",
               format: "esm",
@@ -62,17 +87,12 @@ export async function build() {
               bundle: true,
               watch: watch.value,
             });
-          } catch (e) {
-            if (isValidationError(e)) {
-              console.error(
-                `Config file is invalid. Property "${e.fieldPath}" is incorrect.`
-              );
-            } else if (isObject(e) && e instanceof Error) {
-              console.error("Build failed due to an error: ", e.message);
-            } else {
-              console.error("Build failed due to an unknown error.");
+
+            if (!watch.value) {
+              console.log(chalk.greenBright("Build completed."));
             }
-            process.exit(1);
+          } catch (e) {
+            handleBuildError(e);
           }
         },
       };
@@ -98,6 +118,12 @@ export async function build() {
 
             const config = await parseConfig(path.join(cwd, filename));
 
+            if (watch.value) {
+              console.log(chalk.blueBright("Starting in watch mode."));
+            } else {
+              console.log(chalk.blueBright("Starting."));
+            }
+
             await esbuild.build({
               target: "es6",
               format: "esm",
@@ -117,16 +143,7 @@ export async function build() {
               watch: watch.value,
             });
           } catch (e) {
-            if (isValidationError(e)) {
-              console.error(
-                `Config file is invalid. Property "${e.fieldPath}" is incorrect.`
-              );
-            } else if (isObject(e) && e instanceof Error) {
-              console.error("Build failed due to an error: ", e.message);
-            } else {
-              console.error("Build failed due to an unknown error.");
-            }
-            process.exit(1);
+            handleBuildError(e);
           }
         },
       };
