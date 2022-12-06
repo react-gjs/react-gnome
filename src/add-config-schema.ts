@@ -65,10 +65,10 @@ export const addConfigSchema = async () => {
       return false;
     })
   ) {
-    const configPath = path.resolve(__dirname, "../dist/config-schema.json");
+    const configPath = path.resolve(__dirname, "../config-schema.json");
     settings["json.schemas"].push({
       fileMatch: [CONFIG_FILE_NAME],
-      url: path.relative(cwd, configPath),
+      url: "./" + path.relative(cwd, configPath),
     });
 
     await fs.writeFile(vscodeSettingsFile, JSON.stringify(settings, null, 2));

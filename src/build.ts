@@ -1,9 +1,16 @@
-import { ValidationError } from "dilswer/dist/types/validation-algorithms/validation-error/validation-error";
+import type { ValidationError } from "dilswer/dist/types/validation-algorithms/validation-error/validation-error";
 import esbuild from "esbuild";
 import fs from "fs";
 import path from "path";
 import { parseConfig } from "./config/parse-config";
 import { reactGtkPlugin } from "./esbuild-plugin/react-gtk-plugin";
+
+const isObject = (o: unknown): o is object =>
+  typeof o === "object" && o != null;
+
+const isValidationError = (e: unknown): e is ValidationError => {
+  return (isObject(e) && e instanceof Error && "fieldPath" in e) || false;
+};
 
 const watch = process.argv.includes("--watch") || process.argv.includes("-w");
 
@@ -33,12 +40,14 @@ export async function build() {
       watch,
     });
   } catch (e) {
-    if (ValidationError.isValidationError(e)) {
+    if (isValidationError(e)) {
       console.error(
         `Config file is invalid. Property "${e.fieldPath}" is incorrect.`
       );
-    } else if (e instanceof Error) {
+    } else if (isObject(e) && e instanceof Error) {
       console.error("Build failed due to an error: ", e.message);
+    } else {
+      console.error("Build failed due to an unknown error.");
     }
     process.exit(1);
   }
