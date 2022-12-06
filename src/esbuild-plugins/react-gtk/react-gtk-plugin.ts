@@ -1,6 +1,6 @@
 import type esbuild from "esbuild";
 import fs from "fs/promises";
-import type { Config } from "../config/config-schema";
+import type { Config } from "../../config/config-schema";
 import { getDefaultGiImports } from "./default-gi-imports";
 
 export const reactGtkPlugin = (config: Config) => {

@@ -1,4 +1,4 @@
-import type { GiVersions } from "../config/config-schema";
+import type { GiVersions } from "../../config/config-schema";
 
 class GiImport {
   constructor(private name: string) {}

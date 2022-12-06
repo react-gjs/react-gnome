@@ -4,9 +4,11 @@ import type { ValidationError } from "dilswer/dist/types/validation-algorithms/v
 import esbuild from "esbuild";
 import fs from "fs";
 import path from "path";
+import type { Config } from "./config/config-schema";
 import { parseConfig } from "./config/parse-config";
-import { reactGtkPlugin } from "./react-gtk-esbuild-plugin/react-gtk-plugin";
-import { startAppPlugin } from "./start-app-esbuild-plugin/start-app-plugin";
+import { reactGtkPlugin } from "./esbuild-plugins/react-gtk/react-gtk-plugin";
+import { startAppPlugin } from "./esbuild-plugins/start-app/start-app-plugin";
+import { watchLoggerPlugin } from "./esbuild-plugins/watch-logger/watch-logger-plugin";
 
 const isObject = (o: unknown): o is object =>
   typeof o === "object" && o != null;
@@ -31,6 +33,28 @@ const handleBuildError = (e: unknown) => {
   }
 
   process.exit(1);
+};
+
+const getPlugins = (
+  type: "build" | "start",
+  config: Config,
+  watch: Argument<"boolean", false>
+) => {
+  const plugins = [reactGtkPlugin(config)];
+
+  if (type === "start") {
+    plugins.push(startAppPlugin(path.resolve(process.cwd(), config.outDir)));
+  }
+
+  if (watch.value) {
+    plugins.push(watchLoggerPlugin());
+  }
+
+  if (config.esbuildPlugins) {
+    plugins.push(...config.esbuildPlugins);
+  }
+
+  return plugins;
 };
 
 const WatchArgument = Argument.define({
@@ -75,10 +99,7 @@ export async function build() {
               format: "esm",
               entryPoints: [path.resolve(cwd, config.entrypoint)],
               outfile: path.resolve(cwd, config.outDir, "index.js"),
-              plugins: [
-                reactGtkPlugin(config),
-                ...(config.esbuildPlugins ?? []),
-              ],
+              plugins: getPlugins("build", config, watch),
               external: config.externalPackages,
               minify: config.minify,
               treeShaking: config.treeShake,
@@ -129,11 +150,7 @@ export async function build() {
               format: "esm",
               entryPoints: [path.resolve(cwd, config.entrypoint)],
               outfile: path.resolve(cwd, config.outDir, "index.js"),
-              plugins: [
-                reactGtkPlugin(config),
-                startAppPlugin(path.resolve(cwd, config.outDir)),
-                ...(config.esbuildPlugins ?? []),
-              ],
+              plugins: getPlugins("start", config, watch),
               external: config.externalPackages,
               minify: config.minify,
               treeShaking: config.treeShake,
