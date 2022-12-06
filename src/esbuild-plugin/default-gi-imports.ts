@@ -17,7 +17,6 @@ const GLib = new GiImport("GLib");
 const GObject = new GiImport("GObject");
 const Pango = new GiImport("Pango");
 const Atk = new GiImport("Atk");
-const Cairo = new GiImport("Cairo");
 const GModule = new GiImport("GModule");
 const GdkPixbuf = new GiImport("GdkPixbuf");
 const Cally = new GiImport("Cally");
@@ -40,7 +39,6 @@ export const getDefaultGiImports = (versions: GiVersions = {}) =>
     GObject.get(versions.GObject),
     Pango.get(versions.Pango),
     Atk.get(versions.Atk),
-    Cairo.get(versions.Cairo),
     GModule.get(versions.GModule),
     GdkPixbuf.get(versions.GdkPixbuf),
     Cally.get(versions.Cally),

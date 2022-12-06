@@ -18,7 +18,7 @@ export const reactGtkPlugin = (config: Config) => {
       }));
 
       build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
-        const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(\?.+)/g, "");
+        const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
         return {
           contents: `export default ${name};`,
         };
