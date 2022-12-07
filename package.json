@@ -9,6 +9,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.cjs"
+    },
+    "./build": {
+      "types": "./dist/types/build.d.ts",
+      "import": "./dist/esm/build.mjs",
+      "require": "./dist/cjs/build.cjs"
     }
   },
   "devDependencies": {
@@ -54,5 +59,8 @@
     "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "^1.4.1",
     "esbuild": "^0.15.18"
+  },
+  "peerDependencies": {
+    "ts-node": "^10.9.0"
   }
 }

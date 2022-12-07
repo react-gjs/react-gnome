@@ -31,9 +31,9 @@ export function parseConfig(filePath: string, context: ConfigContext) {
 
   if (p.ext === ".json") {
     return parseJsonConfig(filePath);
-  } else if ([".js", ".cjs", ".mjs"].includes(p.ext)) {
+  } else if ([".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"].includes(p.ext)) {
     return parseJsConfig(filePath, context);
   } else {
-    throw new Error(`Unsupported config file type: ${p.ext}`);
+    throw new Error(`Unsupported config file type: '${p.ext}'.`);
   }
 }

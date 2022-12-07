@@ -1,10 +1,21 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-require-imports */
+const path = require("path");
+
+const getDefault = (module: any) =>
+  typeof module === "object" && "default" in module ? module.default : module;
 
 export const evalJsConfigFile = async (
   config: string
 ): Promise<() => unknown> => {
-  const defaultExport = require(config);
+  const ext = path.extname(config);
+  if (ext === ".mjs" || ext === ".mts") {
+    throw new Error(
+      `Invalid config file type: '${ext}'. react-gnome is running in CommonJS mode and can accept only configs in CommonJS module format. To use ESModules, set the 'type' field in your package.json to 'module'.`
+    );
+  }
+
+  const defaultExport = getDefault(require(config));
 
   if (typeof defaultExport === "function") {
     return defaultExport;

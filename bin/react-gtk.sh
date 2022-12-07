@@ -17,13 +17,28 @@ done
 HERE=$(dirname -- "$HERE")
 HERE="$HERE_DIR/$HERE"
 
-if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
-    node "$HERE"/react-gtk.cjs "$@"
-else
-    if [ "$PKG_JSON_MODULE" = "module" ]; then
-        node "$HERE"/react-gtk.mjs "$@"
+if which ts-node >/dev/null 2>&1; then
+
+    if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
+        ts-node --swc "$HERE"/react-gtk.cjs "$@"
     else
-        node "$HERE"/react-gtk.js "$@"
+        if [ "$PKG_JSON_MODULE" = "module" ]; then
+            ts-node-esm --swc "$HERE"/react-gtk.mjs "$@"
+        else
+            ts-node --swc "$HERE"/react-gtk.js "$@"
+        fi
+
+    fi
+else
+    if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
+        node "$HERE"/react-gtk.cjs "$@"
+    else
+        if [ "$PKG_JSON_MODULE" = "module" ]; then
+            node "$HERE"/react-gtk.mjs "$@"
+        else
+            node "$HERE"/react-gtk.js "$@"
+        fi
+
     fi
 
 fi

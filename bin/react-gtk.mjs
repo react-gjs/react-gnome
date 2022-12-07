@@ -1,3 +1,3 @@
-import { build } from "react-gtk";
+import { build } from "react-gtk/build";
 
 build();
