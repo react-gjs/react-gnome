@@ -5100,7 +5100,7 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     prettier-plugin-jsdoc: ^0.4.2
     typescript: ^4.9.3
   peerDependencies:
-    ts-node: "*"
+    ts-node: ^10.9.0
   bin:
     react-gnome: ./bin/react-gnome.sh
   languageName: unknown
