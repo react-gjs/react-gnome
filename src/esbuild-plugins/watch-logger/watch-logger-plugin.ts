@@ -4,7 +4,7 @@ import type esbuild from "esbuild";
 export const watchLoggerPlugin = () => {
   let isFirstBuild = true;
   return {
-    name: "react-gtk-watch-logger-esbuild-plugin",
+    name: "react-gnome-watch-logger-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
       build.onStart(() => {
         if (!isFirstBuild) {

@@ -20,23 +20,23 @@ HERE="$HERE_DIR/$HERE"
 if which ts-node >/dev/null 2>&1; then
 
     if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
-        ts-node --swc "$HERE"/react-gtk.cjs "$@"
+        ts-node --swc "$HERE"/react-gnome.cjs "$@"
     else
         if [ "$PKG_JSON_MODULE" = "module" ]; then
-            ts-node-esm --swc "$HERE"/react-gtk.mjs "$@"
+            ts-node-esm --swc "$HERE"/react-gnome.mjs "$@"
         else
-            ts-node --swc "$HERE"/react-gtk.js "$@"
+            ts-node --swc "$HERE"/react-gnome.js "$@"
         fi
 
     fi
 else
     if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
-        node "$HERE"/react-gtk.cjs "$@"
+        node "$HERE"/react-gnome.cjs "$@"
     else
         if [ "$PKG_JSON_MODULE" = "module" ]; then
-            node "$HERE"/react-gtk.mjs "$@"
+            node "$HERE"/react-gnome.mjs "$@"
         else
-            node "$HERE"/react-gtk.js "$@"
+            node "$HERE"/react-gnome.js "$@"
         fi
 
     fi

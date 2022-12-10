@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import type { Config } from "./config/config-schema";
 import { parseConfig } from "./config/parse-config";
-import { reactGtkPlugin } from "./esbuild-plugins/react-gtk/react-gtk-plugin";
+import { reactGnomePlugin } from "./esbuild-plugins/react-gnome/react-gnome-plugin";
 import { startAppPlugin } from "./esbuild-plugins/start-app/start-app-plugin";
 import { watchLoggerPlugin } from "./esbuild-plugins/watch-logger/watch-logger-plugin";
 
@@ -40,7 +40,7 @@ const getPlugins = (
   config: Config,
   watch: Argument<"boolean", false>
 ) => {
-  const plugins = [reactGtkPlugin(config)];
+  const plugins = [reactGnomePlugin(config)];
 
   if (type === "start") {
     plugins.push(startAppPlugin(path.resolve(process.cwd(), config.outDir)));
@@ -72,7 +72,7 @@ const BuildModeArgument = Argument.define({
 
 export async function build() {
   configure((main) => {
-    main.setDisplayName("react-gtk");
+    main.setDisplayName("react-gnome");
     main.setDescription("Build GTK apps with React.");
 
     main.addSubCommand("build", () => {
@@ -88,7 +88,7 @@ export async function build() {
             const cwdFiles = fs.readdirSync(cwd);
 
             const filename = cwdFiles.find((f) =>
-              f.startsWith("react-gtk.config.")
+              f.startsWith("react-gnome.config.")
             );
 
             if (!filename) {
@@ -143,7 +143,7 @@ export async function build() {
             const cwdFiles = fs.readdirSync(cwd);
 
             const filename = cwdFiles.find((f) =>
-              f.startsWith("react-gtk.config.")
+              f.startsWith("react-gnome.config.")
             );
 
             if (!filename) {

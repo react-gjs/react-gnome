@@ -1,1 +1,1 @@
-# react-gtk
+# react-gnome

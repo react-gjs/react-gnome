@@ -3,9 +3,9 @@ import fs from "fs/promises";
 import type { Config } from "../../config/config-schema";
 import { getDefaultGiImports } from "./default-gi-imports";
 
-export const reactGtkPlugin = (config: Config) => {
+export const reactGnomePlugin = (config: Config) => {
   return {
-    name: "react-gtk-esbuild-plugin",
+    name: "react-gnome-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
       build.onResolve({ filter: /^gi?:\/\// }, (args) => ({
         path: args.path.replace(/^gi?:/, ""),

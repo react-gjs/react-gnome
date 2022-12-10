@@ -5076,9 +5076,9 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
   languageName: node
   linkType: hard
 
-"react-gtk@workspace:.":
+"react-gnome@workspace:.":
   version: 0.0.0-use.local
-  resolution: "react-gtk@workspace:."
+  resolution: "react-gnome@workspace:."
   dependencies:
     "@ncpa0cpl/nodepack": ^2.0.1
     "@swc/core": ^1.3.21
@@ -5102,7 +5102,7 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
   peerDependencies:
     ts-node: "*"
   bin:
-    react-gtk: ./bin/react-gtk.sh
+    react-gnome: ./bin/react-gnome.sh
   languageName: unknown
   linkType: soft
 

@@ -29,7 +29,7 @@ export const findProjectRoot = async () => {
   }
 };
 
-export const CONFIG_FILE_NAME = "react-gtk.config.json";
+export const CONFIG_FILE_NAME = "react-gnome.config.json";
 
 export const addConfigSchema = async () => {
   const cwd = await findProjectRoot();
