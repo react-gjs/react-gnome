@@ -7,3 +7,4 @@ install-state.gz
 .yarn
 .yarn/*
 .yarn/install-state.gz
+/polyfills/

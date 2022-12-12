@@ -14,7 +14,8 @@
       "types": "./dist/types/build.d.ts",
       "import": "./dist/esm/build.mjs",
       "require": "./dist/cjs/build.cjs"
-    }
+    },
+    "./polyfills/*": "./polyfills/esm/*.mjs"
   },
   "devDependencies": {
     "@ncpa0cpl/nodepack": "^2.0.1",

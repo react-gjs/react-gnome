@@ -9,6 +9,7 @@ import { parseConfig } from "./config/parse-config";
 import { reactGnomePlugin } from "./esbuild-plugins/react-gnome/react-gnome-plugin";
 import { startAppPlugin } from "./esbuild-plugins/start-app/start-app-plugin";
 import { watchLoggerPlugin } from "./esbuild-plugins/watch-logger/watch-logger-plugin";
+import { getDirPath } from "./get-dirpath/get-dirpath";
 
 const isObject = (o: unknown): o is object =>
   typeof o === "object" && o != null;
@@ -55,6 +56,22 @@ const getPlugins = (
   }
 
   return plugins;
+};
+
+const getPolyfills = (config: Config): string[] => {
+  const polyfills: string[] = [];
+
+  const rootPath = getDirPath();
+
+  if (config.polyfills?.fetch) {
+    polyfills.push(path.resolve(rootPath, "polyfills/esm/fetch.mjs"));
+  }
+
+  if (config.polyfills?.base64) {
+    polyfills.push(path.resolve(rootPath, "polyfills/esm/base64.mjs"));
+  }
+
+  return polyfills;
 };
 
 const WatchArgument = Argument.define({
@@ -108,6 +125,7 @@ export async function build() {
             await esbuild.build({
               target: "es6",
               format: "esm",
+              inject: getPolyfills(config),
               entryPoints: [path.resolve(cwd, config.entrypoint)],
               outfile: path.resolve(cwd, config.outDir, "index.js"),
               plugins: getPlugins("build", config, watch),
@@ -163,6 +181,7 @@ export async function build() {
             await esbuild.build({
               target: "es6",
               format: "esm",
+              inject: getPolyfills(config),
               entryPoints: [path.resolve(cwd, config.entrypoint)],
               outfile: path.resolve(cwd, config.outDir, "index.js"),
               plugins: getPlugins("start", config, watch),

@@ -39,6 +39,12 @@ export const ConfigSchema = DataType.RecordOf({
       xlib: OptionalField(DataType.String),
     })
   ),
+  polyfills: OptionalField(
+    DataType.RecordOf({
+      fetch: OptionalField(DataType.Boolean),
+      base64: OptionalField(DataType.Boolean),
+    })
+  ),
 });
 
 ConfigSchema.recordOf.entrypoint.setDescription(

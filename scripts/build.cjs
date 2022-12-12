@@ -7,21 +7,38 @@ const p = (loc) => path.resolve(__dirname, "..", loc);
 
 async function main() {
   try {
-    await build({
-      target: "es6",
-      srcDir: p("src"),
-      outDir: p("dist"),
-      tsConfig: p("tsconfig.json"),
-      formats: ["cjs", "esm", "legacy"],
-      declarations: true,
-      isomorphicImports: {
-        "./config/eval-js-config/eval-js-config.ts": {
-          js: "./config/eval-js-config/eval-js-config.cjs.ts",
-          cjs: "./config/eval-js-config/eval-js-config.cjs.ts",
-          mjs: "./config/eval-js-config/eval-js-config.mjs.ts",
+    await Promise.all([
+      // Build main package
+      await build({
+        target: "es6",
+        srcDir: p("src"),
+        outDir: p("dist"),
+        tsConfig: p("tsconfig.json"),
+        formats: ["cjs", "esm", "legacy"],
+        declarations: true,
+        exclude: [/polyfills\//],
+        isomorphicImports: {
+          "./config/eval-js-config/eval-js-config.ts": {
+            js: "./config/eval-js-config/eval-js-config.cjs.ts",
+            cjs: "./config/eval-js-config/eval-js-config.cjs.ts",
+            mjs: "./config/eval-js-config/eval-js-config.esm.ts",
+          },
+          "./get-dirpath/get-dirpath.ts": {
+            js: "./get-dirpath/get-dirpath.cjs.ts",
+            cjs: "./get-dirpath/get-dirpath.cjs.ts",
+            mjs: "./get-dirpath/get-dirpath.esm.ts",
+          },
         },
-      },
-    });
+      }),
+      // Build polyfill packages
+      await build({
+        target: "es6",
+        srcDir: p("src/polyfills"),
+        outDir: p("polyfills"),
+        tsConfig: p("tsconfig.json"),
+        formats: ["esm"],
+      }),
+    ]);
 
     const { ConfigSchema } = require(p("dist/cjs/config/config-schema.cjs"));
 
