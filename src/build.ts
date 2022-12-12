@@ -9,6 +9,10 @@ import { getPolyfills } from "./utils/get-polyfills";
 import { handleProgramError } from "./utils/handle-program-error";
 import { readConfig } from "./utils/read-config";
 
+type MapArgRecord<A extends Record<string, Argument<any, any>>> = {
+  [K in keyof A]: A[K]["value"];
+};
+
 const WatchArgument = Argument.define({
   flagChar: "-w",
   keyword: "--watch",
@@ -22,14 +26,14 @@ const BuildModeArgument = Argument.define({
   description: "The build mode, either 'development' or 'production'.",
 });
 
-export abstract class Program {
-  readonly config!: Config;
-  readonly cwd = process.cwd();
+abstract class Program {
+  config!: Readonly<Config>;
+  cwd = process.cwd();
 
   readonly args = {
     watch: new WatchArgument(),
     mode: new BuildModeArgument(),
-  };
+  } as const;
 
   get isDev() {
     return this.args.mode.value === "development";
@@ -44,12 +48,43 @@ export abstract class Program {
     after?: esbuild.Plugin[];
   };
 
+  /** @internal */
   abstract main<T extends this>(program: T): any;
 
+  /** @internal */
   async run() {
     try {
-      // @ts-expect-error
       this.config = await readConfig(this);
+      return await this.main(this);
+    } catch (e) {
+      handleProgramError(e);
+    }
+  }
+
+  async runWith(
+    args: MapArgRecord<this["args"]>,
+    config: Config,
+    workingDir?: string
+  ) {
+    try {
+      if (workingDir) {
+        this.cwd = workingDir;
+      }
+      this.config = config;
+      for (const [key, value] of Object.entries(args)) {
+        // @ts-ignore
+        const arg: Argument<any, any> = this.args[key];
+        if (arg) {
+          arg.setDefault(value);
+        }
+      }
+
+      // Freeze the config and args to prevent accidental modification during
+      // the execution of the program.
+      Object.freeze(this);
+      Object.freeze(this.args);
+      Object.freeze(this.config);
+
       return await this.main(this);
     } catch (e) {
       handleProgramError(e);
@@ -57,11 +92,12 @@ export abstract class Program {
   }
 }
 
-class BuildProgram extends Program {
+export class BuildProgram extends Program {
   additionalPlugins() {
     return {};
   }
 
+  /** @internal */
   async main() {
     if (this.watchMode) {
       console.log(chalk.blueBright("Building in watch mode..."));
@@ -90,13 +126,14 @@ class BuildProgram extends Program {
     }
   }
 }
-class StartProgram extends Program {
+export class StartProgram extends Program {
   additionalPlugins() {
     return {
       before: [startAppPlugin(path.resolve(this.cwd, this.config.outDir))],
     };
   }
 
+  /** @internal */
   async main() {
     if (this.watchMode) {
       console.log(chalk.blueBright("Starting in watch mode."));
@@ -122,6 +159,7 @@ class StartProgram extends Program {
   }
 }
 
+/** Invokes the CLI program that builds the app. */
 export async function build() {
   configure((main) => {
     main.setDisplayName("react-gnome");
