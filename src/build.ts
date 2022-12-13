@@ -92,6 +92,8 @@ abstract class Program {
   }
 }
 
+export type { Program };
+
 export class BuildProgram extends Program {
   additionalPlugins() {
     return {};

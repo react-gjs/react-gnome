@@ -56,10 +56,12 @@
     "email": ""
   },
   "dependencies": {
+    "buffer": "^6.0.3",
     "chalk": "^4.1.2",
     "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "^1.4.1",
-    "esbuild": "^0.15.18"
+    "esbuild": "^0.15.18",
+    "whatwg-url-without-unicode": "^8.0.0-3"
   },
   "peerDependencies": {
     "ts-node": "^10.9.0"

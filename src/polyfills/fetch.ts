@@ -38,7 +38,6 @@ async function fetchPolyfill(
   }
 
   if (typeof options.body === "string") {
-    // @ts-expect-error
     message.set_request("application/json", Soup.MemoryUse.COPY, options.body);
   }
 

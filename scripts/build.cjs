@@ -37,6 +37,7 @@ async function main() {
         outDir: p("polyfills"),
         tsConfig: p("tsconfig.json"),
         formats: ["esm"],
+        exclude: [/\.d\.ts$/, /index.ts/],
       }),
     ]);
 
