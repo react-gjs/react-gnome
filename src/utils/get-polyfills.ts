@@ -23,6 +23,10 @@ export const getPolyfills = (program: Program) => {
     polyfills.push(path.resolve(rootPath, "polyfills/esm/buffer.mjs"));
   }
 
+  if (program.config.polyfills?.Blob) {
+    polyfills.push(path.resolve(rootPath, "polyfills/esm/blob.mjs"));
+  }
+
   if (program.config.polyfills?.URL) {
     polyfills.push(path.resolve(rootPath, "polyfills/esm/url.mjs"));
   }

@@ -41,6 +41,7 @@ export const ConfigSchema = DataType.RecordOf({
   ),
   polyfills: OptionalField(
     DataType.RecordOf({
+      Blob: OptionalField(DataType.Boolean),
       Buffer: OptionalField(DataType.Boolean),
       FormData: OptionalField(DataType.Boolean),
       URL: OptionalField(DataType.Boolean),

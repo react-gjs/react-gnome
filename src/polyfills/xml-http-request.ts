@@ -376,6 +376,11 @@ class XMLHttpRequestPolyfill {
     return urlObj.toString();
   }
 
+  private _getTimeout() {
+    if (this.timeout <= 0) return 60 * 60; // 1 hour
+    return Math.max(1, Math.floor(this.timeout / 1000));
+  }
+
   private _getSoupMessage() {
     const message = Soup.Message.new(
       this._requestConfig.method,
@@ -441,7 +446,7 @@ class XMLHttpRequestPolyfill {
 
       const message = this._getSoupMessage();
 
-      httpSession.timeout = Math.max(1, Math.floor(this.timeout / 1000));
+      httpSession.timeout = this._getTimeout();
 
       this._abortCallback = () => httpSession.abort();
 
@@ -544,7 +549,7 @@ class XMLHttpRequestPolyfill {
 
     const message = this._getSoupMessage();
 
-    httpSession.timeout = Math.max(1, Math.floor(this.timeout / 1000));
+    httpSession.timeout = this._getTimeout();
 
     this._setReadyState(ReadyState.LOADING);
     this._eventController.emit(
