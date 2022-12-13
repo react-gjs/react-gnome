@@ -80,6 +80,40 @@ ConfigSchema.recordOf.giVersions.type.setDescription(
   "The versions of the builtin libraries from the `gi://` namespace, that should be used in the generated bundle."
 );
 
+const polyfills = ConfigSchema.recordOf.polyfills.type;
+
+polyfills.setDescription(
+  "Polyfills that should be included in the generated bundle."
+);
+
+polyfills.recordOf.Blob.type.setDescription(
+  "Whether the polyfill for a `Blob` should be included in the generated bundle. When enabled the `Blob` class will become available in the global scope."
+);
+
+polyfills.recordOf.Buffer.type.setDescription(
+  "Whether the polyfill for a `Buffer` should be included in the generated bundle. When enabled the `Buffer` class will become available in the global scope."
+);
+
+polyfills.recordOf.FormData.type.setDescription(
+  "Whether the polyfill for a `FormData` should be included in the generated bundle. When enabled the `FormData` class will become available in the global scope."
+);
+
+polyfills.recordOf.URL.type.setDescription(
+  "Whether the polyfill for a `URL` should be included in the generated bundle. When enabled the `URL` class will become available in the global scope."
+);
+
+polyfills.recordOf.XMLHttpRequest.type.setDescription(
+  "Whether the polyfill for a `XMLHttpRequest` should be included in the generated bundle. When enabled the `XMLHttpRequest` class will become available in the global scope."
+);
+
+polyfills.recordOf.base64.type.setDescription(
+  "Whether the polyfill for `atob()` and `btoa()` functions should be included in the generated bundle. When enabled the `atob()` and `btoa()` will become available in the global scope."
+);
+
+polyfills.recordOf.fetch.type.setDescription(
+  "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope."
+);
+
 export type Config = GetDataType<typeof ConfigSchema>;
 
 export type GiVersions = Config["giVersions"];
