@@ -45,5 +45,11 @@ export const getPolyfills = (program: Program) => {
     polyfills.push(path.resolve(rootPath, "polyfills/esm/base64.mjs"));
   }
 
+  if (program.config.polyfills?.AbortController) {
+    polyfills.push(
+      path.resolve(rootPath, "polyfills/esm/abort-controller.mjs")
+    );
+  }
+
   return polyfills;
 };

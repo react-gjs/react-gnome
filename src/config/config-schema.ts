@@ -41,6 +41,7 @@ export const ConfigSchema = DataType.RecordOf({
   ),
   polyfills: OptionalField(
     DataType.RecordOf({
+      AbortController: OptionalField(DataType.Boolean),
       Blob: OptionalField(DataType.Boolean),
       Buffer: OptionalField(DataType.Boolean),
       FormData: OptionalField(DataType.Boolean),
@@ -84,6 +85,10 @@ const polyfills = ConfigSchema.recordOf.polyfills.type;
 
 polyfills.setDescription(
   "Polyfills that should be included in the generated bundle."
+);
+
+polyfills.recordOf.AbortController.type.setDescription(
+  "Whether the polyfill for an `AbortController` should be included in the generated bundle. When enabled the `AbortController`, `AbortSignal` and `AbortError` classes will become available in the global scope."
 );
 
 polyfills.recordOf.Blob.type.setDescription(

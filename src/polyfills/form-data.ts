@@ -1,6 +1,6 @@
 type FormDataEntryValueP = string;
 
-class FormDataPolyfill {
+class FormData {
   private _entries: Map<string, FormDataEntryValueP[]> = new Map();
 
   append(name: string, value: FormDataEntryValueP): void {
@@ -90,4 +90,4 @@ class FormDataPolyfill {
   }
 }
 
-export { FormDataPolyfill as FormData };
+export { FormData };

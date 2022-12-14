@@ -32,7 +32,7 @@ async function main() {
       }),
       // Build polyfill packages
       await build({
-        target: "es6",
+        target: "es2022",
         srcDir: p("src/polyfills"),
         outDir: p("polyfills"),
         tsConfig: p("tsconfig.json"),

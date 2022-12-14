@@ -116,9 +116,9 @@ const XMLHttpRequestPolyfill = (() => {
       if (!this.listeners.has(event)) {
         return;
       }
-      this.listeners.get(event)!.forEach((listener) => {
+      this.listeners.get(event)!.forEach(async (listener) => {
         try {
-          listener(ev);
+          await listener(ev);
         } catch (e) {
           console.error(e);
         }

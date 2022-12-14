@@ -6,10 +6,7 @@
 
 import Soup from "gi://Soup";
 
-async function fetchPolyfill(
-  url: RequestInfo,
-  options: Partial<Request> = {} as any
-) {
+async function fetch(url: RequestInfo, options: Partial<Request> = {} as any) {
   if (typeof url === "object") {
     options = url;
     if (!options.url) {
@@ -26,8 +23,18 @@ async function fetchPolyfill(
     throw new Error(`Invalid URL: ${url}`);
   }
 
+  const httpSession = new Soup.SessionAsync();
+
   if (options.redirect === "error") {
     message.set_flags(Soup.MessageFlags.NO_REDIRECT);
+  }
+
+  let wasAborted = false;
+  if (options.signal) {
+    options.signal.addEventListener("abort", () => {
+      httpSession.abort();
+      wasAborted = true;
+    });
   }
 
   const headers = options.headers || {};
@@ -41,8 +48,6 @@ async function fetchPolyfill(
     message.set_request("application/json", Soup.MemoryUse.COPY, options.body);
   }
 
-  const httpSession = new Soup.SessionAsync();
-
   const responseBody = await new Promise<string>((resolve) => {
     httpSession.queue_message(message, (_, msg) => {
       resolve(msg.response_body.data);
@@ -53,8 +58,13 @@ async function fetchPolyfill(
   const ok = status_code >= 200 && status_code < 300;
 
   if (!ok) {
-    const error = () =>
-      new Error("HTTP Request has failed, cannot read the response body.");
+    const abortReason = options.signal?.reason;
+    const error = wasAborted
+      ? () =>
+          abortReason ??
+          new Error("Request was aborted. Cannot read the response body.")
+      : () =>
+          new Error("HTTP Request has failed, cannot read the response body.");
 
     return {
       status: status_code,
@@ -97,4 +107,4 @@ async function fetchPolyfill(
   };
 }
 
-export { fetchPolyfill as fetch };
+export { fetch as fetch };
