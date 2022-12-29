@@ -20,6 +20,7 @@ export const handleProgramError = (e: unknown) => {
   } else if (isObject(e) && e instanceof Error) {
     console.error("Build failed due to an error: ", chalk.redBright(e.message));
   } else {
+    console.error(e);
     console.error(chalk.redBright("Build failed due to an unknown error."));
   }
 

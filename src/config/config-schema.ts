@@ -9,6 +9,8 @@ export const EsbuildPluginDataType = DataType.Custom(
 );
 
 export const ConfigSchema = DataType.RecordOf({
+  applicationName: DataType.String,
+  applicationVersion: DataType.String,
   entrypoint: DataType.String,
   outDir: DataType.String,
   externalPackages: OptionalField(DataType.ArrayOf(DataType.String)),
@@ -52,6 +54,14 @@ export const ConfigSchema = DataType.RecordOf({
     })
   ),
 });
+
+ConfigSchema.recordOf.applicationName.setDescription(
+  "The name of the application.\nThis is used to generate the name of the generated bundle."
+);
+
+ConfigSchema.recordOf.applicationVersion.setDescription(
+  "The version of the application.\nThis is used to generate the bundle."
+);
 
 ConfigSchema.recordOf.entrypoint.setDescription(
   "The entrypoint file of the application.\nCan be a relative path from the project root or an absolute path."
