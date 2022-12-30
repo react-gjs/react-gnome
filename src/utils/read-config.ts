@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import type { Program } from "../build";
 import { parseConfig } from "../config/parse-config";
+import type { Program } from "../programs/base";
 
 export const readConfig = async (program: Program) => {
   const cwdFiles = fs.readdirSync(program.cwd);

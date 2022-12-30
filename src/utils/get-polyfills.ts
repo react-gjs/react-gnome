@@ -1,6 +1,6 @@
 import path from "path";
-import type { Program } from "../build";
 import { getDirPath } from "../get-dirpath/get-dirpath";
+import type { Program } from "../programs/base";
 
 export const getPolyfills = (program: Program) => {
   if (program.config.polyfills?.XMLHttpRequest) {

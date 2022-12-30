@@ -4,6 +4,7 @@ import { existsSync } from "fs";
 import path from "path";
 import rimraf from "rimraf";
 import { startAppPlugin } from "../esbuild-plugins/start-app/start-app-plugin";
+import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
 import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
@@ -26,9 +27,10 @@ export class StartProgram extends PackageProgram {
   }
 
   protected async beforeStart() {
+    const appName = this.config.applicationName.replace(/[^\w\d]/g, "");
     const buildDirPath = this.getBuildDirPath();
 
-    await this.prepareBuildFiles(buildDirPath);
+    await this.prepareBuildFiles(appName, buildDirPath);
 
     await new Command("meson", ["setup", "_build"], {
       cwd: buildDirPath,
@@ -43,7 +45,10 @@ export class StartProgram extends PackageProgram {
       console.log(chalk.blueBright("Starting."));
     }
 
+    const appName = this.config.applicationName.replace(/[^\w\d]/g, "");
     const buildDirPath = this.getBuildDirPath();
+
+    this.resources = new AppResources(appName);
 
     if (existsSync(buildDirPath))
       await new Promise<void>((resolve, reject) => {

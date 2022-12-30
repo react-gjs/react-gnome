@@ -9,7 +9,7 @@ export const getGResourceXml = (params: {
     <file>main.js</file>${
       params.files
         ? "\n" +
-          params.files.map((f) => /* xml */ `<file>${f}</file>`).join("\n")
+          params.files.map((f) => /* xml */ `    <file>${f}</file>`).join("\n")
         : ""
     }
   </gresource>

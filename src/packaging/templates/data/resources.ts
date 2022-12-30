@@ -5,10 +5,10 @@ export const getDataResources = (params: {
   /* xml */ `
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/org/gnome/${params.appName}">
-  ${
+  <gresource prefix="/org/gnome/${params.appName}">${
     params.files
-      ? params.files.map((f) => /* xml */ `<file>${f}</file>`).join("\n")
+      ? "\n" +
+        params.files.map((f) => /* xml */ `    <file>${f}</file>`).join("\n")
       : ""
   }
   </gresource>

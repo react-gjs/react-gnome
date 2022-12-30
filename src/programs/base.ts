@@ -1,6 +1,7 @@
 import { Argument } from "clify.js";
 import type esbuild from "esbuild";
 import type { Config } from "../config/config-schema";
+import type { AppResources } from "../utils/app-resources";
 import { handleProgramError } from "../utils/handle-program-error";
 import { readConfig } from "../utils/read-config";
 
@@ -24,6 +25,7 @@ const BuildModeArgument = Argument.define({
 export abstract class Program {
   config!: Readonly<Config>;
   cwd = process.cwd();
+  resources?: AppResources;
 
   readonly args = {
     watch: new WatchArgument(),

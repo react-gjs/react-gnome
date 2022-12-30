@@ -5,7 +5,7 @@ import type { Program } from "../programs/base";
 export const getPlugins = (program: Program) => {
   const additionalPlugins = program.additionalPlugins();
 
-  const plugins = [reactGnomePlugin(program.config)];
+  const plugins = [reactGnomePlugin(program.config, program.resources)];
 
   if (additionalPlugins.before) {
     plugins.push(...additionalPlugins.before);

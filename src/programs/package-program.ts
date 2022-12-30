@@ -21,6 +21,7 @@ import { getPackageJson } from "../packaging/templates/package-json";
 import { getPoFiles } from "../packaging/templates/po/get-po-files";
 import { getLinguas } from "../packaging/templates/po/linguas";
 import { getPostInstallScript } from "../packaging/templates/post-install-script";
+import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
 import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
@@ -125,6 +126,7 @@ export class PackageProgram extends Program {
     });
     const resources = getDataResources({
       appName: context.appName,
+      files: this.resources?.getAll().map((r) => r.name),
     });
     const dataService = getDataService();
     const mesonBuild = getDataMesonBuild();
@@ -144,6 +146,13 @@ export class PackageProgram extends Program {
     );
     await this.write(dataService, dataDirPath, `${context.appID}.service.in`);
     await this.write(mesonBuild, dataDirPath, "meson.build");
+
+    for (const resource of this.resources?.getAll() || []) {
+      await fs.copyFile(
+        resource.fullPath,
+        path.resolve(dataDirPath, resource.name)
+      );
+    }
   }
 
   protected async prepareSrcDirFiles(
@@ -194,9 +203,7 @@ export class PackageProgram extends Program {
     await this.write(packageJson, buildDirPath, `${context.appID}.json`);
   }
 
-  protected async prepareBuildFiles(buildDirPath: string) {
-    const appName = this.config.applicationName.replace(/[^\w\d]/g, "");
-
+  protected async prepareBuildFiles(appName: string, buildDirPath: string) {
     const context: PackagingContext = {
       appName,
       appVersion: this.config.applicationVersion,
@@ -224,7 +231,10 @@ export class PackageProgram extends Program {
   async main() {
     console.log(chalk.blueBright("Building package..."));
 
+    const appName = this.config.applicationName.replace(/[^\w\d]/g, "");
     const buildDirPath = path.resolve(this.cwd, this.config.outDir, ".build");
+
+    this.resources = new AppResources(appName);
 
     if (existsSync(buildDirPath))
       await new Promise<void>((resolve, reject) => {
@@ -251,6 +261,7 @@ export class PackageProgram extends Program {
     });
 
     const { packageName, appVersion } = await this.prepareBuildFiles(
+      appName,
       buildDirPath
     );
 
