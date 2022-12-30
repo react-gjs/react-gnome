@@ -1,6 +1,6 @@
-import type { Program } from "../build";
 import { reactGnomePlugin } from "../esbuild-plugins/react-gnome/react-gnome-plugin";
 import { watchLoggerPlugin } from "../esbuild-plugins/watch-logger/watch-logger-plugin";
+import type { Program } from "../programs/base";
 
 export const getPlugins = (program: Program) => {
   const additionalPlugins = program.additionalPlugins();

@@ -1,7 +1,10 @@
 import { execSync, spawn } from "child_process";
 import type esbuild from "esbuild";
 
-export const startAppPlugin = (directory: string) => {
+export const startAppPlugin = (params: {
+  getCwd: () => string;
+  beforeStart?: () => any;
+}) => {
   let cleanup = () => {};
   const pid = process.pid;
 
@@ -11,11 +14,13 @@ export const startAppPlugin = (directory: string) => {
       build.onEnd(async () => {
         cleanup();
 
+        await params.beforeStart?.();
+
         // spawn the bash process
-        const child = spawn("gjs", ["-m", "./index.js"], {
+        const child = spawn("meson", ["compile", "-C", "_build", "run"], {
           stdio: "inherit",
           shell: true,
-          cwd: directory,
+          cwd: params.getCwd(),
         });
 
         const onChildOutput = (data: any) => {

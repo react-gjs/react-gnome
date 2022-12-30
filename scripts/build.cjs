@@ -10,7 +10,7 @@ async function main() {
     await Promise.all([
       // Build main package
       await build({
-        target: "es6",
+        target: "es2020",
         srcDir: p("src"),
         outDir: p("dist"),
         tsConfig: p("tsconfig.json"),
