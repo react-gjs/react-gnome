@@ -1,41 +1,73 @@
 export const getDataMesonBuild = () =>
   `
-data_resource = gnome.compile_resources(app_id + '.data',
-  app_id + '.data.gresource.xml',
-  source_dir: '.',
+podir = join_paths(meson.source_root(), 'po')
+app_datadir = get_option('datadir')
+
+data_resource = gnome.compile_resources(
+  '@0@.data'.format(app_id),
+  '@0@.data.gresource.xml'.format(app_id),
   gresource_bundle: true,
   install: true,
-  install_dir : pkgdatadir)
-
-appsdir = join_paths(get_option('datadir'), 'applications')
-desktop = intl.merge_file(
-  input : app_id + '.desktop.in',
-  output : app_id + '.desktop',
-  po_dir : '../po',
-  type : 'desktop',
-  install: true,
-  install_dir: appsdir
+  install_dir : pkgdatadir
 )
 
-gsettingsdir = join_paths(get_option('datadir'), 'glib-2.0', 'schemas')
-gsettings_schema = app_id + '.gschema.xml'
-install_data(gsettings_schema, install_dir : gsettingsdir)
-meson.add_install_script('../meson/meson_post_install.py')
+# Installing the schema file
+install_data(
+  '@0@.gschema.xml'.format(app_id),
+  install_dir: join_paths(app_datadir, 'glib-2.0', 'schemas')
+)
 
-local_schemas = configure_file(copy: true,
-  input: gsettings_schema,
-  output: gsettings_schema)
-compile_local_schemas = custom_target('compile_local_schemas',
-  input: local_schemas,
-  output: 'gschemas.compiled',
-  command: ['glib-compile-schemas', meson.current_build_dir()])
+# Building desktop file
+msgfmt = find_program('msgfmt')
+desktop = custom_target(
+  'desktop-file',
+  input : '@0@.desktop.in'.format(app_id),
+  output : '@0@.desktop'.format(app_id),
+  install: true,
+  install_dir: join_paths(app_datadir, 'applications'),
+  command: [msgfmt, '--desktop',
+    '--template', '@INPUT@', '-d', podir, '-o', '@OUTPUT@',
+    '--keyword=X-Geoclue-Reason',
+    '--keyword=Name', '--keyword=Comment', '--keyword=Keywords'
+  ]
+)
+
+# Validating desktop file
+desktop_file_validate = find_program('desktop-file-validate', required:false)
+if desktop_file_validate.found()
+  test (
+    'Validate desktop file',
+    desktop_file_validate,
+    args: join_paths(meson.current_build_dir(), app_id + '.desktop')
+  )
+endif
+
+# Building app data
+appdata = intl.merge_file(
+  input: '@0@.appdata.xml.in'.format(app_id),
+  output: '@0@.appdata.xml'.format(app_id),
+  install: true,
+  install_dir: join_paths(app_datadir, 'metainfo'),
+  po_dir: podir
+)
+
+# Validating app data
+appstream_util = find_program('appstream-util', required: false)
+if appstream_util.found()
+  test(
+    'validate-appdata', appstream_util,
+    args: [
+      'validate-relax', '--nonet', appdata.full_path()
+    ]
+  )
+endif
 
 dbusservicedir = join_paths(get_option('datadir'), 'dbus-1', 'services')
 dbus_service = configure_file(
-  configuration : app_configuration,
-  input : app_id + '.service.in',
-  output : app_id + '.service',
-  install : true,
-  install_dir : dbusservicedir
+  configuration: app_configuration,
+  input: '@0@.service.in'.format(app_id),
+  output: '@0@.service'.format(app_id),
+  install: true,
+  install_dir: dbusservicedir
 )
 `.trim();

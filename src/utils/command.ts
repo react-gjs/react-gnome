@@ -14,23 +14,27 @@ export class Command {
       let stdout = "";
       let stderr = "";
 
-      child.stdout.on("data", (data) => {
-        stdout += data;
+      child.stdout.on("data", (data: Buffer) => {
+        const text = data.toString("utf-8");
+        stdout += text;
       });
 
-      child.stderr.on("data", (data) => {
-        stderr += data;
-      });
-
-      child.on("error", () => {
-        reject(new Error(stderr));
+      child.stderr.on("data", (data: Buffer) => {
+        const text = data.toString("utf-8");
+        stderr += text;
       });
 
       child.on("close", (code) => {
         if (code === 0) {
           resolve(stdout);
         } else {
-          reject(new Error(stderr));
+          reject(
+            new Error(
+              `Command '${this.command} ${this.args.join(
+                " "
+              )}' failed with error code: ${code}.\n\n${stdout}\n\n${stderr}`
+            )
+          );
         }
       });
     });

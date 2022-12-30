@@ -8,6 +8,7 @@ import rimraf from "rimraf";
 import tar from "tar";
 import type { Config } from "./config/config-schema";
 import { startAppPlugin } from "./esbuild-plugins/start-app/start-app-plugin";
+import { getAppData } from "./packaging/templates/data/appdata";
 import { getDataBusname } from "./packaging/templates/data/busname";
 import { getDataDesktopEntry } from "./packaging/templates/data/desktop-entry";
 import { getDataGSchema } from "./packaging/templates/data/gschema";
@@ -246,12 +247,19 @@ export class PackageProgram extends Program {
   }
 
   async prepareMesonDirFiles(mesonDirPath: string, context: PackagingContext) {
-    const postInstallScript = getPostInstallScript();
+    const postInstallScript = getPostInstallScript({
+      packageName: context.packageName,
+    });
 
     await this.write(postInstallScript, mesonDirPath, "meson_post_install.py");
   }
 
   async prepareDataDirFiles(dataDirPath: string, context: PackagingContext) {
+    const appData = getAppData({
+      appID: context.appID,
+      license: "GPL2", // TODO: Make this configurable
+      friendlyName: context.appName, // TODO: Make this configurable
+    });
     const dataBusname = getDataBusname({
       appID: context.appID,
     });
@@ -269,6 +277,7 @@ export class PackageProgram extends Program {
     const dataService = getDataService();
     const mesonBuild = getDataMesonBuild();
 
+    await this.write(appData, dataDirPath, `${context.appID}.appdata.xml.in`);
     await this.write(dataBusname, dataDirPath, `${context.appID}.busname`);
     await this.write(
       dataDesktopEntry,
@@ -297,13 +306,17 @@ export class PackageProgram extends Program {
 
     const srcMesonBuild = getSrcMesonBuild();
 
-    await this.write(inFile, srcDirPath, `${context.appID}.in`);
+    const inFilePath = path.resolve(srcDirPath, `${context.appID}.in`);
+
+    await this.write(inFile, inFilePath);
     await this.write(
       gresource,
       srcDirPath,
-      `${context.appID}.src.gresource.xml`
+      `${context.appID}.src.gresource.xml.in`
     );
     await this.write(srcMesonBuild, srcDirPath, "meson.build");
+
+    await fs.chmod(inFilePath, "0775");
   }
 
   async prepareMainBuildDirFiles(
@@ -314,6 +327,7 @@ export class PackageProgram extends Program {
       appID: context.appID,
       packageName: context.packageName,
       packageVersion: context.appVersion,
+      license: "GPL2", // TODO: Make this configurable
     });
 
     const packageJson = getPackageJson({
@@ -366,7 +380,7 @@ export class PackageProgram extends Program {
       });
 
     await esbuild.build({
-      target: "es6",
+      target: "es2020",
       format: "esm",
       inject: getPolyfills(this),
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
@@ -385,7 +399,9 @@ export class PackageProgram extends Program {
       buildDirPath
     );
 
-    await new Command("meson", ["_build"], { cwd: buildDirPath }).run();
+    await new Command("meson", ["setup", "_build"], {
+      cwd: buildDirPath,
+    }).run();
     await new Command("meson", ["compile", "--clean", "-C", "_build"], {
       cwd: buildDirPath,
     }).run();

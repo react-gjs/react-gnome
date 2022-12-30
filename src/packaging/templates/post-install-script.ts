@@ -1,22 +1,28 @@
-export const getPostInstallScript = () =>
+export const getPostInstallScript = (params: { packageName: string }) =>
   /* py */ `
 #!/usr/bin/env python3
 
 import os
 import pathlib
 import subprocess
+import sys
 
-prefix = pathlib.Path(os.environ.get('MESON_INSTALL_PREFIX', '/usr/local'))
-datadir = prefix / 'share'
 destdir = os.environ.get('DESTDIR', '')
+datadir = sys.argv[1]
+pkgdatadir = sys.argv[2]
+bindir = os.path.join(destdir + os.sep + sys.argv[3])
+app_id = sys.argv[4]
+
+if not os.path.exists(bindir):
+    os.makedirs(bindir)
+
+src = os.path.join(pkgdatadir, app_id)
+dest = os.path.join(bindir, '${params.packageName}')
+subprocess.call(['ln', '-s', '-f', src, dest])
 
 if not destdir:
-    print('Compiling gsettings schemas...')
-    subprocess.call(['glib-compile-schemas', str(datadir / 'glib-2.0' / 'schemas')])
-
+    print("Installing new Schemas")
+    subprocess.call(['glib-compile-schemas', os.path.join(datadir, 'glib-2.0/schemas')])
     print('Updating icon cache...')
-    subprocess.call(['gtk-update-icon-cache', '-qtf', str(datadir / 'icons' / 'hicolor')])
-
-    print('Updating desktop database...')
-    subprocess.call(['update-desktop-database', '-q', str(datadir / 'applications')])
+    subprocess.call(['gtk-update-icon-cache', '-qtf', os.path.join(datadir, 'icons', 'hicolor')])
 `.trim();

@@ -34,7 +34,7 @@ export const reactGnomePlugin = (config: Config) => {
 
         await fs.writeFile(
           build.initialOptions.outfile!,
-          [imports, outputFile].join("\n")
+          [imports, `export function main() {\n${outputFile}\n}`].join("\n")
         );
       });
     },

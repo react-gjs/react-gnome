@@ -6,10 +6,10 @@ export const getGResourceXml = (params: {
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/gnome/${params.appName}/js">
-    <file>main.js</file>
-    ${
+    <file>main.js</file>${
       params.files
-        ? params.files.map((f) => /* xml */ `<file>${f}</file>`).join("\n")
+        ? "\n" +
+          params.files.map((f) => /* xml */ `<file>${f}</file>`).join("\n")
         : ""
     }
   </gresource>

@@ -1,22 +1,28 @@
 export const getSrcMesonBuild = () =>
   `
-app_resource = gnome.compile_resources(app_id + '.src',
-app_id + '.src.gresource.xml',
-source_dir: '.',
-gresource_bundle: true,
-install: true,
-install_dir : pkgdatadir)
 
-app_launcher = configure_file(
-output : app_id,
-input : app_id + '.in',
-configuration: app_configuration)
-
-install_data(app_launcher,
-install_dir: get_option('bindir'),
-install_mode: 'rwxr-xr-x'
+application = configure_file(
+  output : app_id,
+  input : '@0@.in'.format(app_id),
+  configuration: app_configuration,
+  install: true,
+  install_dir: pkgdatadir
 )
 
-run_target('devel', command: [gjs, '-m', app_launcher],
-depends: [app_resource, data_resource, compile_local_schemas])
+application_resource = gnome.compile_resources(
+  '@0@.src'.format(app_id),
+  configure_file(
+    input: '@0@.src.gresource.xml.in'.format(app_id),
+    output: '@0@.src.gresource.xml'.format(app_id),
+    configuration: app_configuration,
+  ),
+  gresource_bundle: true,
+  install: true,
+  install_dir : pkgdatadir
+)
+
+run_target('run', 
+  command: application,
+  depends: application_resource
+)
 `.trim();
