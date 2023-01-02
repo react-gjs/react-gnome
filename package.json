@@ -63,6 +63,7 @@
     "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "^1.4.1",
     "esbuild": "^0.15.18",
+    "path-browserify": "^1.0.1",
     "rimraf": "^3.0.2",
     "tar": "^6.1.13",
     "whatwg-url-without-unicode": "^8.0.0-3"

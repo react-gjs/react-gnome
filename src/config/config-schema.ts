@@ -51,6 +51,12 @@ export const ConfigSchema = DataType.RecordOf({
       XMLHttpRequest: OptionalField(DataType.Boolean),
       base64: OptionalField(DataType.Boolean),
       fetch: OptionalField(DataType.Boolean),
+      node: OptionalField(
+        DataType.RecordOf({
+          path: OptionalField(DataType.Boolean),
+          fs: OptionalField(DataType.Boolean),
+        })
+      ),
     })
   ),
 });
@@ -127,6 +133,18 @@ polyfills.recordOf.base64.type.setDescription(
 
 polyfills.recordOf.fetch.type.setDescription(
   "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope."
+);
+
+polyfills.recordOf.node.type.setDescription(
+  "Polyfill options for some specific Node.js builtin packages."
+);
+
+polyfills.recordOf.node.type.recordOf.path.type.setDescription(
+  "Whether the polyfill for the `path` and/or `node:path` package should be included in the generated bundle. When enabled imports of `path` and `node:path` will be replaced with the polyfill."
+);
+
+polyfills.recordOf.node.type.recordOf.fs.type.setDescription(
+  "Whether the polyfill for the `fs`, `fs/promises`, `node:fs/promises`, and/or `node:fs` package should be included in the generated bundle. When enabled imports of `fs`, `fs/promises`, `node:fs/promises`, and `node:fs` will be replaced with the polyfill."
 );
 
 export type Config = GetDataType<typeof ConfigSchema>;
