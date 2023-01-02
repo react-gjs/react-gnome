@@ -7,7 +7,7 @@ export const getPolyfills = (program: Program) => {
     program.config.polyfills.URL = true;
   }
 
-  if (program.config.polyfills?.URL) {
+  if (program.config.polyfills?.URL || program.config.polyfills?.node?.fs) {
     program.config.polyfills.Buffer = true;
   }
 
