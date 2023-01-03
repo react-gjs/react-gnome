@@ -21,7 +21,6 @@
     "@ncpa0cpl/nodepack": "^2.0.1",
     "@swc/core": "^1.3.21",
     "@swc/jest": "^0.2.23",
-    "@types/jest": "^29.2.4",
     "@types/rimraf": "^3.0.2",
     "@types/tar": "^6.1.3",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
@@ -45,6 +44,7 @@
     "test:prettier": "prettier -c ./src && prettier -c ./__tests__",
     "test:tsc": "tsc --noEmit",
     "build": "node ./scripts/build.cjs",
+    "build:gest": "node ./scripts/build-gest.cjs",
     "postinstall": "node ./dist/legacy/add-config-schema.js"
   },
   "keywords": [],
