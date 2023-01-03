@@ -11,10 +11,24 @@ type SourceMap = {
   names: string[];
 };
 
+type TestUnit = {
+  dirname: string;
+  basename: string;
+  filename: string;
+  testFile: string;
+  setupFile?: string;
+};
+
 type TestUnitInfo = {
   sourceFile: string;
   bundleFile: string;
   mapFile: string;
+};
+
+type GestConfig = {
+  testDirectory: string;
+  parallel: number;
+  setup?: string;
 };
 
 class Command {
@@ -458,6 +472,63 @@ function _getErrorMessage(e: unknown) {
   return String(e);
 }
 
+function _hasProperties<K extends string>(
+  o: object,
+  ...p: K[]
+): o is Record<K, unknown> {
+  for (const key of p) {
+    if (!Object.prototype.hasOwnProperty.call(o, key)) return false;
+  }
+  return true;
+}
+
+async function _readdir(dir: string) {
+  const file = Gio.File.new_for_path(dir);
+
+  const enumerator = await _async<Gio.FileEnumerator>((p2) => {
+    file.enumerate_children_async(
+      "*",
+      Gio.FileQueryInfoFlags.NONE,
+      GLib.PRIORITY_DEFAULT,
+      null,
+      (_, result) => {
+        try {
+          const enumerator = file.enumerate_children_finish(result);
+          p2.resolve(enumerator);
+        } catch (error) {
+          p2.reject(error);
+        }
+      }
+    );
+  });
+
+  const getNextBatch = () =>
+    _async<Gio.FileInfo[]>((p3) => {
+      enumerator.next_files_async(
+        50, // max results
+        GLib.PRIORITY_DEFAULT,
+        null,
+        (_, result) => {
+          try {
+            p3.resolve(enumerator.next_files_finish(result));
+          } catch (e) {
+            p3.reject(e);
+          }
+        }
+      );
+    });
+
+  const allFile: string[] = [];
+
+  let nextBatch: Gio.FileInfo[] = [];
+
+  while ((nextBatch = await getNextBatch()).length > 0) {
+    allFile.push(...nextBatch.map((f) => f.get_name()));
+  }
+
+  return allFile;
+}
+
 async function _walkFiles(
   dir: string,
   onFile: (root: string, name: string) => void
@@ -511,13 +582,29 @@ async function _walkFiles(
   }
 }
 
-async function _buildFile(input: string, output: string) {
-  const cmd = new Command(
-    "node",
+async function _buildFile(params: {
+  input: string;
+  output: string;
+  mainSetup?: string;
+  fileSetup?: string;
+}) {
+  const { input, output, mainSetup, fileSetup } = params;
+
+  const args = [
     "/home/owner/Documents/react-gtk/gest/dist/esm/test-builder.mjs",
     input,
-    output
-  );
+    output,
+  ];
+
+  if (mainSetup) {
+    args.push(mainSetup);
+  }
+
+  if (fileSetup) {
+    args.push(fileSetup);
+  }
+
+  const cmd = new Command("node", ...args);
 
   await cmd.runSync();
 }
@@ -525,7 +612,7 @@ async function _buildFile(input: string, output: string) {
 class TestRunner {
   success: boolean = true;
 
-  constructor(private testFileQueue: string[]) {}
+  constructor(private testFileQueue: TestUnit[], private mainSetup?: string) {}
 
   makePath(parentList: string[]) {
     return parentList.map((n) => `"${n}"`).join(" > ");
@@ -657,11 +744,16 @@ class TestRunner {
   async nextUnit() {
     if (this.testFileQueue.length === 0) return false;
 
-    const testFile = this.testFileQueue.pop() as string;
-    const outputFile = testFile + ".bundled.js";
+    const testUnit = this.testFileQueue.pop() as TestUnit;
+    const outputFile = testUnit.testFile + ".bundled.js";
 
     try {
-      await _buildFile(testFile, outputFile);
+      await _buildFile({
+        input: testUnit.testFile,
+        output: outputFile,
+        fileSetup: testUnit.setupFile,
+        mainSetup: this.mainSetup,
+      });
 
       const mapFile = outputFile + ".map";
       const isOutputAbsolute = outputFile.startsWith("/");
@@ -677,7 +769,7 @@ class TestRunner {
               console.log(`Running Test Suite: "${test.name}"`);
 
               await this.runTest(test, {
-                sourceFile: testFile,
+                sourceFile: testUnit.testFile,
                 bundleFile: outputFile,
                 mapFile: mapFile,
               });
@@ -690,14 +782,14 @@ class TestRunner {
               await _deleteFile(outputFile);
               await _deleteFile(mapFile);
 
-              p.reject(new Error(`Not a test: ${testFile}`));
+              p.reject(new Error(`Not a test: ${testUnit.testFile}`));
             }
           })
           .catch(p.reject);
       });
     } catch (e) {
       this.success = false;
-      console.error(`Failed to start a test:\n${testFile}`, e);
+      console.error(`Failed to start a test:\n${testUnit.testFile}`, e);
     }
 
     return true;
@@ -708,23 +800,82 @@ class TestRunner {
   }
 }
 
+async function loadConfig() {
+  const files = await _readdir(cwd);
+
+  if (files.includes("gest.config.json")) {
+    const configText = await _readFile(_join(cwd, "gest.config.json"));
+    const config = JSON.parse(configText);
+
+    let isValid = false;
+
+    if (typeof config === "object") {
+      if (_hasProperties(config, "testDirectory", "parallel")) {
+        if (
+          typeof config.testDirectory === "string" &&
+          typeof config.parallel === "number"
+        ) {
+          isValid = true;
+        }
+      }
+
+      if (_hasProperties(config, "setup")) {
+        if (typeof config.setup !== "string") {
+          isValid = false;
+        }
+      }
+    }
+
+    if (isValid) {
+      return config as GestConfig;
+    } else {
+      console.warn("Invalid config file. Using default config instead.\n");
+    }
+  }
+}
+
 async function main() {
   try {
-    const testsDir = "./__tests__";
-    const testFileMatcher = /.*\.test\.(ts|js|tsx|jsx)$/;
-    const parallel = 4;
+    const config = await loadConfig();
 
-    const testFiles: string[] = [];
+    const testsDir = config?.testDirectory ?? "./__tests__";
+    const parallel = config?.parallel ?? 4;
+
+    const testFileMatcher = /.*\.test\.(m|c){0,1}(ts|js|tsx|jsx)$/;
+    const setupFileMatcher = /.*\.setup\.(m|c){0,1}js$/;
+
+    const testFiles: TestUnit[] = [];
 
     await _walkFiles(testsDir, (root, name) => {
       if (testFileMatcher.test(name)) {
-        testFiles.push(_join(root, name));
+        testFiles.push({
+          dirname: root,
+          filename: name,
+          basename: name.replace(/\.test\.(m|c){0,1}(ts|js|tsx|jsx)$/, ""),
+          testFile: _join(root, name),
+        });
+      }
+    });
+
+    await _walkFiles(testsDir, (root, name) => {
+      if (setupFileMatcher.test(name)) {
+        const basename = name.replace(
+          /\.setup\.(m|c){0,1}(ts|js|tsx|jsx)$/,
+          ""
+        );
+        const unit = testFiles.find(
+          (unit) => unit.basename === basename && unit.dirname === root
+        );
+
+        if (unit) {
+          unit.setupFile = _join(root, name);
+        }
       }
     });
 
     const testRunners = Array.from(
       { length: parallel },
-      () => new TestRunner(testFiles)
+      () => new TestRunner(testFiles, config?.setup)
     );
 
     await Promise.all(testRunners.map((runner) => runner.start()));

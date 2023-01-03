@@ -1,0 +1,4 @@
+{
+  "testDirectory": "./__tests__",
+  "parallel": 8
+}
