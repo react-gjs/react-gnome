@@ -1,7 +1,16 @@
 import Gio from "gi://Gio";
 import GLib from "gi://GLib";
-import type { Dirent, Mode, PathLike, Stats } from "node:fs";
+import type {
+  BigIntStats,
+  Dirent,
+  Mode,
+  ObjectEncodingOptions,
+  PathLike,
+  StatOptions,
+  Stats,
+} from "node:fs";
 import type fspt from "node:fs/promises";
+import type { FileReadOptions, FileReadResult } from "node:fs/promises";
 
 type AsFunction<T> = T extends Function ? T : () => void;
 
@@ -258,154 +267,6 @@ namespace fspromises {
   function _checkFlag(flags: number, flag: number) {
     return (flags & flag) === flag;
   }
-
-  class FileHandle {
-    _permissions: number | undefined;
-
-    _canRead = false;
-    _canWrite = false;
-    _canAppend = false;
-    _mustExist = true;
-    _mustNotExist = false;
-    _canCreate = true;
-    _truncateOnOpen = false;
-    _onlyDirs = false;
-    _failOnSymlink = false;
-
-    _fileStats: Stats | undefined;
-
-    constructor(
-      private _filePath: string,
-      flags: string | number = "r",
-      mode: Mode = 0o666
-    ) {
-      this._parseFlags(flags);
-      this._permissions = _modeNum(mode, 0o666);
-    }
-
-    private _parseFlags(flags: string | number) {
-      if (typeof flags === "number") {
-        if (_checkFlag(flags, constants.O_RDONLY)) {
-          this._canRead = true;
-        } else if (_checkFlag(flags, constants.O_WRONLY)) {
-          this._canWrite = true;
-        } else if (_checkFlag(flags, constants.O_RDWR)) {
-          this._canWrite = true;
-          this._canAppend = true;
-        } else if (_checkFlag(flags, constants.O_APPEND)) {
-          this._canAppend = true;
-        }
-
-        if (!_checkFlag(flags, constants.O_CREAT)) {
-          this._mustExist = true;
-        }
-
-        if (_checkFlag(flags, constants.O_EXCL)) {
-          this._canCreate = false;
-        }
-
-        if (_checkFlag(flags, constants.O_TRUNC)) {
-          this._truncateOnOpen = true;
-        }
-
-        if (_checkFlag(flags, constants.O_DIRECTORY)) {
-          this._onlyDirs = true;
-        }
-
-        if (_checkFlag(flags, constants.O_NOFOLLOW)) {
-          this._failOnSymlink = true;
-        }
-      } else if (typeof flags === "string") {
-        switch (flags) {
-          case "r":
-            this._canRead = true;
-            break;
-          case "r+":
-          case "rs+":
-            this._canRead = true;
-            this._canWrite = true;
-            break;
-          case "w":
-            this._canWrite = true;
-            this._mustExist = false;
-            break;
-          case "wx":
-            this._canWrite = true;
-            this._mustExist = false;
-            this._mustNotExist = true;
-            break;
-          case "w+":
-            this._canRead = true;
-            this._canWrite = true;
-            this._mustExist = false;
-            break;
-          case "wx+":
-            this._canRead = true;
-            this._canWrite = true;
-            this._mustExist = false;
-            this._mustNotExist = true;
-            break;
-          case "a":
-            this._canAppend = true;
-            this._mustExist = false;
-            break;
-          case "ax":
-            this._canAppend = true;
-            this._mustExist = false;
-            this._mustNotExist = true;
-            break;
-          case "a+":
-            this._canRead = true;
-            this._canAppend = true;
-            this._mustExist = false;
-            break;
-          case "ax+":
-            this._canRead = true;
-            this._canAppend = true;
-            this._mustExist = false;
-            this._mustNotExist = true;
-            break;
-          default:
-            throw new Error(`Invalid flags: ${flags}`);
-        }
-      }
-    }
-
-    writeFile(...[data, options]: FHMArgs<"writeFile">): Promise<void> {}
-
-    write<TBuffer extends Uint8Array>(
-      buffer: TBuffer,
-      offset?: number | null,
-      length?: number | null,
-      position?: number | null
-    ): Promise<{
-      bytesWritten: number;
-      buffer: TBuffer;
-    }>;
-    write(
-      data: string,
-      position?: number | null,
-      encoding?: BufferEncoding | null
-    ): Promise<{
-      bytesWritten: number;
-      buffer: string;
-    }>;
-    write(...args): Promise<any> {}
-  }
-
-  export const open: typeof fspt.open = async (
-    path,
-    flags,
-    mode
-  ): Promise<FileHandle> => {
-    return _async<FileHandle>(async (p) => {
-      const file = Gio.File.new_for_path(path.toString());
-
-      const handle = new FileHandle(path.toString(), flags, mode);
-
-      handle._fileStats = await stat(path);
-    });
-  };
 
   export const stat: typeof fspt.stat = async (path): Promise<any> => {
     return _async<Stats>((p) => {
@@ -701,18 +562,14 @@ namespace fspromises {
       ) {
         for await (const chunk of data) {
           if (typeof chunk === "string") {
-            await path.write(chunk, null, encoding);
+            await path.writeFile(chunk, options);
           } else {
             await path.write(chunk as Buffer);
           }
         }
         return;
       } else {
-        if (typeof data === "string") {
-          await path.write(data, null, encoding);
-        } else {
-          await path.write(data as any);
-        }
+        await path.writeFile(data as string | Uint8Array, options);
         return;
       }
     }
@@ -758,81 +615,82 @@ namespace fspromises {
   ) => {
     _ensureWriteableData(data);
 
-    if (typeof path === "object" && path instanceof FileHandle) {
-      if (!path["_canAppend"]) {
-        throw new Error("FileHandle cannot be appended to.");
-      }
+    const encoding =
+      (typeof options === "string" ? options : options?.encoding) ?? "utf8";
 
+    if (typeof path === "object" && path instanceof FileHandle) {
       if (
         _isIterable(data) &&
         !(data instanceof Buffer) &&
         !(data instanceof Uint8Array)
       ) {
         for await (const chunk of data) {
-          await path.writeFile(chunk, options);
-        }
-        return;
-      } else {
-        await path.writeFile(data, options);
-        return;
-      }
-    }
-
-    return _async((p) => {
-      const file = Gio.File.new_for_path((path as PathLike).toString());
-
-      let bytes: Uint8Array;
-
-      const encoding =
-        (typeof options === "string" ? options : options?.encoding) ?? "utf8";
-
-      if (typeof data === "string") {
-        const buff = new Buffer(data, encoding);
-        bytes = new Uint8Array(buff);
-      } else {
-        const buff = data as Buffer | Buffer[];
-        bytes = Array.isArray(buff)
-          ? (buff.map((b) => new Uint8Array(b)).flat() as any as Uint8Array)
-          : new Uint8Array(buff);
-      }
-
-      file.append_to_async(
-        Gio.FileCreateFlags.NONE,
-        GLib.PRIORITY_DEFAULT,
-        null,
-        (_, result) => {
-          try {
-            const stream = file.append_to_finish(result);
-            stream.write_all_async(
-              bytes as any,
-              GLib.PRIORITY_DEFAULT,
-              null,
-              (_, result) => {
-                try {
-                  stream.write_bytes_finish(result);
-                  stream.close_async(
-                    GLib.PRIORITY_DEFAULT,
-                    null,
-                    (_, result) => {
-                      try {
-                        stream.close_finish(result);
-                        p.resolve(undefined);
-                      } catch (error) {
-                        p.reject(error);
-                      }
-                    }
-                  );
-                } catch (error) {
-                  p.reject(error);
-                }
-              }
-            );
-          } catch (error) {
-            p.reject(error);
+          if (typeof chunk === "string") {
+            // TODO: is this correct?
+            await path.write(chunk, null, encoding);
+          } else {
+            await path.write(chunk as Buffer);
           }
         }
-      );
-    });
+        return;
+      } else {
+        await path.appendFile(data, options);
+        return;
+      }
+    } else {
+      return _async((p) => {
+        const file = Gio.File.new_for_path((path as PathLike).toString());
+
+        let bytes: Uint8Array;
+
+        if (typeof data === "string") {
+          const buff = new Buffer(data, encoding);
+          bytes = new Uint8Array(buff);
+        } else {
+          const buff = data as Buffer | Buffer[];
+          bytes = Array.isArray(buff)
+            ? (buff.map((b) => new Uint8Array(b)).flat() as any as Uint8Array)
+            : new Uint8Array(buff);
+        }
+
+        file.append_to_async(
+          Gio.FileCreateFlags.NONE,
+          GLib.PRIORITY_DEFAULT,
+          null,
+          (_, result) => {
+            try {
+              const stream = file.append_to_finish(result);
+              stream.write_all_async(
+                bytes as any,
+                GLib.PRIORITY_DEFAULT,
+                null,
+                (_, result) => {
+                  try {
+                    stream.write_bytes_finish(result);
+                    stream.close_async(
+                      GLib.PRIORITY_DEFAULT,
+                      null,
+                      (_, result) => {
+                        try {
+                          stream.close_finish(result);
+                          p.resolve(undefined);
+                        } catch (error) {
+                          p.reject(error);
+                        }
+                      }
+                    );
+                  } catch (error) {
+                    p.reject(error);
+                  }
+                }
+              );
+            } catch (error) {
+              p.reject(error);
+            }
+          }
+        );
+      });
+    }
   };
 
   export const readFile: typeof fspt.readFile = async (path, options) => {
@@ -863,6 +721,364 @@ namespace fspromises {
           p.reject(error);
         }
       });
+    });
+  };
+
+  class FileHandle {
+    _permissions: number | undefined;
+
+    _canRead = false;
+    _canWrite = false;
+    _canAppend = false;
+    _mustExist = true;
+    _mustNotExist = false;
+    _canCreate = true;
+    _truncateOnOpen = false;
+    _onlyDirs = false;
+    _failOnSymlink = false;
+
+    _fileStats: Stats | undefined;
+
+    _currentPosition = 0;
+
+    constructor(
+      private _filePath: string,
+      flags: string | number = "r",
+      mode: Mode = 0o666
+    ) {
+      this._parseFlags(flags);
+      this._permissions = _modeNum(mode, 0o666);
+    }
+
+    private _parseFlags(flags: string | number) {
+      if (typeof flags === "number") {
+        if (_checkFlag(flags, constants.O_RDONLY)) {
+          this._canRead = true;
+        } else if (_checkFlag(flags, constants.O_WRONLY)) {
+          this._canWrite = true;
+        } else if (_checkFlag(flags, constants.O_RDWR)) {
+          this._canWrite = true;
+          this._canAppend = true;
+        } else if (_checkFlag(flags, constants.O_APPEND)) {
+          this._canAppend = true;
+        }
+
+        if (!_checkFlag(flags, constants.O_CREAT)) {
+          this._mustExist = true;
+        }
+
+        if (_checkFlag(flags, constants.O_EXCL)) {
+          this._canCreate = false;
+        }
+
+        if (_checkFlag(flags, constants.O_TRUNC)) {
+          this._truncateOnOpen = true;
+        }
+
+        if (_checkFlag(flags, constants.O_DIRECTORY)) {
+          this._onlyDirs = true;
+        }
+
+        if (_checkFlag(flags, constants.O_NOFOLLOW)) {
+          this._failOnSymlink = true;
+        }
+      } else if (typeof flags === "string") {
+        switch (flags) {
+          case "r":
+            this._canRead = true;
+            break;
+          case "r+":
+          case "rs+":
+            this._canRead = true;
+            this._canWrite = true;
+            break;
+          case "w":
+            this._canWrite = true;
+            this._mustExist = false;
+            break;
+          case "wx":
+            this._canWrite = true;
+            this._mustExist = false;
+            this._mustNotExist = true;
+            break;
+          case "w+":
+            this._canRead = true;
+            this._canWrite = true;
+            this._mustExist = false;
+            break;
+          case "wx+":
+            this._canRead = true;
+            this._canWrite = true;
+            this._mustExist = false;
+            this._mustNotExist = true;
+            break;
+          case "a":
+            this._canAppend = true;
+            this._mustExist = false;
+            break;
+          case "ax":
+            this._canAppend = true;
+            this._mustExist = false;
+            this._mustNotExist = true;
+            break;
+          case "a+":
+            this._canRead = true;
+            this._canAppend = true;
+            this._mustExist = false;
+            break;
+          case "ax+":
+            this._canRead = true;
+            this._canAppend = true;
+            this._mustExist = false;
+            this._mustNotExist = true;
+            break;
+          default:
+            throw new Error(`Invalid flags: ${flags}`);
+        }
+      }
+    }
+
+    private async _getIoStream() {
+      return await _async<Gio.FileIOStream>((p) => {
+        const file = Gio.File.new_for_path(this._filePath);
+
+        file.open_readwrite_async(
+          GLib.PRIORITY_DEFAULT,
+          null,
+          async (_, result) => {
+            try {
+              const stream = file.open_readwrite_finish(result);
+              p.resolve(stream);
+            } catch (error) {
+              p.reject(error);
+            }
+          }
+        );
+      });
+    }
+
+    stat(
+      opts?: StatOptions & {
+        bigint?: false | undefined;
+      }
+    ): Promise<Stats>;
+    stat(
+      opts: StatOptions & {
+        bigint: true;
+      }
+    ): Promise<BigIntStats>;
+    stat(opts?: StatOptions): Promise<Stats | BigIntStats> {
+      return stat(this._filePath, opts);
+    }
+
+    chown(...[uid, gid]: FHMArgs<"chown">): Promise<void> {
+      return chown(this._filePath, uid, gid);
+    }
+
+    chmod(...[mode]: FHMArgs<"chmod">): Promise<void> {
+      return chmod(this._filePath, mode);
+    }
+
+    appendFile(...[data, options]: FHMArgs<"appendFile">): Promise<void> {
+      if (!this._canAppend) {
+        throw new Error("The opened file is not in a append mode.");
+      }
+
+      return this.writeFile(data, options);
+    }
+
+    read(
+      buffer: Buffer,
+      offset?: number | null,
+      length?: number | null,
+      position?: number | null
+    ): Promise<FileReadResult<Buffer>>;
+    read(options?: FileReadOptions<Buffer>): Promise<FileReadResult<Buffer>>;
+    async read(...args: any[]): Promise<FileReadResult<Buffer>> {
+      if (!this._canRead) {
+        throw new Error("The opened file is not in a read mode.");
+      }
+
+      let buffer: Buffer, offset: number, length: number, position: number;
+
+      if (!(args[0] instanceof Buffer)) {
+        const options = args[0] as FileReadOptions<Buffer>;
+        buffer = options.buffer ?? Buffer.alloc(0xffff);
+        offset = options.offset || 0;
+        length = options.length || buffer.byteLength;
+        position = options.position || this._currentPosition;
+      } else {
+        buffer = args[0];
+        offset = args[1] || 0;
+        length = args[2] || buffer.byteLength;
+        position = args[3] || this._currentPosition;
+      }
+
+      const iostream = await this._getIoStream();
+
+      try {
+        iostream.seek(position, GLib.SeekType.SET, null);
+
+        const readStream = iostream.get_input_stream();
+
+        const result = await _async<FileReadResult<Buffer>>((p) => {
+          readStream.read_bytes_async(
+            length,
+            GLib.PRIORITY_DEFAULT,
+            null,
+            (_, result) => {
+              try {
+                const bytes = readStream
+                  .read_bytes_finish(result)
+                  .unref_to_array() as any as Uint8Array;
+
+                for (let i = 0; i < bytes.byteLength; i++) {
+                  buffer[offset + i] = bytes[i]!;
+                }
+
+                p.resolve({
+                  buffer,
+                  bytesRead: bytes.byteLength,
+                });
+              } catch (error) {
+                p.reject(error);
+              }
+            }
+          );
+        });
+
+        this._currentPosition += result.bytesRead;
+
+        return result;
+      } finally {
+        iostream.close(null);
+      }
+    }
+
+    readFile(
+      options?: {
+        encoding?: null | undefined;
+        flag?: string | number | undefined;
+      } | null
+    ): Promise<Buffer>;
+    readFile(
+      options:
+        | {
+            encoding: BufferEncoding;
+            flag?: string | number | undefined;
+          }
+        | BufferEncoding
+    ): Promise<string>;
+    readFile(
+      options?:
+        | (ObjectEncodingOptions & {
+            flag?: string | number | undefined;
+          })
+        | BufferEncoding
+        | null
+    ): Promise<string | Buffer> {
+      if (!this._canRead) {
+        throw new Error("The opened file is not in a read mode.");
+      }
+
+      return readFile(this._filePath, options);
+    }
+
+    writeFile(...[data, options]: FHMArgs<"writeFile">): Promise<void> {
+      if (!this._canWrite && !this._canAppend) {
+        throw new Error("The opened file is in a read-only mode.");
+      }
+
+      if (this._canAppend) {
+        return appendFile(this._filePath, data, options);
+      }
+
+      return writeFile(this._filePath, data, options);
+    }
+
+    write<TBuffer extends Uint8Array>(
+      buffer: TBuffer,
+      offset?: number | null,
+      length?: number | null,
+      position?: number | null
+    ): Promise<{
+      bytesWritten: number;
+      buffer: TBuffer;
+    }>;
+    write(
+      data: string,
+      position?: number | null,
+      encoding?: BufferEncoding | null
+    ): Promise<{
+      bytesWritten: number;
+      buffer: string;
+    }>;
+    async write(...args: any[]): Promise<any> {
+      if (!this._canWrite && !this._canAppend) {
+        throw new Error("The opened file is in a read-only mode.");
+      }
+
+      let bytes: Uint8Array;
+      let position: number;
+
+      if (typeof args[0] === "string") {
+        position = args[1] ?? this._currentPosition;
+        bytes = new Buffer(args[0], args[2] ?? "utf8");
+      } else {
+        const offset: number = args[1] ?? 0;
+        const length: number = args[2] ?? args[0].byteLength;
+        position = args[3] ?? this._currentPosition;
+        bytes = args[0].slice(offset, offset + length);
+      }
+
+      const iostream = await this._getIoStream();
+
+      try {
+        iostream.seek(position, GLib.SeekType.SET, null);
+
+        const writeStream = iostream.get_output_stream();
+
+        const bytesWritten = await _async<number>((p) => {
+          writeStream.write_async(
+            bytes as any as number[],
+            GLib.PRIORITY_DEFAULT,
+            null,
+            (_, result) => {
+              try {
+                const bytesWritten = writeStream.write_finish(result);
+                p.resolve(bytesWritten);
+              } catch (error) {
+                p.reject(error);
+              }
+            }
+          );
+        });
+
+        this._currentPosition += bytesWritten;
+
+        return {
+          bytesWritten,
+          buffer: args[0],
+        };
+      } finally {
+        iostream.close(null);
+      }
+    }
+
+    close() {}
+  }
+
+  export const open = async (
+    path: PathLike,
+    flags?: string | number,
+    mode?: Mode
+  ): Promise<FileHandle> => {
+    return _async<FileHandle>(async (p) => {
+      const handle = new FileHandle(path.toString(), flags, mode);
+
+      handle._fileStats = await stat(path);
+
+      p.resolve(handle);
     });
   };
 }
