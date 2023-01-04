@@ -8,6 +8,7 @@ import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
 import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
+import { DefaultBuildSettings } from "./default-build-settings";
 import { PackageProgram } from "./package-program";
 
 export class StartProgram extends PackageProgram {
@@ -59,8 +60,7 @@ export class StartProgram extends PackageProgram {
       });
 
     await esbuild.build({
-      target: "es6",
-      format: "esm",
+      ...DefaultBuildSettings,
       inject: getPolyfills(this),
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(buildDirPath, "src", "main.js"),
@@ -68,9 +68,6 @@ export class StartProgram extends PackageProgram {
       external: this.config.externalPackages,
       minify: this.config.minify ?? (this.isDev ? false : true),
       treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      jsx: "transform",
-      keepNames: true,
-      bundle: true,
       watch: this.watchMode,
     });
   }

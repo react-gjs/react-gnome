@@ -5,12 +5,34 @@ const fs = require("fs/promises");
 
 const p = (loc) => path.resolve(__dirname, "..", loc);
 
+const removeGiImportsPlugin = {
+  name: "remove-gi-imports",
+  setup(build) {
+    build.onResolve({ filter: /^gi?:\/\// }, (args) => ({
+      path: args.path.replace(/^gi?:/, ""),
+      namespace: "gi",
+    }));
+
+    build.onResolve({ filter: /.*/, namespace: "gi" }, (args) => ({
+      path: args.path.replace(/^gi?:/, ""),
+      namespace: "gi",
+    }));
+
+    build.onLoad({ filter: /.*/, namespace: "gi" }, (args) => {
+      const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
+      return {
+        contents: `export default ${name};`,
+      };
+    });
+  },
+};
+
 async function main() {
   try {
     await Promise.all([
       // Build main package
       await build({
-        target: "es2020",
+        target: "es6",
         srcDir: p("src"),
         outDir: p("dist"),
         tsConfig: p("tsconfig.json"),
@@ -32,12 +54,13 @@ async function main() {
       }),
       // Build polyfill packages
       await build({
-        target: "es2022",
+        target: "ESNext",
         srcDir: p("src/polyfills"),
         outDir: p("polyfills"),
         tsConfig: p("tsconfig.json"),
         formats: ["esm"],
-        exclude: [/\.d\.ts$/, /index.ts/],
+        exclude: [/\.d\.ts$/, /index.ts/, /tsconfig/],
+        esbuildOptions: { plugins: [removeGiImportsPlugin] },
       }),
     ]);
 

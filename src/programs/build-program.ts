@@ -4,6 +4,7 @@ import path from "path";
 import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
 import { Program } from "./base";
+import { DefaultBuildSettings } from "./default-build-settings";
 
 export class BuildProgram extends Program {
   additionalPlugins() {
@@ -19,8 +20,7 @@ export class BuildProgram extends Program {
     }
 
     await esbuild.build({
-      target: "es6",
-      format: "esm",
+      ...DefaultBuildSettings,
       inject: getPolyfills(this),
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
@@ -28,9 +28,6 @@ export class BuildProgram extends Program {
       external: this.config.externalPackages,
       minify: this.config.minify ?? (this.isDev ? false : true),
       treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      jsx: "transform",
-      keepNames: true,
-      bundle: true,
       watch: this.watchMode,
     });
 

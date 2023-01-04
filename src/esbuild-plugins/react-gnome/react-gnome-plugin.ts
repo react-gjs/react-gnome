@@ -32,7 +32,7 @@ export const reactGnomePlugin = (config: Config, resources?: AppResources) => {
         namespace: "gi",
       }));
 
-      build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
+      build.onLoad({ filter: /.*/, namespace: "gi" }, (args) => {
         const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
         return {
           contents: `export default ${name};`,

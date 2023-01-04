@@ -15,6 +15,23 @@ export const nodePkgPolyfillsPlugin = (config: Config) => {
             };
           });
         }
+
+        if (nodeFills.fs) {
+          build.onResolve({ filter: /^(fs)|(node:fs)$/ }, () => {
+            return {
+              path: "react-gnome/polyfills/fs.mjs",
+            };
+          });
+
+          build.onResolve(
+            { filter: /^(fs\/promises)|(node:fs\/promises)$/ },
+            () => {
+              return {
+                path: "react-gnome/polyfills/fs-promises.mjs",
+              };
+            }
+          );
+        }
       }
     },
   };

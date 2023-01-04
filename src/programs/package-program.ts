@@ -27,6 +27,7 @@ import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
 import { pascalToKebab } from "../utils/pascal-to-kebab";
 import { Program } from "./base";
+import { DefaultBuildSettings } from "./default-build-settings";
 
 type PackagingContext = {
   appID: string;
@@ -245,8 +246,7 @@ export class PackageProgram extends Program {
       });
 
     await esbuild.build({
-      target: "es2020",
-      format: "esm",
+      ...DefaultBuildSettings,
       inject: getPolyfills(this),
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(buildDirPath, "src", "main.js"),
@@ -254,9 +254,6 @@ export class PackageProgram extends Program {
       external: this.config.externalPackages,
       minify: this.config.minify ?? (this.isDev ? false : true),
       treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      jsx: "transform",
-      keepNames: true,
-      bundle: true,
       watch: false,
     });
 

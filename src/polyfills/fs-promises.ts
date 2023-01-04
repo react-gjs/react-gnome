@@ -1,38 +1,38 @@
 import Gio from "gi://Gio";
 import GLib from "gi://GLib";
 import type { Dirent, Mode, PathLike, Stats } from "node:fs";
-import type fs from "node:fs/promises";
+import type fspt from "node:fs/promises";
 
 type AsFunction<T> = T extends Function ? T : () => void;
 
-type FsFileHandle = Awaited<ReturnType<typeof fs.open>>;
+type FsFileHandle = Awaited<ReturnType<typeof fspt.open>>;
 
 type FHMArgs<M extends keyof FsFileHandle> = Parameters<
   AsFunction<FsFileHandle[M]>
 >;
 
-export const constants = {
-  COPYFILE_EXCL: 1,
-  COPYFILE_FICLONE: 2,
-  COPYFILE_FICLONE_FORCE: 4,
-  O_RDONLY: 0,
-  O_WRONLY: 1,
-  O_RDWR: 2,
-  O_CREAT: 64,
-  O_EXCL: 128,
-  O_NOCTTY: 256,
-  O_TRUNC: 512,
-  O_APPEND: 1024,
-  O_NONBLOCK: 2048,
-  O_DSYNC: 4096,
-  O_DIRECT: 16384,
-  O_NOATIME: 262144,
-  O_NOFOLLOW: 131072,
-  O_SYNC: 1052672,
-  O_DIRECTORY: 65536,
-};
+namespace fspromises {
+  export const constants = {
+    COPYFILE_EXCL: 1,
+    COPYFILE_FICLONE: 2,
+    COPYFILE_FICLONE_FORCE: 4,
+    O_RDONLY: 0,
+    O_WRONLY: 1,
+    O_RDWR: 2,
+    O_CREAT: 64,
+    O_EXCL: 128,
+    O_NOCTTY: 256,
+    O_TRUNC: 512,
+    O_APPEND: 1024,
+    O_NONBLOCK: 2048,
+    O_DSYNC: 4096,
+    O_DIRECT: 16384,
+    O_NOATIME: 262144,
+    O_NOFOLLOW: 131072,
+    O_SYNC: 1052672,
+    O_DIRECTORY: 65536,
+  };
 
-const fsPromisesPolyfill = (() => {
   function _isIterable(obj: any): obj is Iterable<any> {
     return obj != null && typeof obj[Symbol.iterator] === "function";
   }
@@ -393,7 +393,7 @@ const fsPromisesPolyfill = (() => {
     write(...args): Promise<any> {}
   }
 
-  const open: typeof fs.open = async (
+  export const open: typeof fspt.open = async (
     path,
     flags,
     mode
@@ -407,7 +407,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const stat: typeof fs.stat = async (path): Promise<any> => {
+  export const stat: typeof fspt.stat = async (path): Promise<any> => {
     return _async<Stats>((p) => {
       const file = Gio.File.new_for_path(path.toString());
 
@@ -428,7 +428,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const readdir: typeof fs.readdir = async (path, options) => {
+  export const readdir: typeof fspt.readdir = async (path, options) => {
     return _async<any[]>(async (p) => {
       const file = Gio.File.new_for_path(path.toString());
 
@@ -486,7 +486,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const lstat: typeof fs.lstat = async (path): Promise<any> => {
+  export const lstat: typeof fspt.lstat = async (path): Promise<any> => {
     return _async<Stats>((p) => {
       const file = Gio.File.new_for_path(path.toString());
 
@@ -507,7 +507,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const chmod: typeof fs.chmod = async (path, mode) => {
+  export const chmod: typeof fspt.chmod = async (path, mode) => {
     return _async((p) => {
       const file = Gio.File.new_for_path(path.toString());
 
@@ -532,7 +532,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const chown: typeof fs.chown = async (path, uid, gid) => {
+  export const chown: typeof fspt.chown = async (path, uid, gid) => {
     return _async((p) => {
       const file = Gio.File.new_for_path(path.toString());
 
@@ -558,7 +558,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const mkdir: typeof fs.mkdir = async (path, options) => {
+  export const mkdir: typeof fspt.mkdir = async (path, options) => {
     return _async((p) => {
       const file = Gio.File.new_for_path(path.toString());
 
@@ -592,7 +592,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const rename: typeof fs.rename = async (oldPath, newPath) => {
+  export const rename: typeof fspt.rename = async (oldPath, newPath) => {
     return _async((p) => {
       const oldFile = Gio.File.new_for_path(oldPath.toString());
       const newFile = Gio.File.new_for_path(newPath.toString());
@@ -619,7 +619,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const copyFile: typeof fs.copyFile = async (src, dest, flags) => {
+  export const copyFile: typeof fspt.copyFile = async (src, dest, flags) => {
     return _async((p) => {
       const srcFile = Gio.File.new_for_path(src.toString());
       const destFile = Gio.File.new_for_path(dest.toString());
@@ -647,7 +647,9 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const unlink: typeof fs.unlink = async (path) => {
+  export const cp = copyFile;
+
+  export const unlink: typeof fspt.unlink = async (path) => {
     return _async((p) => {
       const file = Gio.File.new_for_path(path.toString());
 
@@ -664,7 +666,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const rm: typeof fs.rm = async (path, options) => {
+  export const rm: typeof fspt.rm = async (path, options) => {
     return _async(async (p) => {
       if (options?.recursive) {
         if ((await stat(path)).isDirectory()) {
@@ -681,7 +683,11 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const writeFile: typeof fs.writeFile = async (path, data, options) => {
+  export const writeFile: typeof fspt.writeFile = async (
+    path,
+    data,
+    options
+  ) => {
     _ensureWriteableData(data);
 
     const encoding =
@@ -745,7 +751,11 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const appendFile: typeof fs.appendFile = async (path, data, options) => {
+  export const appendFile: typeof fspt.appendFile = async (
+    path,
+    data,
+    options
+  ) => {
     _ensureWriteableData(data);
 
     if (typeof path === "object" && path instanceof FileHandle) {
@@ -825,7 +835,7 @@ const fsPromisesPolyfill = (() => {
     });
   };
 
-  const readFile: typeof fs.readFile = async (path, options) => {
+  export const readFile: typeof fspt.readFile = async (path, options) => {
     if (typeof path === "object" && path instanceof FileHandle) {
       return; //
     }
@@ -855,38 +865,23 @@ const fsPromisesPolyfill = (() => {
       });
     });
   };
+}
 
-  return {
-    stat,
-    lstat,
-    readdir,
-    chmod,
-    chown,
-    mkdir,
-    rename,
-    copyFile,
-    cp: copyFile,
-    unlink,
-    rm,
-    writeFile,
-    appendFile,
-    readFile,
-  };
-})();
+export default fspromises;
 
-export default fsPromisesPolyfill;
-
-export const stat = fsPromisesPolyfill.stat;
-export const lstat = fsPromisesPolyfill.lstat;
-export const readdir = fsPromisesPolyfill.readdir;
-export const chmod = fsPromisesPolyfill.chmod;
-export const chown = fsPromisesPolyfill.chown;
-export const mkdir = fsPromisesPolyfill.mkdir;
-export const rename = fsPromisesPolyfill.rename;
-export const copyFile = fsPromisesPolyfill.copyFile;
-export const cp = fsPromisesPolyfill.cp;
-export const unlink = fsPromisesPolyfill.unlink;
-export const rm = fsPromisesPolyfill.rm;
-export const writeFile = fsPromisesPolyfill.writeFile;
-export const appendFile = fsPromisesPolyfill.appendFile;
-export const readFile = fsPromisesPolyfill.readFile;
+export const appendFile = fspromises.appendFile;
+export const chmod = fspromises.chmod;
+export const chown = fspromises.chown;
+export const constants = fspromises.constants;
+export const copyFile = fspromises.copyFile;
+export const cp = fspromises.cp;
+export const lstat = fspromises.lstat;
+export const mkdir = fspromises.mkdir;
+export const open = fspromises.open;
+export const readdir = fspromises.readdir;
+export const readFile = fspromises.readFile;
+export const rename = fspromises.rename;
+export const rm = fspromises.rm;
+export const stat = fspromises.stat;
+export const unlink = fspromises.unlink;
+export const writeFile = fspromises.writeFile;
