@@ -3,6 +3,10 @@ import GLib from "gi://GLib";
 import Gtk from "gi://Gtk?version=3.0";
 import type { ExpectError, It, Test, TestHook } from "./gest-globals";
 
+declare global {
+  function print(text: string): void;
+}
+
 type SourceMap = {
   version: number;
   sources: string[];
@@ -158,6 +162,295 @@ class Command {
     });
   }
 }
+const cwd = new Command("pwd").runSync().trim();
+
+const escape = "\u001b";
+
+const Bold = `${escape}[1m`;
+
+class TermColor {
+  protected static parseRgbArgs(args: any[]): {
+    r: number;
+    g: number;
+    b: number;
+  } {
+    if (args.length === 1) {
+      const arg = args[0];
+      if (typeof arg === "string") {
+        if (arg.startsWith("rgb(")) {
+          const rgb = arg.slice(4, -1).split(",");
+          return {
+            r: Number(rgb[0]!),
+            g: Number(rgb[1]!),
+            b: Number(rgb[2]!),
+          };
+        } else if (arg.startsWith("#")) {
+          const rgb = arg.slice(1).split("");
+          return {
+            r: parseInt(rgb[0]! + rgb[1]!, 16),
+            g: parseInt(rgb[2]! + rgb[3]!, 16),
+            b: parseInt(rgb[4]! + rgb[5]!, 16),
+          };
+        }
+      } else if (typeof arg === "object") {
+        return arg as { r: number; g: number; b: number };
+      }
+    } else if (args.length === 3) {
+      return { r: args[0], g: args[1], b: args[2] };
+    }
+
+    throw new Error("Invalid arguments");
+  }
+
+  static define(name: string, color: string): void {}
+
+  static rgb(...args: any[]): string {
+    return "";
+  }
+
+  static get(color: string): string {
+    if (color in this) {
+      return (this as any)[color];
+    } else {
+      return this.rgb(color);
+    }
+  }
+}
+
+class TermFontColor extends TermColor {
+  static reset = `${escape}[0m`;
+  static red = `${escape}[31m`;
+  static green = `${escape}[32m`;
+  static yellow = `${escape}[33m`;
+  static blue = `${escape}[34m`;
+  static magenta = `${escape}[35m`;
+  static cyan = `${escape}[36m`;
+  static white = `${escape}[37m`;
+  static lightRed = `${escape}[91m`;
+  static lightGreen = `${escape}[92m`;
+  static lightYellow = `${escape}[93m`;
+  static lightBlue = `${escape}[94m`;
+  static lightMagenta = `${escape}[95m`;
+  static lightCyan = `${escape}[96m`;
+  static lightWhite = `${escape}[97m`;
+
+  static rgb(c: `#${string}` | `rgb(${string})`): string;
+  static rgb(c: { r: number; g: number; b: number }): string;
+  static rgb(r: number, g: number, b: number): string;
+  static rgb(...args: any[]): string {
+    const rgb = this.parseRgbArgs(args);
+
+    return `${escape}[38;2;${rgb.r};${rgb.g};${rgb.b}m`;
+  }
+
+  static define(name: string, color: `#${string}` | `rgb(${string})`): void {
+    Object.assign(this, { [name]: this.rgb(color) });
+  }
+}
+
+class TermBgColor extends TermColor {
+  static reset = `${escape}[0m`;
+  static red = `${escape}[41m`;
+  static green = `${escape}[42m`;
+  static yellow = `${escape}[43m`;
+  static blue = `${escape}[44m`;
+  static magenta = `${escape}[45m`;
+  static cyan = `${escape}[46m`;
+  static white = `${escape}[47m`;
+  static lightRed = `${escape}[101m`;
+  static lightGreen = `${escape}[102m`;
+  static lightYellow = `${escape}[103m`;
+  static lightBlue = `${escape}[104m`;
+  static lightMagenta = `${escape}[105m`;
+  static lightCyan = `${escape}[106m`;
+  static lightWhite = `${escape}[107m`;
+
+  static rgb(c: `#${string}` | `rgb(${string})`): string;
+  static rgb(c: { r: number; g: number; b: number }): string;
+  static rgb(r: number, g: number, b: number): string;
+  static rgb(...args: any[]): string {
+    const rgb = this.parseRgbArgs(args);
+
+    return `${escape}[48;2;${rgb.r};${rgb.g};${rgb.b}m`;
+  }
+
+  static define(name: string, color: `#${string}` | `rgb(${string})`): void {
+    Object.assign(this, { [name]: this.rgb(color) });
+  }
+}
+
+class TermMarkupFormatter {
+  private static parseTagAttributes(
+    tag: string
+  ): Map<string, string | boolean> {
+    const attributes = new Map<string, string | boolean>();
+
+    const attributesListString = tag.slice(2, -1);
+    const attributesStrings = attributesListString.split(" ");
+
+    for (const [name, value] of attributesStrings.map((s) => s.split("="))) {
+      if (value !== undefined) {
+        attributes.set(name!, value.slice(1, -1));
+      } else {
+        attributes.set(name!, true);
+      }
+    }
+
+    return attributes;
+  }
+
+  private findNextMarkupTag(
+    text: string,
+    start: number
+  ): { startIndex: number; endIndex: number } {
+    let startIndex = text.indexOf("<", start);
+    if (startIndex === -1) {
+      return { startIndex: -1, endIndex: -1 };
+      // startIndex = text.indexOf("</p>", start);
+
+      // if (startIndex === -1) {
+      //   return { startIndex: -1, endIndex: -1 };
+      // }
+    }
+
+    const endIndex = text.indexOf(">", startIndex);
+
+    return { startIndex, endIndex };
+  }
+
+  static format(text: string): string {
+    const tracker = new TermMarkupFormatter();
+
+    let result = "";
+    let offset = 0;
+
+    while (true) {
+      const { startIndex, endIndex } = tracker.findNextMarkupTag(text, offset);
+
+      if (startIndex === -1) {
+        break;
+      }
+
+      result += text.slice(offset, startIndex);
+
+      const tag = text.slice(startIndex, endIndex + 1);
+
+      if (tag === "</p>") {
+        tracker.exitScope();
+        const currentScope = tracker.currentScope;
+        let formats: string[] = [];
+
+        if (currentScope.bold) {
+          formats.push(Bold);
+        }
+        if (currentScope.bg) {
+          formats.push(currentScope.bg);
+        }
+        if (currentScope.color) {
+          formats.push(currentScope.color);
+        }
+
+        result += `${TermFontColor.reset}${formats.join("")}`;
+      }
+
+      const attributes = TermMarkupFormatter.parseTagAttributes(tag);
+
+      const colorAttrib = attributes.get("color");
+      const boldAttrib = attributes.get("bold");
+      const bgAttrib = attributes.get("bg");
+
+      if (colorAttrib || boldAttrib || bgAttrib) {
+        const scope: {
+          color?: string | undefined;
+          bg?: string | undefined;
+          bold?: boolean | undefined;
+        } = {};
+
+        if (boldAttrib) {
+          scope.bold = true;
+          result += Bold;
+        }
+
+        if (typeof bgAttrib === "string") {
+          const bg = TermBgColor.get(bgAttrib);
+          scope.bg = bg;
+          result += bg;
+        }
+
+        if (typeof colorAttrib === "string") {
+          const color = TermFontColor.get(colorAttrib);
+          scope.color = color;
+          result += color;
+        }
+
+        tracker.enterScope(scope);
+      }
+
+      offset = endIndex + 1;
+    }
+
+    result += text.slice(offset);
+
+    if (tracker.scopeStack.length > 0) {
+      result += TermFontColor.reset;
+    }
+
+    return result;
+  }
+
+  private constructor() {}
+
+  private scopeStack: { color?: string; bg?: string; bold?: boolean }[] = [];
+  private currentScope: { color?: string; bg?: string; bold?: boolean } = {};
+
+  private enterScope(scope: { color?: string; bg?: string; bold?: boolean }) {
+    this.scopeStack.push(scope);
+    this.currentScope = scope;
+  }
+
+  private exitScope() {
+    this.scopeStack.pop();
+    this.currentScope = this.scopeStack[this.scopeStack.length - 1] ?? {};
+  }
+}
+
+class Output {
+  static print(text: string) {
+    try {
+      const formatted = TermMarkupFormatter.format(text);
+      print(formatted);
+    } catch (e) {
+      //
+    }
+  }
+}
+
+class OutputBuffer {
+  private lines: string[] = [];
+
+  private appendToLastLine(text: string) {
+    const lastLine = this.lines.pop();
+    if (lastLine) {
+      this.lines.push(lastLine + text);
+    } else {
+      this.lines.push(text);
+    }
+  }
+
+  print(...text: string[]) {
+    this.appendToLastLine(text.join(""));
+  }
+
+  println(text: string) {
+    this.lines.push(text);
+  }
+
+  flush() {
+    const text = this.lines.join("\n");
+    Output.print(text);
+    this.lines = [];
+  }
+}
 
 class Base64VLQ {
   char_to_integer: Record<string, number> = {};
@@ -264,26 +557,28 @@ class SourceMapReader {
     for (const [index, line] of vlqs.entries()) {
       state[0] = 0;
 
-      for (const segment of line) {
+      for (const [segindex, segment] of line.entries()) {
         if (!segment) continue;
-
         const segmentCords = this.converter.decode(segment);
 
         const prevState: typeof state = [...state];
 
         state[0] += segmentCords[0];
-        state[1] += segmentCords[1];
-        state[2] += segmentCords[2];
-        state[3] += segmentCords[3];
-        if (segmentCords[4] !== undefined) state[4] += segmentCords[4];
 
-        if (index === outLine) {
-          if (prevState[0] <= outColumn && outColumn <= state[0]) {
-            return {
-              file: this.map.sources[state[1]],
-              line: state[2],
-              column: state[3],
-            };
+        if (segmentCords.length > 1) {
+          state[1] += segmentCords[1];
+          state[2] += segmentCords[2];
+          state[3] += segmentCords[3];
+          if (segmentCords[4] !== undefined) state[4] += segmentCords[4];
+
+          if (index === outLine) {
+            if (prevState[0] < outColumn && outColumn <= state[0]) {
+              return {
+                file: this.map.sources[state[1]],
+                line: state[2],
+                column: state[3],
+              };
+            }
           }
         }
       }
@@ -312,7 +607,10 @@ class NoLogError extends Error {
   }
 }
 
-const cwd = new Command("pwd").runSync().trim();
+const _leftPad = (str: string, len: number, char = " ") => {
+  const pad = char.repeat(len);
+  return pad + str.replaceAll("\n", "\n" + pad);
+};
 
 function _async<T = void>(
   callback: (promise: { resolve(v: T): void; reject(e: any): void }) => void
@@ -611,11 +909,15 @@ async function _buildFile(params: {
 
 class TestRunner {
   success: boolean = true;
+  mainOutput = new OutputBuffer();
+  testErrorOutputs: OutputBuffer[] = [];
 
   constructor(private testFileQueue: TestUnit[], private mainSetup?: string) {}
 
   makePath(parentList: string[]) {
-    return parentList.map((n) => `"${n}"`).join(" > ");
+    return parentList
+      .map((n) => `"${n}"`)
+      .join(/* html */ `<p bold color="white"> > </p>`);
   }
 
   async getLocationFromMap(info: TestUnitInfo, line: number, column: number) {
@@ -625,13 +927,11 @@ class TestRunner {
       const sourceReader = new SourceMapReader(map);
       return sourceReader.getOriginalPosition(line, column);
     } catch (e) {
-      console.log(e);
-
       return null;
     }
   }
 
-  async runHook(hook: TestHook, info: TestUnitInfo) {
+  async runHook(hook: TestHook, info: TestUnitInfo, errOutput: OutputBuffer) {
     try {
       await hook.callback();
     } catch (e) {
@@ -641,33 +941,43 @@ class TestRunner {
         hook.column
       );
 
-      console.error(
-        `\nAn error occurred when running a lifecycle hook:\n`,
-        _getErrorMessage(e),
-        `\n\n${info.sourceFile}${
+      errOutput.println(
+        /* html */ `<p bold bg="customBlack" color="red">An error occurred when running a lifecycle hook:</p>`
+      );
+      errOutput.println(_getErrorMessage(e));
+      errOutput.println(
+        /* html */ `<p color="#FFFFFF">${info.sourceFile}${
           location ? `:${location?.line}:${location?.column}` : ""
-        }`
+        }</p>`
       );
 
       throw new NoLogError(e, "Hook error");
     }
   }
 
-  async runTestCase(testCase: It, info: TestUnitInfo, parentList: string[]) {
+  async runTestCase(
+    testCase: It,
+    info: TestUnitInfo,
+    parentList: string[],
+    errOutput: OutputBuffer
+  ) {
     try {
       await testCase.callback();
+      return true;
     } catch (e) {
+      const testPath = this.makePath([...parentList, testCase.name]);
+
       if (_isExpectError(e)) {
         e.handle();
         const location = await this.getLocationFromMap(info, e.line, e.column);
-        console.warn(
-          "\n",
-          this.makePath(parentList),
-          `\nTest case failed:\n`,
-          e.message,
-          `\n\n${info.sourceFile}${
+        errOutput.println(
+          /* html */ `<p bold bg="customBlack" color="red">${testPath}</p>`
+        );
+        errOutput.println(_leftPad(e.message, 4));
+        errOutput.println(
+          /* html */ `<p color="#FFFFFF">${info.sourceFile}${
             location ? `:${location?.line}:${location?.column}` : ""
-          }`
+          }</p>`
         );
         this.success = false;
       } else {
@@ -676,69 +986,94 @@ class TestRunner {
           testCase.line,
           testCase.column
         );
-        console.warn(
-          "\n",
-          this.makePath(parentList),
-          `\nTest case failed:\n`,
-          _getErrorMessage(e),
-          `\n\n${info.sourceFile}${
+        errOutput.println(
+          /* html */ `<p bold bg="customBlack" color="red">${testPath}</p>`
+        );
+        errOutput.println(_leftPad(_getErrorMessage(e), 4));
+        errOutput.println(
+          /* html */ `<p color="#FFFFFF">${info.sourceFile}${
             location ? `:${location?.line}:${location?.column}` : ""
-          }`
+          }</p>`
         );
         this.success = false;
-        throw e;
       }
+      return false;
     }
   }
 
-  async runTest(test: Test, info: TestUnitInfo, parentList: string[] = []) {
+  async runTest(
+    test: Test,
+    info: TestUnitInfo,
+    parentList: string[] = [],
+    errOutput: OutputBuffer
+  ): Promise<boolean> {
+    let passed = true;
+
     try {
       for (const hook of test.beforeAll) {
-        await this.runHook(hook, info);
+        await this.runHook(hook, info, errOutput);
       }
 
       for (const testCase of test.its) {
         for (const hook of test.beforeEach) {
-          await this.runHook(hook, info);
+          await this.runHook(hook, info, errOutput);
         }
 
-        await this.runTestCase(testCase, info, parentList.concat(test.name));
+        const result = await this.runTestCase(
+          testCase,
+          info,
+          parentList.concat(test.name),
+          errOutput
+        );
+
+        passed &&= result;
 
         for (const hook of test.afterEach) {
-          await this.runHook(hook, info);
+          await this.runHook(hook, info, errOutput);
         }
       }
 
       for (const subTest of test.subTests) {
-        await this.runTest(
+        const result = await this.runTest(
           {
             ...subTest,
             beforeEach: [...test.beforeEach, ...subTest.beforeEach],
             afterEach: [...test.afterEach, ...subTest.afterEach],
           },
           info,
-          parentList.concat(test.name)
+          parentList.concat(test.name),
+          errOutput
         );
+        passed &&= result;
       }
 
       for (const hook of test.afterAll) {
-        await this.runHook(hook, info);
+        await this.runHook(hook, info, errOutput);
       }
     } catch (e) {
       this.success = false;
 
       if (NoLogError.isError(e) && e instanceof NoLogError) {
-        return;
+        return false;
       }
 
-      console.error(
-        "\n",
-        this.makePath(parentList.concat(test.name)),
-        "\nTest failed due to an error:\n\n",
-        _getErrorMessage(e),
-        "\n"
+      const testPath = this.makePath(parentList.concat(test.name));
+
+      errOutput.println(/* html */ `<p bold color="green">${testPath}</p>`);
+      errOutput.println(
+        /* html */ `<p color="red">Test failed due to an error:</p>`
       );
+      errOutput.println(
+        /* html */ `<p color="rgb(180, 180, 180)">${_leftPad(
+          _getErrorMessage(e),
+          4
+        )}</p>`
+      );
+
+      return false;
     }
+
+    return passed;
   }
 
   async nextUnit() {
@@ -760,22 +1095,46 @@ class TestRunner {
       const importPath =
         "file://" + (isOutputAbsolute ? outputFile : _join(cwd, outputFile));
 
+      const relativePath =
+        "." +
+        importPath.replace("file://" + cwd, "").replace(/\.bundled\.js$/, "");
+
       await _async((p) => {
         import(importPath)
           .then(async (module) => {
             const test = module.default;
 
             if (_isTest(test)) {
-              console.log(`Running Test Suite: "${test.name}"`);
+              // this.mainOutput.println(
+              //   /* html */ `<p color="green">Running Test Suite:</p> "${test.name}"`
+              // );
 
-              await this.runTest(test, {
-                sourceFile: testUnit.testFile,
-                bundleFile: outputFile,
-                mapFile: mapFile,
-              });
+              const errTestOutput = new OutputBuffer();
+              this.testErrorOutputs.push(errTestOutput);
+
+              const passed = await this.runTest(
+                test,
+                {
+                  sourceFile: testUnit.testFile,
+                  bundleFile: outputFile,
+                  mapFile: mapFile,
+                },
+                undefined,
+                errTestOutput
+              );
 
               await _deleteFile(outputFile);
               await _deleteFile(mapFile);
+
+              if (passed) {
+                this.mainOutput.println(
+                  /* html */ `[✓] <p bold color="green">${relativePath}</p> <p bold color="white" bg="lightGreen">PASSED</p>`
+                );
+              } else {
+                this.mainOutput.println(
+                  /* html */ `[✘] <p bold color="red">${relativePath}</p> <p bold color="white" bg="lightRed">FAILED</p>`
+                );
+              }
 
               p.resolve();
             } else {
@@ -789,7 +1148,12 @@ class TestRunner {
       });
     } catch (e) {
       this.success = false;
-      console.error(`Failed to start a test:\n${testUnit.testFile}`, e);
+      this.mainOutput.println(
+        /* html */ `<p color="red">Failed to start a test:</p> "${testUnit.testFile}"`
+      );
+      this.mainOutput.println(_getErrorMessage(e));
+    } finally {
+      this.mainOutput.flush();
     }
 
     return true;
@@ -829,7 +1193,9 @@ async function loadConfig() {
     if (isValid) {
       return config as GestConfig;
     } else {
-      console.warn("Invalid config file. Using default config instead.\n");
+      Output.print(
+        /* html */ `<p color="yellow">Invalid config file. Using default config instead.</p>`
+      );
     }
   }
 }
@@ -881,16 +1247,26 @@ async function main() {
     await Promise.all(testRunners.map((runner) => runner.start()));
 
     if (testRunners.some((runner) => !runner.success)) {
-      console.warn("\nTests have failed.\n");
+      print("\n");
+
+      for (const runner of testRunners) {
+        for (const errOutput of runner.testErrorOutputs) {
+          errOutput.flush();
+        }
+      }
+
+      Output.print(/* html */ `\n<p color="red">Tests have failed.</p>`);
     } else {
-      console.log("\nAll tests have passed.\n");
+      Output.print(/* html */ `\n<p color="green">All tests have passed.</p>`);
     }
   } catch (e) {
-    console.error(e);
+    Output.print(/* html */ `\n<p color="red">${_getErrorMessage(e)}</p>`);
   } finally {
     Gtk.main_quit();
   }
 }
+
+TermBgColor.define("customBlack", "#1b1c26");
 
 Gtk.init(null);
 main();
