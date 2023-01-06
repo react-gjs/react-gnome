@@ -37,9 +37,22 @@ export type Matcher = (
   matcherArgs: any[]
 ) => MatcherResult | Promise<MatcherResult>;
 
+type CalledFrom = {
+  line: number;
+  column: number;
+};
+
 export type MatcherResultHandlers = {
-  sync: (result: MatcherResult, negate?: boolean) => void;
-  async: (result: Promise<MatcherResult>, negate?: boolean) => Promise<void>;
+  sync: (
+    result: MatcherResult,
+    negate: boolean,
+    celledFrom: CalledFrom
+  ) => void;
+  async: (
+    result: Promise<MatcherResult>,
+    negate: boolean,
+    celledFrom: CalledFrom
+  ) => Promise<void>;
 };
 
 class TestCollector {
@@ -202,7 +215,7 @@ class Matchers {
   static proxy(
     testedValue: any,
     handleMatcherResult: MatcherResultHandlers,
-    negate?: boolean
+    negate: boolean = false
   ): any {
     return new Proxy(
       {},
@@ -215,11 +228,19 @@ class Matchers {
           const matcher = Matchers.get(matcherName as string);
 
           return (...args: any[]) => {
+            // Get line where this function was called
+            let [line, column] = _getLineFromError(new Error());
+
+            const calledFrom = {
+              line,
+              column,
+            };
+
             const r = matcher(testedValue, args);
             if (r instanceof Promise) {
-              return handleMatcherResult.async(r, negate);
+              return handleMatcherResult.async(r, negate, calledFrom);
             } else {
-              return handleMatcherResult.sync(r, negate);
+              return handleMatcherResult.sync(r, negate, calledFrom);
             }
           };
         },
@@ -239,11 +260,11 @@ export class ExpectError extends Error {
   line: number;
   column: number;
 
-  constructor(message: string, line: number, column: number) {
+  constructor(message: string, calledFrom: CalledFrom) {
     super(message);
     this.name = "ExpectError";
-    this.line = line;
-    this.column = column;
+    this.line = calledFrom.line;
+    this.column = calledFrom.column;
     this.detectUnhandled();
   }
 
@@ -261,24 +282,25 @@ export class ExpectError extends Error {
 }
 
 export const expect = (value: any) => {
-  // Get line where this function was called
   const [line, column] = _getLineFromError(new Error());
 
   const handlers: MatcherResultHandlers = {
     sync(result, negate) {
       if (result.failed && !negate) {
-        throw new ExpectError(result.reason, line, column);
-      } else if (!result.failed && negate) {
-        throw new ExpectError(
-          "Matcher was expected to fail, but it passed.",
+        throw new ExpectError(result.reason, {
           line,
-          column
-        );
+          column,
+        });
+      } else if (!result.failed && negate) {
+        throw new ExpectError("Matcher was expected to fail, but it passed.", {
+          line,
+          column,
+        });
       }
     },
-    async async(result, negate) {
+    async async(result, negate, calledFrom) {
       const awaitedResult = await result;
-      return this.sync(awaitedResult, negate);
+      return this.sync(awaitedResult, negate, calledFrom);
     },
   };
 

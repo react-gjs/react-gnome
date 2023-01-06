@@ -547,6 +547,28 @@ class SourceMapReader {
 
   constructor(private map: SourceMap) {}
 
+  private getLineN(text: string, n: number) {
+    let line = 0;
+    let lineStart = 0;
+
+    while (line !== n) {
+      lineStart = text.indexOf("\n", lineStart) + 1;
+      line++;
+    }
+
+    if (line > 0 && lineStart === 0) {
+      return "";
+    }
+
+    let lineEnd = text.indexOf("\n", lineStart + 1);
+
+    if (lineEnd === -1) {
+      lineEnd = text.length;
+    }
+
+    return text.slice(lineStart, lineEnd);
+  }
+
   getOriginalPosition(outLine: number, outColumn: number) {
     const vlqs = this.map.mappings.split(";").map((line) => line.split(","));
 
@@ -557,7 +579,7 @@ class SourceMapReader {
     for (const [index, line] of vlqs.entries()) {
       state[0] = 0;
 
-      for (const [segindex, segment] of line.entries()) {
+      for (const [_, segment] of line.entries()) {
         if (!segment) continue;
         const segmentCords = this.converter.decode(segment);
 
@@ -576,7 +598,7 @@ class SourceMapReader {
               return {
                 file: this.map.sources[state[1]],
                 line: state[2],
-                column: state[3],
+                column: outColumn + state[3] - state[0],
               };
             }
           }
@@ -584,10 +606,19 @@ class SourceMapReader {
       }
 
       if (index === outLine) {
+        const sourceFileContent = this.map.sourcesContent?.[state[1]];
+
+        let column = outColumn;
+
+        if (sourceFileContent) {
+          const lineContent = this.getLineN(sourceFileContent, state[2] - 1);
+          column = lineContent.indexOf("expect(") + 1;
+        }
+
         return {
           file: this.map.sources[state[1]],
           line: state[2],
-          column: state[3],
+          column,
         };
       }
     }
