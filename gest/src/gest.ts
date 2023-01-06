@@ -450,6 +450,11 @@ class OutputBuffer {
     Output.print(text);
     this.lines = [];
   }
+
+  pipeTo(output: OutputBuffer) {
+    output.lines.push(...this.lines);
+    this.lines = [];
+  }
 }
 
 class Base64VLQ {
@@ -801,6 +806,44 @@ function _getErrorMessage(e: unknown) {
   return String(e);
 }
 
+function _getErrorStack(e: unknown, sourceMap?: SourceMap) {
+  if (typeof e === "object" && !!e && e instanceof Error) {
+    const stack = e.stack;
+    if (stack) {
+      if (!sourceMap) return stack;
+
+      const lines = stack.split("\n");
+      const result: string[] = [];
+
+      const sourceMapReader = new SourceMapReader(sourceMap);
+
+      for (const line of lines) {
+        if (!line.includes("bundled.js")) {
+          result.push(line);
+          continue;
+        }
+
+        const match = line.match(/(.*):(\d+):(\d+)$/);
+
+        if (match) {
+          const [, , line, column] = match;
+          const mapped = sourceMapReader.getOriginalPosition(+line!, +column!);
+          if (mapped) {
+            result.push(`${mapped.file}:${mapped.line}:${mapped.column}`);
+          } else {
+            result.push(line!);
+          }
+        } else {
+          result.push(line);
+        }
+      }
+
+      return result.join("\n");
+    }
+  }
+  return "";
+}
+
 function _hasProperties<K extends string>(
   o: object,
   ...p: K[]
@@ -938,7 +981,14 @@ async function _buildFile(params: {
   await cmd.runSync();
 }
 
+type RunnerTestOutputs = {
+  err: OutputBuffer;
+  info: OutputBuffer;
+};
+
 class TestRunner {
+  private verbose = true;
+
   success: boolean = true;
   mainOutput = new OutputBuffer();
   testErrorOutputs: OutputBuffer[] = [];
@@ -949,6 +999,15 @@ class TestRunner {
     return parentList
       .map((n) => `"${n}"`)
       .join(/* html */ `<p bold color="white"> > </p>`);
+  }
+
+  private async getSourceMapFileContent(filePath: string) {
+    try {
+      const fileContent = await _readFile(filePath);
+      return JSON.parse(fileContent);
+    } catch {
+      return undefined;
+    }
   }
 
   async getLocationFromMap(info: TestUnitInfo, line: number, column: number) {
@@ -962,7 +1021,7 @@ class TestRunner {
     }
   }
 
-  async runHook(hook: TestHook, info: TestUnitInfo, errOutput: OutputBuffer) {
+  async runHook(hook: TestHook, info: TestUnitInfo, output: RunnerTestOutputs) {
     try {
       await hook.callback();
     } catch (e) {
@@ -972,11 +1031,11 @@ class TestRunner {
         hook.column
       );
 
-      errOutput.println(
+      output.err.println(
         /* html */ `<p bold bg="customBlack" color="red">An error occurred when running a lifecycle hook:</p>`
       );
-      errOutput.println(_getErrorMessage(e));
-      errOutput.println(
+      output.err.println(_getErrorMessage(e));
+      output.err.println(
         /* html */ `<p color="#FFFFFF">${info.sourceFile}${
           location ? `:${location?.line}:${location?.column}` : ""
         }</p>`
@@ -990,22 +1049,25 @@ class TestRunner {
     testCase: It,
     info: TestUnitInfo,
     parentList: string[],
-    errOutput: OutputBuffer
+    output: RunnerTestOutputs
   ) {
+    const testPath = this.makePath([...parentList, testCase.name]);
     try {
       await testCase.callback();
+      output.info.println(/* html */ `   [✓] <p color="green">${testPath}</p>`);
       return true;
     } catch (e) {
-      const testPath = this.makePath([...parentList, testCase.name]);
-
+      output.info.println(
+        /* html */ `   [✗] <p color="lightRed">${testPath}</p>`
+      );
       if (_isExpectError(e)) {
         e.handle();
         const location = await this.getLocationFromMap(info, e.line, e.column);
-        errOutput.println(
+        output.err.println(
           /* html */ `<p bold bg="customBlack" color="red">${testPath}</p>`
         );
-        errOutput.println(_leftPad(e.message, 4));
-        errOutput.println(
+        output.err.println(_leftPad(e.message, 4));
+        output.err.println(
           /* html */ `<p color="#FFFFFF">${info.sourceFile}${
             location ? `:${location?.line}:${location?.column}` : ""
           }</p>`
@@ -1017,11 +1079,17 @@ class TestRunner {
           testCase.line,
           testCase.column
         );
-        errOutput.println(
+        output.err.println(
           /* html */ `<p bold bg="customBlack" color="red">${testPath}</p>`
         );
-        errOutput.println(_leftPad(_getErrorMessage(e), 4));
-        errOutput.println(
+        output.err.println(_leftPad(_getErrorMessage(e), 4));
+        output.err.println(
+          _leftPad(
+            _getErrorStack(e, await this.getSourceMapFileContent(info.mapFile)),
+            6
+          )
+        );
+        output.err.println(
           /* html */ `<p color="#FFFFFF">${info.sourceFile}${
             location ? `:${location?.line}:${location?.column}` : ""
           }</p>`
@@ -1036,31 +1104,31 @@ class TestRunner {
     test: Test,
     info: TestUnitInfo,
     parentList: string[] = [],
-    errOutput: OutputBuffer
+    output: RunnerTestOutputs
   ): Promise<boolean> {
     let passed = true;
 
     try {
       for (const hook of test.beforeAll) {
-        await this.runHook(hook, info, errOutput);
+        await this.runHook(hook, info, output);
       }
 
       for (const testCase of test.its) {
         for (const hook of test.beforeEach) {
-          await this.runHook(hook, info, errOutput);
+          await this.runHook(hook, info, output);
         }
 
         const result = await this.runTestCase(
           testCase,
           info,
           parentList.concat(test.name),
-          errOutput
+          output
         );
 
         passed &&= result;
 
         for (const hook of test.afterEach) {
-          await this.runHook(hook, info, errOutput);
+          await this.runHook(hook, info, output);
         }
       }
 
@@ -1073,13 +1141,13 @@ class TestRunner {
           },
           info,
           parentList.concat(test.name),
-          errOutput
+          output
         );
         passed &&= result;
       }
 
       for (const hook of test.afterAll) {
-        await this.runHook(hook, info, errOutput);
+        await this.runHook(hook, info, output);
       }
     } catch (e) {
       this.success = false;
@@ -1090,11 +1158,11 @@ class TestRunner {
 
       const testPath = this.makePath(parentList.concat(test.name));
 
-      errOutput.println(/* html */ `<p bold color="green">${testPath}</p>`);
-      errOutput.println(
+      output.err.println(/* html */ `<p bold color="green">${testPath}</p>`);
+      output.err.println(
         /* html */ `<p color="red">Test failed due to an error:</p>`
       );
-      errOutput.println(
+      output.err.println(
         /* html */ `<p color="rgb(180, 180, 180)">${_leftPad(
           _getErrorMessage(e),
           4
@@ -1141,6 +1209,8 @@ class TestRunner {
               // );
 
               const errTestOutput = new OutputBuffer();
+              const infoTestOutput = new OutputBuffer();
+
               this.testErrorOutputs.push(errTestOutput);
 
               const passed = await this.runTest(
@@ -1151,7 +1221,10 @@ class TestRunner {
                   mapFile: mapFile,
                 },
                 undefined,
-                errTestOutput
+                {
+                  err: errTestOutput,
+                  info: infoTestOutput,
+                }
               );
 
               await _deleteFile(outputFile);
@@ -1166,6 +1239,8 @@ class TestRunner {
                   /* html */ `[✘] <p bold color="red">${relativePath}</p> <p bold color="white" bg="lightRed">FAILED</p>`
                 );
               }
+
+              if (this.verbose) infoTestOutput.pipeTo(this.mainOutput);
 
               p.resolve();
             } else {
@@ -1192,6 +1267,11 @@ class TestRunner {
 
   async start() {
     while (await this.nextUnit()) {}
+  }
+
+  setOptions(config: { verbose: boolean }) {
+    this.verbose = config.verbose;
+    return this;
   }
 }
 
@@ -1233,6 +1313,13 @@ async function loadConfig() {
 
 async function main() {
   try {
+    // @ts-expect-error
+    const pargs: string[] = imports.system.programArgs;
+
+    const options = {
+      verbose: pargs.includes("--verbose"),
+    };
+
     const config = await loadConfig();
 
     const testsDir = config?.testDirectory ?? "./__tests__";
@@ -1270,15 +1357,14 @@ async function main() {
       }
     });
 
-    const testRunners = Array.from(
-      { length: parallel },
-      () => new TestRunner(testFiles, config?.setup)
+    const testRunners = Array.from({ length: parallel }, () =>
+      new TestRunner(testFiles, config?.setup).setOptions(options)
     );
 
     await Promise.all(testRunners.map((runner) => runner.start()));
 
     if (testRunners.some((runner) => !runner.success)) {
-      print("\n");
+      print("");
 
       for (const runner of testRunners) {
         for (const errOutput of runner.testErrorOutputs) {
