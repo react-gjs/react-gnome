@@ -3,6 +3,10 @@ const [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
     Abort = "abort",
   }
 
+  class Event {
+    constructor(public type: Events) {}
+  }
+
   class EventController<E = Events> {
     private listeners: Map<E, Array<(ev: Event) => void>> = new Map();
 

@@ -39,7 +39,7 @@
   "scripts": {
     "fix:lint": "eslint --fix .",
     "fix:prettier": "prettier -w ./src .",
-    "test:unit": "gjs -m ./gest/dist/esm/gest.mjs",
+    "test:unit": "gjs -m ./gest/dist/esm/gest.mjs --verbose",
     "test:lint": "eslint .",
     "test:prettier": "prettier -c ./src && prettier -c ./__tests__",
     "test:tsc": "tsc --noEmit",
