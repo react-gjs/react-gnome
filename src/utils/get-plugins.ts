@@ -1,3 +1,4 @@
+import { nodePkgPolyfillsPlugin } from "../esbuild-plugins/node-pkg-polyfills/node-pkg-polyfills";
 import { reactGnomePlugin } from "../esbuild-plugins/react-gnome/react-gnome-plugin";
 import { watchLoggerPlugin } from "../esbuild-plugins/watch-logger/watch-logger-plugin";
 import type { Program } from "../programs/base";
@@ -5,7 +6,10 @@ import type { Program } from "../programs/base";
 export const getPlugins = (program: Program) => {
   const additionalPlugins = program.additionalPlugins();
 
-  const plugins = [reactGnomePlugin(program.config, program.resources)];
+  const plugins = [
+    nodePkgPolyfillsPlugin(program.config),
+    reactGnomePlugin(program.config, program.resources),
+  ];
 
   if (additionalPlugins.before) {
     plugins.push(...additionalPlugins.before);

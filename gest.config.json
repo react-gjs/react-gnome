@@ -1,0 +1,5 @@
+{
+  "setup": "./__tests__/setup.js",
+  "testDirectory": "./__tests__",
+  "parallel": 8
+}

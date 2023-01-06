@@ -21,7 +21,6 @@
     "@ncpa0cpl/nodepack": "^2.0.1",
     "@swc/core": "^1.3.21",
     "@swc/jest": "^0.2.23",
-    "@types/jest": "^29.2.4",
     "@types/rimraf": "^3.0.2",
     "@types/tar": "^6.1.3",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
@@ -40,11 +39,12 @@
   "scripts": {
     "fix:lint": "eslint --fix .",
     "fix:prettier": "prettier -w ./src .",
-    "test:jest": "jest --coverage",
+    "test:unit": "gjs -m ./gest/dist/esm/gest.mjs",
     "test:lint": "eslint .",
     "test:prettier": "prettier -c ./src && prettier -c ./__tests__",
     "test:tsc": "tsc --noEmit",
     "build": "node ./scripts/build.cjs",
+    "build:gest": "node ./scripts/build-gest.cjs",
     "postinstall": "node ./dist/legacy/add-config-schema.js"
   },
   "keywords": [],
@@ -63,6 +63,7 @@
     "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "^1.4.1",
     "esbuild": "^0.15.18",
+    "path-browserify": "^1.0.1",
     "rimraf": "^3.0.2",
     "tar": "^6.1.13",
     "whatwg-url-without-unicode": "^8.0.0-3"
