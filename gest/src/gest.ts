@@ -7,6 +7,736 @@ declare global {
   function print(text: string): void;
 }
 
+namespace Termx {
+  const escape = "\u001b";
+  const Bold = `${escape}[1m`;
+  export class TermxColors {
+    /** @abstract */
+    protected static predefinedColors: { [key: string]: string } = {};
+
+    protected static parseRgbArgs(args: any[]): {
+      r: number;
+      g: number;
+      b: number;
+    } {
+      if (args.length === 1) {
+        const arg = args[0];
+        if (typeof arg === "string") {
+          if (arg.startsWith("rgb(")) {
+            const rgb = arg.slice(4, -1).split(",");
+            return {
+              r: Number(rgb[0]!),
+              g: Number(rgb[1]!),
+              b: Number(rgb[2]!),
+            };
+          } else if (arg.startsWith("#")) {
+            const rgb = arg.slice(1).split("");
+            return {
+              r: parseInt(rgb[0]! + rgb[1]!, 16),
+              g: parseInt(rgb[2]! + rgb[3]!, 16),
+              b: parseInt(rgb[4]! + rgb[5]!, 16),
+            };
+          }
+        } else if (typeof arg === "object") {
+          return arg as { r: number; g: number; b: number };
+        }
+      } else if (args.length === 3) {
+        return { r: args[0], g: args[1], b: args[2] };
+      }
+
+      throw new Error("Invalid rgb arguments");
+    }
+
+    static get(color: string): string {
+      if (color in this.predefinedColors) {
+        return this.predefinedColors[color]!;
+      } else {
+        return this.rgb(color);
+      }
+    }
+
+    static define(name: string, color: string): void {
+      if (name in this.predefinedColors) {
+        throw new Error(`Color ${name} is already defined.`);
+      }
+      Object.assign(this.predefinedColors, { [name]: this.rgb(color) });
+    }
+
+    /** @abstract */
+    static rgb(...args: any[]): string {
+      return "";
+    }
+  }
+
+  export class TermxBgColor extends TermxColors {
+    protected static predefinedColors = {
+      unset: `${escape}[0m`,
+      red: `${escape}[41m`,
+      green: `${escape}[42m`,
+      yellow: `${escape}[43m`,
+      blue: `${escape}[44m`,
+      magenta: `${escape}[45m`,
+      cyan: `${escape}[46m`,
+      white: `${escape}[47m`,
+      lightRed: `${escape}[101m`,
+      lightGreen: `${escape}[102m`,
+      lightYellow: `${escape}[103m`,
+      lightBlue: `${escape}[104m`,
+      lightMagenta: `${escape}[105m`,
+      lightCyan: `${escape}[106m`,
+      lightWhite: `${escape}[107m`,
+    };
+
+    static rgb(c: `#${string}` | `rgb(${string})`): string;
+    static rgb(c: { r: number; g: number; b: number }): string;
+    static rgb(r: number, g: number, b: number): string;
+    static rgb(...args: any[]): string {
+      const rgb = this.parseRgbArgs(args);
+
+      return `${escape}[48;2;${rgb.r};${rgb.g};${rgb.b}m`;
+    }
+  }
+
+  export class TermxFontColor extends TermxColors {
+    protected static predefinedColors = {
+      unset: `${escape}[0m`,
+      red: `${escape}[31m`,
+      green: `${escape}[32m`,
+      yellow: `${escape}[33m`,
+      blue: `${escape}[34m`,
+      magenta: `${escape}[35m`,
+      cyan: `${escape}[36m`,
+      white: `${escape}[37m`,
+      lightRed: `${escape}[91m`,
+      lightGreen: `${escape}[92m`,
+      lightYellow: `${escape}[93m`,
+      lightBlue: `${escape}[94m`,
+      lightMagenta: `${escape}[95m`,
+      lightCyan: `${escape}[96m`,
+      lightWhite: `${escape}[97m`,
+    };
+
+    static rgb(c: `#${string}` | `rgb(${string})`): string;
+    static rgb(c: { r: number; g: number; b: number }): string;
+    static rgb(r: number, g: number, b: number): string;
+    static rgb(...args: any[]): string {
+      const rgb = this.parseRgbArgs(args);
+
+      return `${escape}[38;2;${rgb.r};${rgb.g};${rgb.b}m`;
+    }
+  }
+
+  export type XmlObject = {
+    tag: string;
+    textNode?: boolean;
+    attributes: Array<[attributeName: string, value: string | boolean]>;
+    content: Array<string | XmlObject>;
+  };
+
+  export function parseXml(xml: string): XmlObject {
+    if (xml[0] !== "<") {
+      return {
+        tag: "",
+        textNode: true,
+        attributes: [],
+        content: parseContent(xml),
+      };
+    }
+
+    // Create the return object
+    const obj: XmlObject = {} as XmlObject;
+
+    // Check for the opening and closing tags
+    const startTagRegex = /<(\w+)\s*[^>]*>/;
+    const endTagRegex = /<\/(\w+)\s*>/;
+    const startTagMatch = xml.match(startTagRegex);
+    const endTagMatch = xml.match(endTagRegex);
+    if (!startTagMatch || !endTagMatch) {
+      return {
+        tag: "",
+        textNode: true,
+        attributes: [],
+        content: [xml],
+      };
+    }
+
+    // Get the tag name and attributes
+    const tagName = startTagMatch[1];
+    obj["tag"] = tagName!;
+    const attributes = startTagMatch[0].slice(
+      tagName!.length + 1,
+      startTagMatch[0].indexOf(">", tagName!.length)
+    );
+    if (attributes && attributes[1]) {
+      obj["attributes"] = parseAttributes(
+        attributes[attributes.length - 1] === "/"
+          ? attributes.slice(0, -1)
+          : attributes
+      );
+    } else {
+      obj["attributes"] = [];
+    }
+
+    // Get the content
+    const contentStartIndex = startTagMatch[0].length;
+    const contentEndIndex = findEndTagPosition(
+      xml.slice(contentStartIndex),
+      tagName!
+    );
+    const content = xml.substring(
+      contentStartIndex,
+      contentStartIndex + contentEndIndex.position
+    );
+    if (content.length > 0) {
+      // Parse the content recursively
+      obj["content"] = parseContent(content);
+    } else {
+      obj["content"] = [];
+    }
+
+    return obj;
+  }
+
+  function parseContent(content: string): Array<string | XmlObject> {
+    const results = [];
+
+    let currentIndex = 0;
+    let currentChar = content[currentIndex];
+    let currentContent = "";
+    let currentTag = "";
+    let currentAttributeString = "";
+    let inTag = false;
+    let inAttribute = false;
+    let inQuote = false;
+    let quoteType = "";
+
+    while (currentIndex < content.length) {
+      currentChar = content[currentIndex];
+      if (currentChar === "<" && !inQuote) {
+        inTag = true;
+        currentTag = "";
+        currentAttributeString = "";
+      } else if (currentChar === ">" && !inQuote) {
+        inTag = false;
+        if (currentContent.length > 0) {
+          results.push(currentContent);
+          currentContent = "";
+        }
+
+        const prevChar = content[currentIndex - 1];
+
+        if (prevChar === "/") {
+          if (currentTag[currentTag.length - 1] === "/") {
+            currentTag = currentTag.slice(0, -1);
+          }
+          results.push(
+            parseXml(
+              `<${currentTag} ${currentAttributeString}></${currentTag}>`
+            )
+          );
+        } else {
+          const closeTagIndex = findEndTagPosition(
+            content.slice(currentIndex + 1),
+            currentTag
+          );
+
+          if (closeTagIndex.isSelfClosing) {
+            results.push(
+              parseXml(
+                `<${currentTag} ${currentAttributeString}></${currentTag}>`
+              )
+            );
+            currentIndex = closeTagIndex.position + currentIndex + 1;
+          } else {
+            const subTag = content.substring(
+              currentIndex + 1,
+              closeTagIndex.position + currentIndex + 1
+            );
+            results.push(
+              parseXml(
+                `<${currentTag} ${currentAttributeString}>${subTag}</${currentTag}>`
+              )
+            );
+            currentIndex =
+              closeTagIndex.position + currentIndex + currentTag.length + 3;
+          }
+        }
+        inAttribute = false;
+        inQuote = false;
+        inTag = false;
+      } else if (inTag && currentChar === " " && !inQuote) {
+        inAttribute = true;
+        currentAttributeString += currentChar;
+      } else if (
+        inAttribute &&
+        (currentChar === "'" || currentChar === '"') &&
+        !inQuote
+      ) {
+        inQuote = true;
+        quoteType = currentChar;
+        currentAttributeString += currentChar;
+      } else if (inAttribute && currentChar === quoteType && inQuote) {
+        inQuote = false;
+        currentAttributeString += currentChar + " ";
+      } else {
+        if (inTag) {
+          if (inAttribute) {
+            currentAttributeString += currentChar;
+          } else {
+            currentTag += currentChar;
+          }
+        } else {
+          currentContent += currentChar;
+        }
+      }
+      currentIndex++;
+    }
+
+    if (currentContent.length > 0) {
+      results.push(currentContent);
+    }
+
+    return results;
+  }
+
+  function findEndTagPosition(
+    content: string,
+    tag: string
+  ): { position: number; isSelfClosing: boolean } {
+    try {
+      let c = 0;
+
+      for (let i = 0; i < content.length; i++) {
+        const char = content[i]!;
+
+        switch (char) {
+          case "<": {
+            const isClosing = content[i + 1] === "/";
+            if (isClosing) {
+              const isFinalEndTag =
+                content.slice(i + 2, i + 2 + tag.length) === tag;
+
+              if (c === 0) {
+                if (isFinalEndTag) {
+                  return {
+                    position: i,
+                    isSelfClosing: false,
+                  };
+                }
+                throw new Error("Invalid XML. No closing tag found.");
+              }
+
+              c--;
+            } else {
+              c++;
+            }
+            break;
+          }
+          case ">": {
+            const isClosing = content[i - 1] === "/";
+            if (isClosing) {
+              if (c === 0) {
+                return {
+                  position: i,
+                  isSelfClosing: true,
+                };
+              }
+
+              c--;
+            }
+            break;
+          }
+        }
+      }
+
+      throw new Error("Invalid XML. No closing tag found.");
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+  }
+
+  function parseAttributes(
+    attributeString: string
+  ): Array<[attributeName: string, value: string | boolean]> {
+    const result: Array<[attributeName: string, value: string | boolean]> = [];
+
+    for (const attr of attributeString.split(" ")) {
+      if (attr.length === 0) {
+        continue;
+      }
+      const [name, value] = attr.split("=");
+      result.push([name!, value ? value.slice(1, -1) : true]);
+    }
+
+    return result;
+  }
+
+  export type Scope = {
+    parentTag?: string;
+    color?: string;
+    bg?: string;
+    bold?: boolean;
+  };
+
+  export class ScopeTracker {
+    private static scopeStack: Scope[] = [
+      {
+        parentTag: "",
+      },
+    ];
+    private static _currentScope: Scope = this.scopeStack[0]!;
+
+    static get currentScope(): Scope {
+      return this._currentScope;
+    }
+
+    static enterScope(scope: Scope) {
+      this.scopeStack.push(scope);
+      this._currentScope = Object.assign({}, this._currentScope, scope);
+    }
+
+    static exitScope() {
+      this.scopeStack.pop();
+      this._currentScope = this.scopeStack[this.scopeStack.length - 1] ?? {};
+    }
+  }
+
+  export class MarkupFormatter {
+    static format(text: string): string {
+      const xml = parseXml(text);
+      return TermxFontColor.get("unset") + desanitizeHtml(this.formatXml(xml));
+    }
+
+    private static formatXml(xml: XmlObject, isLast = true): string {
+      let result = "";
+
+      switch (xml.tag) {
+        case "span":
+        case "p": {
+          const parentTag = ScopeTracker.currentScope.parentTag;
+
+          ScopeTracker.enterScope(this.createScope(xml));
+
+          result +=
+            this.scopeToTermMarks(ScopeTracker.currentScope) +
+            xml.content
+              .map((content, index) => {
+                if (typeof content === "string") {
+                  return xml.textNode ? content.trim() : content;
+                }
+
+                const isLast = index === xml.content.length - 1;
+                return this.formatXml(content, isLast);
+              })
+              .join("");
+
+          ScopeTracker.exitScope();
+
+          if (xml.tag === "p" && parentTag === "" && !isLast) {
+            result += "\n";
+          }
+
+          result +=
+            TermxFontColor.get("unset") +
+            this.scopeToTermMarks(ScopeTracker.currentScope);
+
+          break;
+        }
+        case "br": {
+          result += "\n";
+          break;
+        }
+        case "": {
+          result += xml.content
+            .map((content, index) => {
+              if (typeof content === "string") {
+                return xml.textNode ? content.trim() : content;
+              }
+
+              const isLast = index === xml.content.length - 1;
+              return this.formatXml(content, isLast);
+            })
+            .join("");
+          break;
+        }
+        default: {
+          throw new Error(`Invalid tag: <${xml.tag}>`);
+        }
+      }
+
+      return result;
+    }
+
+    private static scopeToTermMarks(scope: Scope): string {
+      let result = ""; //TermxFontColor.get("unset");
+
+      if (scope.bold) {
+        result += Bold;
+      }
+
+      if (scope.color) {
+        result += TermxFontColor.get(scope.color);
+      }
+
+      if (scope.bg) {
+        result += TermxBgColor.get(scope.bg);
+      }
+
+      return result;
+    }
+
+    private static createScope(xml: XmlObject): Scope {
+      const scope: Scope = {};
+
+      if (xml.tag) {
+        scope.parentTag = xml.tag;
+      }
+
+      for (const [name, value] of xml.attributes) {
+        switch (name) {
+          case "bold":
+            scope.bold = value === true || value === "true";
+            break;
+          case "color":
+            scope.color = as(value, "string");
+            break;
+          case "bg":
+            scope.bg = as(value, "string");
+            break;
+          default:
+            throw new Error(`Invalid attribute: ${name}`);
+        }
+      }
+
+      return scope;
+    }
+  }
+
+  function as(value: string | boolean, as: "string"): string;
+  function as(value: string | boolean, as: "boolean"): boolean;
+  function as(value: string | boolean, as: "string" | "boolean") {
+    if (typeof value === as) {
+      return value;
+    }
+    throw new Error(`Invalid attribute type: ${typeof value} (expected ${as})`);
+  }
+
+  export function html(...args: any[]): string {
+    const b = args[0];
+    let c = "",
+      a = 0,
+      d = 0;
+    for (c = b[0], a = 1, d = args.length; a < d; a++) {
+      if (
+        typeof args[a] === "object" &&
+        args[a] !== null &&
+        args[a].name === "RawHtml"
+      ) {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        c += args[a].toString() + b[a];
+      } else {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        c += sanitizeHtml(args[a].toString()) + b[a];
+      }
+    }
+    return c;
+  }
+
+  /**
+   * Creates a RawHtml object that can be used to insert raw HTML
+   * into a `html` template.
+   *
+   * @example
+   *   html`<div>${"<span>hello</span>"}</div>`;
+   *   // > <div>&lt;span&gt;hello&lt;/span&gt;</div>
+   *
+   *   html`<div>${raw("<span>hello</span>")}</div>`;
+   *   // > <div><span>hello</span></div>
+   */
+  export function raw(html: string): RawHtml {
+    return new RawHtml(html);
+  }
+
+  function sanitizeHtml(html: string): string {
+    return html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function desanitizeHtml(html: string): string {
+    return html.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  }
+
+  class RawHtml {
+    name = "RawHtml";
+    constructor(public html: string) {}
+
+    toString(): string {
+      return this.html;
+    }
+  }
+
+  export class Output {
+    private static defaultEnvPrint?: (text: string) => void;
+    private static globalOutput: Output = new Output();
+
+    /** Formats the given markup and prints it to the console. */
+    static print(...markup: string[]): void {
+      Output.globalOutput.print(...markup);
+    }
+
+    /**
+     * Formats the given markup and prints it to the console, and
+     * adds a new line character at the start of each markup
+     * string.
+     */
+    static println(...markup: string[]): void {
+      Output.globalOutput.println(...markup);
+    }
+
+    /**
+     * Sets the default print function for the current
+     * environment.
+     *
+     * Setting a new default print function will not affect any
+     * existing Output instances.
+     */
+    static setEnvPrint(envPrint: (text: string) => void): void {
+      Output.defaultEnvPrint = envPrint;
+      Output.globalOutput = new Output(envPrint);
+    }
+
+    private envPrint: (text: string) => void;
+
+    constructor(envPrint?: (text: string) => void) {
+      if (envPrint) {
+        this.envPrint = envPrint;
+      } else {
+        if (Output.defaultEnvPrint) {
+          this.envPrint = Output.defaultEnvPrint;
+        } else if (typeof print === "function") {
+          this.envPrint = print;
+        } else if (typeof console !== "undefined" && console.log) {
+          this.envPrint = (v) => console.log(v);
+        } else {
+          throw new Error(
+            "Unable to detect print function for current environment."
+          );
+        }
+      }
+    }
+
+    /** Formats the given markup and prints it to the console. */
+    public print(...markup: string[]): void {
+      for (const m of markup) {
+        const formatted = MarkupFormatter.format(m);
+        this.envPrint(formatted);
+      }
+    }
+
+    /**
+     * Formats the given markup and prints it to the console, and
+     * adds a new line character at the start of each markup
+     * string.
+     */
+    public println(...markup: string[]): void {
+      for (const m of markup) {
+        const formatted = MarkupFormatter.format(m);
+        this.envPrint("\n" + MarkupFormatter.format(formatted));
+      }
+    }
+  }
+
+  export class OutputBuffer {
+    private static globalOutputBuffer: OutputBuffer;
+
+    static {
+      OutputBuffer.globalOutputBuffer = new OutputBuffer();
+    }
+
+    /**
+     * Formats the given markup and adds it to the current
+     * buffer.
+     *
+     * Once the buffer is flushed, the markup will be printed to
+     * the console.
+     */
+    static print(markup: string): void {
+      Termx.OutputBuffer.globalOutputBuffer.print(markup);
+    }
+
+    /**
+     * Formats the given markup and adds it to the current
+     * buffer, and adds a new line character at the start of each
+     * markup string.
+     *
+     * Once the buffer is flushed, the markup will be printed to
+     * the console.
+     */
+    static println(markup: string): void {
+      Termx.OutputBuffer.globalOutputBuffer.println(markup);
+    }
+
+    private buffer: string[] = [];
+
+    constructor(private output: typeof Output | Output = Output) {}
+
+    private appendToLastLine(markup: string) {
+      const lastLine = this.buffer.pop();
+      if (lastLine) {
+        this.buffer.push(lastLine + markup);
+      } else {
+        this.buffer.push(markup);
+      }
+    }
+
+    /**
+     * Formats the given markup and adds it to the current
+     * buffer.
+     *
+     * Once the buffer is flushed, the markup will be printed to
+     * the console.
+     */
+    print(...markup: string[]) {
+      this.appendToLastLine(markup.join(""));
+    }
+
+    /**
+     * Formats the given markup and adds it to the current
+     * buffer, and adds a new line character at the start of each
+     * markup string.
+     *
+     * Once the buffer is flushed, the markup will be printed to
+     * the console.
+     */
+    println(...markup: string[]) {
+      this.buffer.push(...markup);
+    }
+
+    /**
+     * Flushes the current buffer, printing all markup to the
+     * console.
+     */
+    flush() {
+      if (this.buffer.length === 0) return;
+
+      this.output.print(...this.buffer);
+      this.buffer = [];
+    }
+
+    /**
+     * Pipes the content of the current buffer to another
+     * Termx.OutputBuffer instance.
+     */
+    pipeTo(output: Termx.OutputBuffer) {
+      if (this.buffer.length === 0) return;
+      output.buffer.push(...this.buffer);
+      this.buffer = [];
+    }
+  }
+}
+
+const html = Termx.html;
+
 type SourceMap = {
   version: number;
   sources: string[];
@@ -163,301 +893,6 @@ class Command {
   }
 }
 const cwd = new Command("pwd").runSync().trim();
-
-const escape = "\u001b";
-
-const Bold = `${escape}[1m`;
-
-class TermColor {
-  protected static parseRgbArgs(args: any[]): {
-    r: number;
-    g: number;
-    b: number;
-  } {
-    if (args.length === 1) {
-      const arg = args[0];
-      if (typeof arg === "string") {
-        if (arg.startsWith("rgb(")) {
-          const rgb = arg.slice(4, -1).split(",");
-          return {
-            r: Number(rgb[0]!),
-            g: Number(rgb[1]!),
-            b: Number(rgb[2]!),
-          };
-        } else if (arg.startsWith("#")) {
-          const rgb = arg.slice(1).split("");
-          return {
-            r: parseInt(rgb[0]! + rgb[1]!, 16),
-            g: parseInt(rgb[2]! + rgb[3]!, 16),
-            b: parseInt(rgb[4]! + rgb[5]!, 16),
-          };
-        }
-      } else if (typeof arg === "object") {
-        return arg as { r: number; g: number; b: number };
-      }
-    } else if (args.length === 3) {
-      return { r: args[0], g: args[1], b: args[2] };
-    }
-
-    throw new Error("Invalid arguments");
-  }
-
-  static define(name: string, color: string): void {}
-
-  static rgb(...args: any[]): string {
-    return "";
-  }
-
-  static get(color: string): string {
-    if (color in this) {
-      return (this as any)[color];
-    } else {
-      return this.rgb(color);
-    }
-  }
-}
-
-class TermFontColor extends TermColor {
-  static reset = `${escape}[0m`;
-  static red = `${escape}[31m`;
-  static green = `${escape}[32m`;
-  static yellow = `${escape}[33m`;
-  static blue = `${escape}[34m`;
-  static magenta = `${escape}[35m`;
-  static cyan = `${escape}[36m`;
-  static white = `${escape}[37m`;
-  static lightRed = `${escape}[91m`;
-  static lightGreen = `${escape}[92m`;
-  static lightYellow = `${escape}[93m`;
-  static lightBlue = `${escape}[94m`;
-  static lightMagenta = `${escape}[95m`;
-  static lightCyan = `${escape}[96m`;
-  static lightWhite = `${escape}[97m`;
-
-  static rgb(c: `#${string}` | `rgb(${string})`): string;
-  static rgb(c: { r: number; g: number; b: number }): string;
-  static rgb(r: number, g: number, b: number): string;
-  static rgb(...args: any[]): string {
-    const rgb = this.parseRgbArgs(args);
-
-    return `${escape}[38;2;${rgb.r};${rgb.g};${rgb.b}m`;
-  }
-
-  static define(name: string, color: `#${string}` | `rgb(${string})`): void {
-    Object.assign(this, { [name]: this.rgb(color) });
-  }
-}
-
-class TermBgColor extends TermColor {
-  static reset = `${escape}[0m`;
-  static red = `${escape}[41m`;
-  static green = `${escape}[42m`;
-  static yellow = `${escape}[43m`;
-  static blue = `${escape}[44m`;
-  static magenta = `${escape}[45m`;
-  static cyan = `${escape}[46m`;
-  static white = `${escape}[47m`;
-  static lightRed = `${escape}[101m`;
-  static lightGreen = `${escape}[102m`;
-  static lightYellow = `${escape}[103m`;
-  static lightBlue = `${escape}[104m`;
-  static lightMagenta = `${escape}[105m`;
-  static lightCyan = `${escape}[106m`;
-  static lightWhite = `${escape}[107m`;
-
-  static rgb(c: `#${string}` | `rgb(${string})`): string;
-  static rgb(c: { r: number; g: number; b: number }): string;
-  static rgb(r: number, g: number, b: number): string;
-  static rgb(...args: any[]): string {
-    const rgb = this.parseRgbArgs(args);
-
-    return `${escape}[48;2;${rgb.r};${rgb.g};${rgb.b}m`;
-  }
-
-  static define(name: string, color: `#${string}` | `rgb(${string})`): void {
-    Object.assign(this, { [name]: this.rgb(color) });
-  }
-}
-
-class TermMarkupFormatter {
-  private static parseTagAttributes(
-    tag: string
-  ): Map<string, string | boolean> {
-    const attributes = new Map<string, string | boolean>();
-
-    const attributesListString = tag.slice(2, -1);
-    const attributesStrings = attributesListString.split(" ");
-
-    for (const [name, value] of attributesStrings.map((s) => s.split("="))) {
-      if (value !== undefined) {
-        attributes.set(name!, value.slice(1, -1));
-      } else {
-        attributes.set(name!, true);
-      }
-    }
-
-    return attributes;
-  }
-
-  private findNextMarkupTag(
-    text: string,
-    start: number
-  ): { startIndex: number; endIndex: number } {
-    let startIndex = text.indexOf("<", start);
-    if (startIndex === -1) {
-      return { startIndex: -1, endIndex: -1 };
-      // startIndex = text.indexOf("</p>", start);
-
-      // if (startIndex === -1) {
-      //   return { startIndex: -1, endIndex: -1 };
-      // }
-    }
-
-    const endIndex = text.indexOf(">", startIndex);
-
-    return { startIndex, endIndex };
-  }
-
-  static format(text: string): string {
-    const tracker = new TermMarkupFormatter();
-
-    let result = "";
-    let offset = 0;
-
-    while (true) {
-      const { startIndex, endIndex } = tracker.findNextMarkupTag(text, offset);
-
-      if (startIndex === -1) {
-        break;
-      }
-
-      result += text.slice(offset, startIndex);
-
-      const tag = text.slice(startIndex, endIndex + 1);
-
-      if (tag === "</p>") {
-        tracker.exitScope();
-        const currentScope = tracker.currentScope;
-        let formats: string[] = [];
-
-        if (currentScope.bold) {
-          formats.push(Bold);
-        }
-        if (currentScope.bg) {
-          formats.push(currentScope.bg);
-        }
-        if (currentScope.color) {
-          formats.push(currentScope.color);
-        }
-
-        result += `${TermFontColor.reset}${formats.join("")}`;
-      }
-
-      const attributes = TermMarkupFormatter.parseTagAttributes(tag);
-
-      const colorAttrib = attributes.get("color");
-      const boldAttrib = attributes.get("bold");
-      const bgAttrib = attributes.get("bg");
-
-      if (colorAttrib || boldAttrib || bgAttrib) {
-        const scope: {
-          color?: string | undefined;
-          bg?: string | undefined;
-          bold?: boolean | undefined;
-        } = {};
-
-        if (boldAttrib) {
-          scope.bold = true;
-          result += Bold;
-        }
-
-        if (typeof bgAttrib === "string") {
-          const bg = TermBgColor.get(bgAttrib);
-          scope.bg = bg;
-          result += bg;
-        }
-
-        if (typeof colorAttrib === "string") {
-          const color = TermFontColor.get(colorAttrib);
-          scope.color = color;
-          result += color;
-        }
-
-        tracker.enterScope(scope);
-      }
-
-      offset = endIndex + 1;
-    }
-
-    result += text.slice(offset);
-
-    if (tracker.scopeStack.length > 0) {
-      result += TermFontColor.reset;
-    }
-
-    return result;
-  }
-
-  private constructor() {}
-
-  private scopeStack: { color?: string; bg?: string; bold?: boolean }[] = [];
-  private currentScope: { color?: string; bg?: string; bold?: boolean } = {};
-
-  private enterScope(scope: { color?: string; bg?: string; bold?: boolean }) {
-    this.scopeStack.push(scope);
-    this.currentScope = scope;
-  }
-
-  private exitScope() {
-    this.scopeStack.pop();
-    this.currentScope = this.scopeStack[this.scopeStack.length - 1] ?? {};
-  }
-}
-
-class Output {
-  static print(text: string) {
-    try {
-      const formatted = TermMarkupFormatter.format(text);
-      print(formatted);
-    } catch (e) {
-      console.warn(e);
-    }
-  }
-}
-
-class OutputBuffer {
-  private lines: string[] = [];
-
-  private appendToLastLine(text: string) {
-    const lastLine = this.lines.pop();
-    if (lastLine) {
-      this.lines.push(lastLine + text);
-    } else {
-      this.lines.push(text);
-    }
-  }
-
-  print(...text: string[]) {
-    this.appendToLastLine(text.join(""));
-  }
-
-  println(text: string) {
-    this.lines.push(text);
-  }
-
-  flush() {
-    if (this.lines.length === 0) return;
-    const text = this.lines.join("\n");
-    Output.print(text);
-    this.lines = [];
-  }
-
-  pipeTo(output: OutputBuffer) {
-    if (this.lines.length === 0) return;
-    output.lines.push(...this.lines);
-    this.lines = [];
-  }
-}
 
 class Base64VLQ {
   char_to_integer: Record<string, number> = {};
@@ -997,8 +1432,8 @@ async function _buildFile(params: {
 }
 
 type RunnerTestOutputs = {
-  err: OutputBuffer;
-  info: OutputBuffer;
+  err: Termx.OutputBuffer;
+  info: Termx.OutputBuffer;
 };
 
 type TestRunnerOptions = {
@@ -1015,15 +1450,15 @@ class TestRunner {
   }
 
   success: boolean = true;
-  mainOutput = new OutputBuffer();
-  testErrorOutputs: OutputBuffer[] = [];
+  mainOutput = new Termx.OutputBuffer();
+  testErrorOutputs: Termx.OutputBuffer[] = [];
 
   constructor(private testFileQueue: TestUnit[], private mainSetup?: string) {}
 
   makePath(parentList: string[]) {
     return parentList
       .map((n) => `"${n}"`)
-      .join(/* html */ `<p bold color="white"> > </p>`);
+      .join(html`<p bold color="white">${" > "}</p>`);
   }
 
   private testNameMatches(name: string) {
@@ -1067,15 +1502,16 @@ class TestRunner {
         hook.line,
         hook.column
       );
+      const link =
+        info.sourceFile + location
+          ? `:${location?.line}:${location?.column}`
+          : "";
 
-      output.err.println(
-        /* html */ `<p bold bg="customBlack" color="red">An error occurred when running a lifecycle hook:</p>`
-      );
-      output.err.println(_getErrorMessage(e));
-      output.err.println(
-        /* html */ `<p color="#FFFFFF">${info.sourceFile}${
-          location ? `:${location?.line}:${location?.column}` : ""
-        }</p>`
+      // prettier-ignore
+      output.err.println(html`
+        <p bold bg="customBlack" color="red">An error occurred when running a lifecycle hook:</p>
+        <p>${_getErrorMessage(e)}</p>
+        <p color="#FFFFFF">${link}</p>`
       );
 
       throw new NoLogError(e, "Hook error");
@@ -1093,30 +1529,34 @@ class TestRunner {
       if (!this.testNameMatches(testPath)) {
         if (this.verbose) {
           output.info.println(
-            /* html */ `   [-] <p color="yellow">${testPath}</p>`
+            html`<p>    [-] <p color="yellow">${Termx.raw(testPath)}</p></p>`
           );
         }
         return true;
       }
       await testCase.callback();
-      output.info.println(/* html */ `   [✓] <p color="green">${testPath}</p>`);
+      output.info.println(
+        html`<p>    [✓] <p color="green">${Termx.raw(testPath)}</p></p>`
+      );
       return true;
     } catch (e) {
       output.info.println(
-        /* html */ `   [✗] <p color="lightRed">${testPath}</p>`
+        html`<p>    [✘] <p color="lightRed">${Termx.raw(testPath)}</p></p>`
       );
       if (_isExpectError(e)) {
         e.handle();
         const location = await this.getLocationFromMap(info, e.line, e.column);
-        output.err.println(
-          /* html */ `<p bold bg="customBlack" color="red">${testPath}</p>`
-        );
-        output.err.println(_leftPad(e.message, 4));
-        output.err.println(
-          /* html */ `<p color="#FFFFFF">${info.sourceFile}${
-            location ? `:${location?.line}:${location?.column}` : ""
-          }</p>`
-        );
+        const link =
+          info.sourceFile +
+          (location ? `:${location?.line}:${location?.column}` : "");
+
+        // prettier-ignore
+        output.err.println(html`
+          <p bold bg="customBlack" color="red">${Termx.raw(testPath)}</p>
+          <p>${_leftPad(e.message, 4)}</p>
+          <p color="#FFFFFF">${link}</p>
+        `);
+
         this.success = false;
       } else {
         const location = await this.getLocationFromMap(
@@ -1124,21 +1564,27 @@ class TestRunner {
           testCase.line,
           testCase.column
         );
+        const link =
+          info.sourceFile +
+          (location ? `:${location?.line}:${location?.column}` : "");
+
         output.err.println(
-          /* html */ `<p bold bg="customBlack" color="red">${testPath}</p>`
+          html`
+            <p bold bg="customBlack" color="red">${Termx.raw(testPath)}</p>
+            <p>${_leftPad(_getErrorMessage(e), 4)}</p>
+            <p>
+              ${_leftPad(
+                _getErrorStack(
+                  e,
+                  await this.getSourceMapFileContent(info.mapFile)
+                ),
+                6
+              )}
+            </p>
+            <p color="#FFFFFF">${link}</p>
+          `
         );
-        output.err.println(_leftPad(_getErrorMessage(e), 4));
-        output.err.println(
-          _leftPad(
-            _getErrorStack(e, await this.getSourceMapFileContent(info.mapFile)),
-            6
-          )
-        );
-        output.err.println(
-          /* html */ `<p color="#FFFFFF">${info.sourceFile}${
-            location ? `:${location?.line}:${location?.column}` : ""
-          }</p>`
-        );
+
         this.success = false;
       }
       return false;
@@ -1203,16 +1649,11 @@ class TestRunner {
 
       const testPath = this.makePath(parentList.concat(test.name));
 
-      output.err.println(/* html */ `<p bold color="green">${testPath}</p>`);
-      output.err.println(
-        /* html */ `<p color="red">Test failed due to an error:</p>`
-      );
-      output.err.println(
-        /* html */ `<p color="rgb(180, 180, 180)">${_leftPad(
-          _getErrorMessage(e),
-          4
-        )}</p>`
-      );
+      output.err.println(html`
+        <p bold color="green">${Termx.raw(testPath)}</p>
+        <p color="red">Test failed due to an error:</p>
+        <p color="rgb(180, 180, 180)">${_leftPad(_getErrorMessage(e), 4)}</p>
+      `);
 
       return false;
     }
@@ -1239,7 +1680,7 @@ class TestRunner {
       if (!this.testFileMatches(testUnit.testFile)) {
         if (this.verbose) {
           this.mainOutput.println(
-            /* html */ `[-] <p bold color="yellow">${relativePath}</p> <p bold color="white" bg="lightYellow">SKIPPED</p>`
+            html`<p>  [-] <p bold color="yellow">${relativePath}</p><p bold color="white" bg="lightYellow">SKIPPED</p></p>`
           );
         }
         return true;
@@ -1258,8 +1699,8 @@ class TestRunner {
             const test = module.default;
 
             if (_isTest(test)) {
-              const errTestOutput = new OutputBuffer();
-              const infoTestOutput = new OutputBuffer();
+              const errTestOutput = new Termx.OutputBuffer();
+              const infoTestOutput = new Termx.OutputBuffer();
 
               this.testErrorOutputs.push(errTestOutput);
 
@@ -1282,11 +1723,13 @@ class TestRunner {
 
               if (passed) {
                 this.mainOutput.println(
-                  /* html */ `[✓] <p bold color="green">${relativePath}</p> <p bold color="white" bg="lightGreen">PASSED</p>`
+                  // prettier-ignore
+                  html`<p>[✓] <span bold color="green">${relativePath} </span><span bold color="white" bg="lightGreen">PASSED</span></p>`
                 );
               } else {
                 this.mainOutput.println(
-                  /* html */ `[✘] <p bold color="red">${relativePath}</p> <p bold color="white" bg="lightRed">FAILED</p>`
+                  // prettier-ignore
+                  html`<p>[✘] <span bold color="red">${relativePath} </span><span bold color="white" bg="lightRed">FAILED</span></p>`
                 );
               }
 
@@ -1304,9 +1747,11 @@ class TestRunner {
       });
     } catch (e) {
       this.success = false;
-      this.mainOutput.println(
-        /* html */ `<p color="red">Failed to start a test:</p> "${testUnit.testFile}"`
-      );
+      // prettier-ignore
+      this.mainOutput.println(html`
+          <p color="red">Failed to start a test:</p>
+          <p>"${testUnit.testFile}"</p>
+      `);
       this.mainOutput.println(_getErrorMessage(e));
     } finally {
       this.mainOutput.flush();
@@ -1354,8 +1799,9 @@ async function loadConfig() {
     if (isValid) {
       return config as GestConfig;
     } else {
-      Output.print(
-        /* html */ `<p color="yellow">Invalid config file. Using default config instead.</p>`
+      Termx.Output.print(
+        // prettier-ignore
+        html`<p color="yellow">Invalid config file. Using default config instead.</p>`
       );
     }
   }
@@ -1367,17 +1813,18 @@ async function main() {
     const pargs: string[] = imports.system.programArgs;
 
     if (pargs.includes("--help") || pargs.includes("-h")) {
-      Output.print(/* html */ `<p bold>gest</p>
-<p>A simple test runner for Gnome JavaScript</p>
-
-<p>Usage: gest [options]</p>
-
-<p>Options:</p>
-<p>  -h, --help</p>
-<p>  -v, --verbose</p>
-<p>  -t, --testNamePattern [regex]</p>
-<p>  -p, --testPathPattern [regex]</p>
-`);
+      Termx.Output.print(html`
+        <p bold>gest</p>
+        <p>A simple test runner for Gnome JavaScript</p>
+        <br />
+        <p>Usage: gest [options]</p>
+        <br />
+        <p>Options:</p>
+        <p>-h, --help</p>
+        <p>-v, --verbose</p>
+        <p>-t, --testNamePattern [regex]</p>
+        <p>-p, --testPathPattern [regex]</p>
+      `);
 
       return;
     }
@@ -1443,18 +1890,18 @@ async function main() {
         }
       }
 
-      Output.print(/* html */ `\n<p color="red">Tests have failed.</p>`);
+      Termx.Output.println(html`<p color="red">Tests have failed.</p>`);
     } else {
-      Output.print(/* html */ `\n<p color="green">All tests have passed.</p>`);
+      Termx.Output.println(html`<p color="green">All tests have passed.</p>`);
     }
   } catch (e) {
-    Output.print(/* html */ `\n<p color="red">${_getErrorMessage(e)}</p>`);
+    Termx.Output.print(html`<p color="red">${_getErrorMessage(e)}</p>`);
   } finally {
     Gtk.main_quit();
   }
 }
 
-TermBgColor.define("customBlack", "#1b1c26");
+Termx.TermxBgColor.define("customBlack", "#1b1c26");
 
 Gtk.init(null);
 setTimeout(() => {
