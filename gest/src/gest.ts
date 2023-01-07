@@ -1813,6 +1813,7 @@ async function main() {
     const pargs: string[] = imports.system.programArgs;
 
     if (pargs.includes("--help") || pargs.includes("-h")) {
+      // prettier-ignore
       Termx.Output.print(html`
         <p bold>gest</p>
         <p>A simple test runner for Gnome JavaScript</p>
@@ -1820,10 +1821,10 @@ async function main() {
         <p>Usage: gest [options]</p>
         <br />
         <p>Options:</p>
-        <p>-h, --help</p>
-        <p>-v, --verbose</p>
-        <p>-t, --testNamePattern [regex]</p>
-        <p>-p, --testPathPattern [regex]</p>
+        <p>  -h, --help</p>
+        <p>  -v, --verbose</p>
+        <p>  -t, --testNamePattern [regex]</p>
+        <p>  -p, --testPathPattern [regex]</p>
       `);
 
       return;
