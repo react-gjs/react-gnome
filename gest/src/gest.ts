@@ -552,7 +552,7 @@ class SourceMapReader {
 
   constructor(private map: SourceMap) {}
 
-  private getLineN(text: string, n: number) {
+  protected getLineN(text: string, n: number) {
     let line = 0;
     let lineStart = 0;
 
@@ -575,6 +575,10 @@ class SourceMapReader {
   }
 
   getOriginalPosition(outLine: number, outColumn: number) {
+    // SourceMap is 0 based, error stack is 1 based
+    outLine -= 1;
+    outColumn -= 1;
+
     const vlqs = this.map.mappings.split(";").map((line) => line.split(","));
 
     const state: [number, number, number, number, number] = [0, 0, 0, 0, 0];
@@ -602,8 +606,8 @@ class SourceMapReader {
             if (prevState[0] < outColumn && outColumn <= state[0]) {
               return {
                 file: this.map.sources[state[1]],
-                line: state[2],
-                column: outColumn + state[3] - state[0],
+                line: state[2] + 1, // back to 1 based
+                column: outColumn + state[3] - state[0] + 1, // back to 1 based
               };
             }
           }
@@ -611,19 +615,10 @@ class SourceMapReader {
       }
 
       if (index === outLine) {
-        const sourceFileContent = this.map.sourcesContent?.[state[1]];
-
-        let column = outColumn;
-
-        if (sourceFileContent) {
-          const lineContent = this.getLineN(sourceFileContent, state[2] - 1);
-          column = lineContent.indexOf("expect(") + 1;
-        }
-
         return {
           file: this.map.sources[state[1]],
-          line: state[2],
-          column,
+          line: state[2] + 1, // back to 1 based
+          column: 1,
         };
       }
     }
