@@ -420,7 +420,7 @@ class Output {
       const formatted = TermMarkupFormatter.format(text);
       print(formatted);
     } catch (e) {
-      //
+      console.warn(e);
     }
   }
 }
@@ -1366,11 +1366,27 @@ async function main() {
     // @ts-expect-error
     const pargs: string[] = imports.system.programArgs;
 
+    if (pargs.includes("--help") || pargs.includes("-h")) {
+      Output.print(/* html */ `<p bold>gest</p>
+<p>A simple test runner for Gnome JavaScript</p>
+
+<p>Usage: gest [options]</p>
+
+<p>Options:</p>
+<p>  -h, --help</p>
+<p>  -v, --verbose</p>
+<p>  -t, --testNamePattern [regex]</p>
+<p>  -p, --testPathPattern [regex]</p>
+`);
+
+      return;
+    }
+
     const testNamePattern = _getArgValue(pargs, "-t", "--testNamePattern");
     const testFilePattern = _getArgValue(pargs, "-p", "--testPathPattern");
 
     const options: TestRunnerOptions = {
-      verbose: pargs.includes("--verbose"),
+      verbose: pargs.includes("--verbose") || pargs.includes("-v"),
       testNamePattern,
       testFilePattern,
     };
@@ -1441,5 +1457,7 @@ async function main() {
 TermBgColor.define("customBlack", "#1b1c26");
 
 Gtk.init(null);
-main();
+setTimeout(() => {
+  main();
+}, 0);
 Gtk.main();
