@@ -446,12 +446,14 @@ class OutputBuffer {
   }
 
   flush() {
+    if (this.lines.length === 0) return;
     const text = this.lines.join("\n");
     Output.print(text);
     this.lines = [];
   }
 
   pipeTo(output: OutputBuffer) {
+    if (this.lines.length === 0) return;
     output.lines.push(...this.lines);
     this.lines = [];
   }
@@ -638,10 +640,28 @@ class NoLogError extends Error {
   }
 }
 
-const _leftPad = (str: string, len: number, char = " ") => {
+function _getArgValue(args: string[], ...argNames: string[]) {
+  for (const argName of argNames) {
+    const argIndex = args.indexOf(argName);
+    if (argIndex === -1) {
+      continue;
+    }
+
+    const argValue = args[argIndex + 1];
+    if (argValue === undefined) {
+      continue;
+    }
+
+    return argValue;
+  }
+
+  return undefined;
+}
+
+function _leftPad(str: string, len: number, char = " ") {
   const pad = char.repeat(len);
   return pad + str.replaceAll("\n", "\n" + pad);
-};
+}
 
 function _async<T = void>(
   callback: (promise: { resolve(v: T): void; reject(e: any): void }) => void
@@ -748,7 +768,7 @@ function _join(...args: string[]) {
   return _normalize(joined);
 }
 
-const _readFile = async (path: string) => {
+async function _readFile(path: string) {
   return _async<string>((p) => {
     const encoding = "utf-8";
 
@@ -768,9 +788,9 @@ const _readFile = async (path: string) => {
       }
     });
   });
-};
+}
 
-const _deleteFile = async (path: string) => {
+async function _deleteFile(path: string) {
   return _async((p) => {
     const file = Gio.File.new_for_path(path);
 
@@ -785,7 +805,7 @@ const _deleteFile = async (path: string) => {
       }
     });
   });
-};
+}
 
 function _isTest(t: any): t is Test {
   return t && typeof t === "object" && t.name && t.line !== undefined;
@@ -981,8 +1001,18 @@ type RunnerTestOutputs = {
   info: OutputBuffer;
 };
 
+type TestRunnerOptions = {
+  verbose?: boolean;
+  testNamePattern?: string;
+  testFilePattern?: string;
+};
+
 class TestRunner {
-  private verbose = true;
+  private options: TestRunnerOptions = {};
+
+  private get verbose() {
+    return this.options.verbose ?? false;
+  }
 
   success: boolean = true;
   mainOutput = new OutputBuffer();
@@ -994,6 +1024,18 @@ class TestRunner {
     return parentList
       .map((n) => `"${n}"`)
       .join(/* html */ `<p bold color="white"> > </p>`);
+  }
+
+  private testNameMatches(name: string) {
+    const { testNamePattern } = this.options;
+    if (!testNamePattern) return true;
+    return name.match(testNamePattern) !== null;
+  }
+
+  private testFileMatches(name: string) {
+    const { testFilePattern } = this.options;
+    if (!testFilePattern) return true;
+    return name.match(testFilePattern) !== null;
   }
 
   private async getSourceMapFileContent(filePath: string) {
@@ -1048,6 +1090,14 @@ class TestRunner {
   ) {
     const testPath = this.makePath([...parentList, testCase.name]);
     try {
+      if (!this.testNameMatches(testPath)) {
+        if (this.verbose) {
+          output.info.println(
+            /* html */ `   [-] <p color="yellow">${testPath}</p>`
+          );
+        }
+        return true;
+      }
       await testCase.callback();
       output.info.println(/* html */ `   [✓] <p color="green">${testPath}</p>`);
       return true;
@@ -1176,7 +1226,25 @@ class TestRunner {
     const testUnit = this.testFileQueue.pop() as TestUnit;
     const outputFile = testUnit.testFile + ".bundled.js";
 
+    const mapFile = outputFile + ".map";
+    const isOutputAbsolute = outputFile.startsWith("/");
+    const importPath =
+      "file://" + (isOutputAbsolute ? outputFile : _join(cwd, outputFile));
+
+    const relativePath =
+      "." +
+      importPath.replace("file://" + cwd, "").replace(/\.bundled\.js$/, "");
+
     try {
+      if (!this.testFileMatches(testUnit.testFile)) {
+        if (this.verbose) {
+          this.mainOutput.println(
+            /* html */ `[-] <p bold color="yellow">${relativePath}</p> <p bold color="white" bg="lightYellow">SKIPPED</p>`
+          );
+        }
+        return true;
+      }
+
       await _buildFile({
         input: testUnit.testFile,
         output: outputFile,
@@ -1184,25 +1252,12 @@ class TestRunner {
         mainSetup: this.mainSetup,
       });
 
-      const mapFile = outputFile + ".map";
-      const isOutputAbsolute = outputFile.startsWith("/");
-      const importPath =
-        "file://" + (isOutputAbsolute ? outputFile : _join(cwd, outputFile));
-
-      const relativePath =
-        "." +
-        importPath.replace("file://" + cwd, "").replace(/\.bundled\.js$/, "");
-
       await _async((p) => {
         import(importPath)
           .then(async (module) => {
             const test = module.default;
 
             if (_isTest(test)) {
-              // this.mainOutput.println(
-              //   /* html */ `<p color="green">Running Test Suite:</p> "${test.name}"`
-              // );
-
               const errTestOutput = new OutputBuffer();
               const infoTestOutput = new OutputBuffer();
 
@@ -1264,8 +1319,8 @@ class TestRunner {
     while (await this.nextUnit()) {}
   }
 
-  setOptions(config: { verbose: boolean }) {
-    this.verbose = config.verbose;
+  setOptions(options: TestRunnerOptions) {
+    Object.assign(this.options, options);
     return this;
   }
 }
@@ -1311,8 +1366,13 @@ async function main() {
     // @ts-expect-error
     const pargs: string[] = imports.system.programArgs;
 
-    const options = {
+    const testNamePattern = _getArgValue(pargs, "-t", "--testNamePattern");
+    const testFilePattern = _getArgValue(pargs, "-p", "--testPathPattern");
+
+    const options: TestRunnerOptions = {
       verbose: pargs.includes("--verbose"),
+      testNamePattern,
+      testFilePattern,
     };
 
     const config = await loadConfig();
