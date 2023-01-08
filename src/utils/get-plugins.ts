@@ -8,7 +8,7 @@ export const getPlugins = (program: Program) => {
 
   const plugins = [
     nodePkgPolyfillsPlugin(program.config),
-    reactGnomePlugin(program.config, program.resources),
+    reactGnomePlugin(program),
   ];
 
   if (additionalPlugins.before) {

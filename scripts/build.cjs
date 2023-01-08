@@ -16,7 +16,7 @@ async function main() {
         tsConfig: p("tsconfig.json"),
         formats: ["cjs", "esm", "legacy"],
         declarations: true,
-        exclude: [/polyfills\//],
+        exclude: [/\/polyfills\//],
         isomorphicImports: {
           "./config/eval-js-config/eval-js-config.ts": {
             js: "./config/eval-js-config/eval-js-config.cjs.ts",

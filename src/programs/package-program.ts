@@ -231,7 +231,7 @@ export class PackageProgram extends Program {
   async main() {
     console.log(chalk.blueBright("Building package..."));
 
-    const appName = this.config.applicationName.replace(/[^\w\d]/g, "");
+    const appName = this.appName;
     const buildDirPath = path.resolve(this.cwd, this.config.outDir, ".build");
 
     this.resources = new AppResources(appName);

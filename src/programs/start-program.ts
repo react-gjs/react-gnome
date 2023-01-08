@@ -27,7 +27,7 @@ export class StartProgram extends PackageProgram {
   }
 
   protected async beforeStart() {
-    const appName = this.config.applicationName.replace(/[^\w\d]/g, "");
+    const appName = this.appName;
     const buildDirPath = this.getBuildDirPath();
 
     await this.prepareBuildFiles(appName, buildDirPath);

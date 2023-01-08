@@ -1,26 +1,49 @@
 import type esbuild from "esbuild";
 import fs from "fs/promises";
-import type { Config } from "../../config/config-schema";
-import type { AppResources } from "../../utils/app-resources";
+import type { Program } from "../../programs/base";
 import { getDefaultGiImports } from "./default-gi-imports";
 
-export const reactGnomePlugin = (config: Config, resources?: AppResources) => {
+export const reactGnomePlugin = (program: Program) => {
   return {
     name: "react-gnome-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
-      if (resources)
+      if (program.resources)
         build.onLoad(
           {
             filter:
               /(.*\.(jpg|jpeg|png|webp|mp4|svg|css|ui))|.*\.resource\.[\w\d]*/i,
           },
           (args) => {
-            const resource = resources.registerResource(args.path);
+            const resource = program.resources!.registerResource(args.path);
             return {
               contents: `const resource = "${resource.resourceString}";\nexport default resource;`,
             };
           }
         );
+
+      build.onResolve(
+        {
+          filter: /^system:.*$/,
+        },
+        (args) => {
+          return {
+            namespace: "system",
+            path: args.path.replace(/^system:/, ""),
+          };
+        }
+      );
+
+      build.onLoad(
+        {
+          filter: /^env$/,
+          namespace: "system",
+        },
+        () => {
+          return {
+            contents: program.envs.toJavascriptModule(),
+          };
+        }
+      );
 
       build.onResolve({ filter: /^gi?:\/\// }, (args) => ({
         path: args.path.replace(/^gi?:/, ""),
@@ -45,7 +68,7 @@ export const reactGnomePlugin = (config: Config, resources?: AppResources) => {
           "utf8"
         );
 
-        const imports = getDefaultGiImports(config.giVersions);
+        const imports = getDefaultGiImports(program.config.giVersions);
 
         await fs.writeFile(
           build.initialOptions.outfile!,

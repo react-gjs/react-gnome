@@ -2,6 +2,7 @@ import { Argument } from "clify.js";
 import type esbuild from "esbuild";
 import type { Config } from "../config/config-schema";
 import type { AppResources } from "../utils/app-resources";
+import { EnvVars } from "../utils/env-vars";
 import { handleProgramError } from "../utils/handle-program-error";
 import { readConfig } from "../utils/read-config";
 
@@ -23,6 +24,7 @@ const BuildModeArgument = Argument.define({
 });
 
 export abstract class Program {
+  envs = new EnvVars();
   config!: Readonly<Config>;
   cwd = process.cwd();
   resources?: AppResources;
@@ -40,10 +42,21 @@ export abstract class Program {
     return this.args.watch.value || false;
   }
 
+  get appName() {
+    return this.config.applicationName.replace(/[^\w\d]/g, "");
+  }
+
   abstract additionalPlugins(): {
     before?: esbuild.Plugin[];
     after?: esbuild.Plugin[];
   };
+
+  private populateDefaultEnvVars() {
+    this.envs.define("appName", this.config.applicationName);
+    this.envs.define("appVersion", this.config.applicationVersion);
+    this.envs.define("appId", `org.gnome.${this.config.applicationName}`);
+    this.envs.define("mode", this.isDev ? "development" : "production");
+  }
 
   /** @internal */
   abstract main<T extends this>(program: T): any;
@@ -52,6 +65,7 @@ export abstract class Program {
   async run() {
     try {
       this.config = await readConfig(this);
+      this.populateDefaultEnvVars();
       return await this.main(this);
     } catch (e) {
       handleProgramError(e);
@@ -81,6 +95,8 @@ export abstract class Program {
       Object.freeze(this);
       Object.freeze(this.args);
       Object.freeze(this.config);
+
+      this.populateDefaultEnvVars();
 
       return await this.main(this);
     } catch (e) {
