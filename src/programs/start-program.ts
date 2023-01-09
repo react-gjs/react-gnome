@@ -8,9 +8,9 @@ import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
 import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
-import { PackageProgram } from "./package-program";
+import { BuildProgram } from "./build-program";
 
-export class StartProgram extends PackageProgram {
+export class StartProgram extends BuildProgram {
   protected getBuildDirPath() {
     return path.resolve(this.cwd, this.config.outDir, ".build");
   }

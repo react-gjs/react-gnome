@@ -1,6 +1,6 @@
 import { configure } from "clify.js";
 import { BuildProgram } from "./programs/build-program";
-import { PackageProgram } from "./programs/package-program";
+import { BundleProgram } from "./programs/bundle-program";
 import { StartProgram } from "./programs/start-program";
 
 /** Invokes the CLI program that builds the app. */
@@ -9,19 +9,18 @@ export async function build() {
     main.setDisplayName("react-gnome");
     main.setDescription("Build GTK apps with React.");
 
-    const buildCommand = main.addSubCommand("build", () => new BuildProgram());
-    const startCommand = main.addSubCommand("start", () => new StartProgram());
-    const packageCommand = main.addSubCommand(
-      "create-package",
-      () => new PackageProgram()
-    );
+    const bundleCmd = main.addSubCommand("bundle", () => new BundleProgram());
+    const buildCmd = main.addSubCommand("build", () => new BuildProgram());
+    const startCmd = main.addSubCommand("start", () => new StartProgram());
 
-    buildCommand.setDescription("Build and bundle the app into a single file.");
-    startCommand.setDescription("Build, bundle and open the app.");
-    packageCommand.setDescription(
-      "Build, bundle and create a full package for the app."
+    bundleCmd.setDescription(
+      "Create a bundled js file, without the tarball or meson configuration. This is useful if you want to manage the build process yourself."
     );
+    buildCmd.setDescription(
+      "Create a tarball and meson configuration thats ready to be installed."
+    );
+    startCmd.setDescription("Build and run the app immediately after.");
   });
 }
 
-export { BuildProgram, PackageProgram, StartProgram };
+export { BundleProgram, BuildProgram, StartProgram };
