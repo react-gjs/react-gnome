@@ -8,15 +8,31 @@ export const EsbuildPluginDataType = DataType.Custom(
   }
 );
 
+const RegexDataType = DataType.Custom((v): v is RegExp => {
+  return typeof v === "object" && v !== null && v instanceof RegExp;
+});
+
 export const ConfigSchema = DataType.RecordOf({
   applicationName: DataType.String,
   applicationVersion: DataType.String,
   entrypoint: DataType.String,
-  outDir: DataType.String,
-  externalPackages: OptionalField(DataType.ArrayOf(DataType.String)),
-  minify: OptionalField(DataType.Boolean),
-  treeShake: OptionalField(DataType.Boolean),
+  envVars: OptionalField(
+    DataType.RecordOf({
+      allow: OptionalField(
+        DataType.OneOf(DataType.ArrayOf(DataType.String), RegexDataType)
+      ),
+      defaults: OptionalField(
+        DataType.Dict(DataType.String, DataType.Number, DataType.Boolean)
+      ),
+      disallow: OptionalField(
+        DataType.OneOf(DataType.ArrayOf(DataType.String), RegexDataType)
+      ),
+      envFilePath: OptionalField(DataType.String),
+      systemVars: OptionalField(DataType.Boolean),
+    })
+  ),
   esbuildPlugins: OptionalField(DataType.ArrayOf(EsbuildPluginDataType)),
+  externalPackages: OptionalField(DataType.ArrayOf(DataType.String)),
   giVersions: OptionalField(
     DataType.RecordOf({
       Gtk: OptionalField(DataType.Literal("3.0")),
@@ -41,6 +57,8 @@ export const ConfigSchema = DataType.RecordOf({
       xlib: OptionalField(DataType.String),
     })
   ),
+  outDir: DataType.String,
+  minify: OptionalField(DataType.Boolean),
   polyfills: OptionalField(
     DataType.RecordOf({
       AbortController: OptionalField(DataType.Boolean),
@@ -59,6 +77,7 @@ export const ConfigSchema = DataType.RecordOf({
       ),
     })
   ),
+  treeShake: OptionalField(DataType.Boolean),
 });
 
 ConfigSchema.recordOf.applicationName.setDescription(
@@ -95,6 +114,26 @@ ConfigSchema.recordOf.esbuildPlugins.type.setDescription(
 
 ConfigSchema.recordOf.giVersions.type.setDescription(
   "The versions of the builtin libraries from the `gi://` namespace, that should be used in the generated bundle."
+);
+
+ConfigSchema.recordOf.envVars.type.recordOf.systemVars.type.setDescription(
+  "Whether the system environment variables should be included in the generated bundle.\nBy default is always disabled."
+);
+
+ConfigSchema.recordOf.envVars.type.recordOf.allow.type.setDescription(
+  "If system vars are enabled, an array of strings or a Regex of environment variables that can be included in the generated bundle.\nBy default allows all."
+);
+
+ConfigSchema.recordOf.envVars.type.recordOf.disallow.type.setDescription(
+  "If system vars are enabled, an array of strings or a Regex of environment variables that should not be included in the generated bundle.\nBy default disallows none."
+);
+
+ConfigSchema.recordOf.envVars.type.recordOf.defaults.type.setDescription(
+  "A dictionary of environment variables and values to use if the variable is not set in the system environment or .env file."
+);
+
+ConfigSchema.recordOf.envVars.type.recordOf.envFilePath.type.setDescription(
+  "The path to the .env file. Should be a relative path from the project root. If this option is specified but the file does not exist, build will fail with an error.\nDefault is `.env`."
 );
 
 const polyfills = ConfigSchema.recordOf.polyfills.type;

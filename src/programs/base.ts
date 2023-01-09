@@ -4,6 +4,7 @@ import type { Config } from "../config/config-schema";
 import type { AppResources } from "../utils/app-resources";
 import { EnvVars } from "../utils/env-vars";
 import { handleProgramError } from "../utils/handle-program-error";
+import { parseEnvVarConfig } from "../utils/parse-env-var-config";
 import { readConfig } from "../utils/read-config";
 
 type MapArgRecord<A extends Record<string, Argument<any, any>>> = {
@@ -52,6 +53,8 @@ export abstract class Program {
   };
 
   private populateDefaultEnvVars() {
+    parseEnvVarConfig(this);
+
     this.envs.define("appName", this.config.applicationName);
     this.envs.define("appVersion", this.config.applicationVersion);
     this.envs.define("appId", `org.gnome.${this.config.applicationName}`);

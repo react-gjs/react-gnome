@@ -1,4 +1,4 @@
-export type EnvVariableValue = string | number | boolean | null;
+export type EnvVariableValue = string | number | boolean | undefined;
 
 export class EnvVars {
   private defined = new Map<string, EnvVariableValue>();
