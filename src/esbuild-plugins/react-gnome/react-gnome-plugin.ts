@@ -43,12 +43,12 @@ export const reactGnomePlugin = (program: Program) => {
 
       build.onResolve(
         {
-          filter: /^system:.*$/,
+          filter: /^gapp:(env)$/,
         },
         (args) => {
           return {
-            namespace: "system",
-            path: args.path.replace(/^system:/, ""),
+            namespace: "gapp",
+            path: args.path.replace(/^gapp:/, ""),
           };
         }
       );
@@ -56,7 +56,7 @@ export const reactGnomePlugin = (program: Program) => {
       build.onLoad(
         {
           filter: /^env$/,
-          namespace: "system",
+          namespace: "gapp",
         },
         () => {
           return {
