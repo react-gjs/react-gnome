@@ -1,12 +1,32 @@
 import type esbuild from "esbuild";
 import fs from "fs/promises";
 import type { Program } from "../../programs/base";
+import { generateUniqueName } from "../../utils/generate-unique-name";
 import { getDefaultGiImports } from "./default-gi-imports";
+
+class ExternalImport {
+  importName: string;
+
+  constructor(public path: string) {
+    this.importName =
+      "_" + path.replace(/[^a-zA-Z]/g, "") + "_" + generateUniqueName(8);
+  }
+
+  toImportStatement() {
+    return `import * as ${this.importName} from "${this.path}";`;
+  }
+
+  toExportStatement() {
+    return `module.exports = ${this.importName};`;
+  }
+}
 
 export const reactGnomePlugin = (program: Program) => {
   return {
     name: "react-gnome-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
+      const externalImports: ExternalImport[] = [];
+
       if (program.resources)
         build.onLoad(
           {
@@ -55,6 +75,24 @@ export const reactGnomePlugin = (program: Program) => {
         namespace: "gi",
       }));
 
+      build.onResolve({ filter: /.*/ }, (args) => {
+        if (program.config.externalPackages?.includes(args.path)) {
+          return {
+            path: args.path,
+            namespace: "external-import",
+          };
+        }
+      });
+
+      build.onLoad({ filter: /.*/, namespace: "external-import" }, (args) => {
+        const externalImport = new ExternalImport(args.path);
+        externalImports.push(externalImport);
+
+        return {
+          contents: externalImport.toExportStatement(),
+        };
+      });
+
       build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
         const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
         return {
@@ -68,11 +106,13 @@ export const reactGnomePlugin = (program: Program) => {
           "utf8"
         );
 
-        const imports = getDefaultGiImports(program.config.giVersions);
+        const imports = [getDefaultGiImports(program.config.giVersions)];
+
+        imports.push(...externalImports.map((e) => e.toImportStatement()));
 
         await fs.writeFile(
           build.initialOptions.outfile!,
-          [imports, `export function main() {\n${outputFile}\n}`].join("\n")
+          [...imports, `export function main() {\n${outputFile}\n}`].join("\n")
         );
       });
     },

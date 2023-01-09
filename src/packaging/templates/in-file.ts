@@ -9,9 +9,13 @@ imports.package.init({
     libdir: '@libdir@',
 });
 
+Object.assign(globalThis, {
+  MAIN_LOOP_NAME: "react-gnome-app:main-loop"
+});
+
 import('resource:///org/gnome/${params.appName}/js/main.js')
-  .then((entrypoint) => {
-    entrypoint.main();
+  .then((main) => {
+    imports.package.run(main)
   })
   .catch(error => {
     console.error(error);
@@ -20,5 +24,5 @@ import('resource:///org/gnome/${params.appName}/js/main.js')
 
 // Main Loop must be started from this entry file, or otherwise all Promises block until main loop exits
 // See https://gitlab.gnome.org/GNOME/gjs/-/issues/468 for more details
-imports.mainloop.run();
+imports.mainloop.run(MAIN_LOOP_NAME);
 `.trim();

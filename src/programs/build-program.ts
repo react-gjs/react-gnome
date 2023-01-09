@@ -25,7 +25,6 @@ export class BuildProgram extends Program {
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
       plugins: getPlugins(this),
-      external: this.config.externalPackages,
       minify: this.config.minify ?? (this.isDev ? false : true),
       treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
       jsx: "transform",
