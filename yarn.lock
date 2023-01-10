@@ -2104,7 +2104,16 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
-"dilswer@npm:^1.2.0, dilswer@npm:^1.4.1":
+"dilswer@npm:1.5.0":
+  version: 1.5.0
+  resolution: "dilswer@npm:1.5.0"
+  dependencies:
+    "@types/json-schema": ^7.0.11
+  checksum: c31cc0f6a6d537e2641ebb303c6a1eea776cda2ca63780b5ce0256b1444449defa3e6ded5486a7c1be2e2b4a01f1b0b367dfd1e17fb6152845f2ce6bc013b3b3
+  languageName: node
+  linkType: hard
+
+"dilswer@npm:^1.2.0":
   version: 1.4.1
   resolution: "dilswer@npm:1.4.1"
   dependencies:
@@ -5157,7 +5166,7 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     buffer: ^6.0.3
     chalk: ^4.1.2
     clify.js: "ncpa0cpl/clify.js#0.0.1"
-    dilswer: ^1.4.1
+    dilswer: 1.5.0
     esbuild: ^0.15.18
     eslint: ^8.29.0
     eslint-config-prettier: ^8.5.0

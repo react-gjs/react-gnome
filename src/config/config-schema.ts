@@ -1,15 +1,15 @@
 import { DataType, OptionalField } from "dilswer";
-import type esbuild from "esbuild";
 
-export const EsbuildPluginDataType = DataType.Custom(
-  (v): v is esbuild.Plugin => {
-    return typeof v === "object" && v != null;
-  }
+export const EsbuildPluginDataType = DataType.RecordOf({
+  name: DataType.String,
+  setup: DataType.Function,
+}).setTitle("EsbuildPlugin");
+
+const RegexDataType = DataType.InstanceOf(RegExp);
+
+RegexDataType.setDescription(
+  "A Regular expression. Only supported in JavaScript config files."
 );
-
-const RegexDataType = DataType.Custom((v): v is RegExp => {
-  return typeof v === "object" && v !== null && v instanceof RegExp;
-});
 
 export const ConfigSchema = DataType.RecordOf({
   applicationName: DataType.String,
@@ -82,6 +82,16 @@ export const ConfigSchema = DataType.RecordOf({
   treeShake: OptionalField(DataType.Boolean),
 });
 
+ConfigSchema.setTitle("Config");
+ConfigSchema.recordOf.envVars.type.setTitle("EnvVars");
+ConfigSchema.recordOf.esbuildPlugins.type.setTitle("EsbuildPlugins");
+ConfigSchema.recordOf.externalPackages.type.setTitle("ExternalPackages");
+ConfigSchema.recordOf.giVersions.type.setTitle("GiVersions");
+ConfigSchema.recordOf.polyfills.type.setTitle("Polyfills");
+ConfigSchema.recordOf.polyfills.type.recordOf.node.type.setTitle(
+  "NodePolyfills"
+);
+
 ConfigSchema.recordOf.applicationName.setDescription(
   "The name of the application. It is recommended for this name to only include letters, numbers, dashes and floors. Additional it is invalid to have the first or last letter of the name to be anything else than a letter or a number."
 );
@@ -91,15 +101,15 @@ ConfigSchema.recordOf.applicationVersion.setDescription(
 );
 
 ConfigSchema.recordOf.applicationPrefix.type.setDescription(
-  "The prefix of the application ID. For example `com.example`. This value will be a part of the app id. It must only contain letters, dashes and dots.\nDefault is `org.gnome`."
+  "The prefix of the application ID. For example `com.example`. This value will be a part of the app id. It must only contain letters, dashes and dots.\n\nDefault is `org.gnome`."
 );
 
 ConfigSchema.recordOf.entrypoint.setDescription(
-  "The entrypoint file of the application.\nCan be a relative path from the project root or an absolute path."
+  "The entrypoint file of the application. Should be a relative path from the project root."
 );
 
 ConfigSchema.recordOf.outDir.setDescription(
-  "The output directory for the generated bundle.\nCan be a relative path from the project root or an absolute path."
+  "The output directory for the generated bundle. Should be a relative path from the project root."
 );
 
 ConfigSchema.recordOf.externalPackages.type.setDescription(
@@ -107,11 +117,11 @@ ConfigSchema.recordOf.externalPackages.type.setDescription(
 );
 
 ConfigSchema.recordOf.minify.type.setDescription(
-  "Whether the generated bundle should be minified.\nThis is useful for production builds.\nBy default is enabled in `production` mode and disabled in `development` mode."
+  "Whether the generated bundle should be minified.\nThis is useful for production builds.\n\nBy default is enabled in `production` mode and disabled in `development` mode."
 );
 
 ConfigSchema.recordOf.treeShake.type.setDescription(
-  "Whether unused code should be removed from the bundle.\nThis is useful for production builds.\nBy default is enabled in `production` mode and disabled in `development` mode."
+  "Whether unused code should be removed from the bundle.\nThis is useful for production builds.\n\nBy default is enabled in `production` mode and disabled in `development` mode."
 );
 
 ConfigSchema.recordOf.esbuildPlugins.type.setDescription(
@@ -122,16 +132,20 @@ ConfigSchema.recordOf.giVersions.type.setDescription(
   "The versions of the builtin libraries from the `gi://` namespace, that should be used in the generated bundle."
 );
 
+ConfigSchema.recordOf.envVars.type.setDescription(
+  "Settings for environment variables injected into the generated bundle."
+);
+
 ConfigSchema.recordOf.envVars.type.recordOf.systemVars.type.setDescription(
-  "Whether the system environment variables should be included in the generated bundle.\nBy default is always disabled."
+  "Whether the system environment variables should be included in the generated bundle.\n\nBy default is always disabled."
 );
 
 ConfigSchema.recordOf.envVars.type.recordOf.allow.type.setDescription(
-  "If system vars are enabled, an array of strings or a Regex of environment variables that can be included in the generated bundle.\nBy default allows all."
+  "If system vars are enabled, an array of strings or a Regex of environment variables that can be included in the generated bundle.\n\nBy default allows all."
 );
 
 ConfigSchema.recordOf.envVars.type.recordOf.disallow.type.setDescription(
-  "If system vars are enabled, an array of strings or a Regex of environment variables that should not be included in the generated bundle.\nBy default disallows none."
+  "If system vars are enabled, an array of strings or a Regex of environment variables that should not be included in the generated bundle.\n\nBy default disallows none."
 );
 
 ConfigSchema.recordOf.envVars.type.recordOf.defaults.type.setDescription(
@@ -139,7 +153,7 @@ ConfigSchema.recordOf.envVars.type.recordOf.defaults.type.setDescription(
 );
 
 ConfigSchema.recordOf.envVars.type.recordOf.envFilePath.type.setDescription(
-  "The path to the .env file. Should be a relative path from the project root. If this option is specified but the file does not exist, build will fail with an error.\nDefault is `.env`."
+  "The path to the .env file. Should be a relative path from the project root. If this option is specified but the file does not exist, build will fail with an error.\n\nDefault is `.env`."
 );
 
 ConfigSchema.recordOf.friendlyName.type.setDescription(
@@ -147,7 +161,7 @@ ConfigSchema.recordOf.friendlyName.type.setDescription(
 );
 
 ConfigSchema.recordOf.license.type.setDescription(
-  "The license of the application.\nDefault is `GPL-2.0`."
+  "The license of the application.\n\nDefault is `GPL-2.0`."
 );
 
 const polyfills = ConfigSchema.recordOf.polyfills.type;

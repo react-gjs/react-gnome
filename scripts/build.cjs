@@ -1,5 +1,5 @@
 const { build } = require("@ncpa0cpl/nodepack");
-const { toJsonSchema } = require("dilswer");
+const { toJsonSchema, toTsType } = require("dilswer");
 const path = require("path");
 const fs = require("fs/promises");
 
@@ -46,6 +46,11 @@ async function main() {
     const configJsonSchema = toJsonSchema(ConfigSchema, {
       additionalProperties: false,
       customParser: {
+        Function() {
+          return {
+            title: "EsBuild Plugin Setup Function",
+          };
+        },
         Custom() {
           // EsBuild Plugin
           return {
@@ -62,6 +67,16 @@ async function main() {
     await fs.writeFile(
       p("dist/config-schema.json"),
       JSON.stringify(configJsonSchema, null, 2)
+    );
+
+    const configTsType = toTsType(ConfigSchema, {
+      mode: "named-expanded",
+      onDuplicateName: "rename",
+    });
+
+    await fs.writeFile(
+      p("dist/types/config/config-type.d.ts"),
+      configTsType.replace(/export type/g, "export declare type")
     );
   } catch (e) {
     console.error(e);
