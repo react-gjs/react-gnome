@@ -122,10 +122,9 @@ export class BuildProgram extends Program {
     });
     const gschema = getDataGSchema({
       appID: context.appID,
-      appName: context.appName,
     });
     const resources = getDataResources({
-      appName: context.appName,
+      appID: context.appID,
       files: this.resources?.getAll().map((r) => r.name),
     });
     const dataService = getDataService();
@@ -161,11 +160,10 @@ export class BuildProgram extends Program {
   ) {
     const inFile = getInFile({
       appID: context.appID,
-      appName: context.appName,
     });
 
     const gresource = getGResourceXml({
-      appName: context.appName,
+      appID: context.appID,
     });
 
     const srcMesonBuild = getSrcMesonBuild();
@@ -207,7 +205,7 @@ export class BuildProgram extends Program {
     const context: PackagingContext = {
       appName,
       appVersion: this.config.applicationVersion,
-      appID: `org.gnome.${appName}`,
+      appID: this.appID,
       packageName: `${pascalToKebab(appName)}`,
     };
 
@@ -234,7 +232,7 @@ export class BuildProgram extends Program {
     const appName = this.appName;
     const buildDirPath = path.resolve(this.cwd, this.config.outDir, ".build");
 
-    this.resources = new AppResources(appName);
+    this.resources = new AppResources(this.appID);
 
     if (existsSync(buildDirPath))
       await new Promise<void>((resolve, reject) => {

@@ -1,7 +1,8 @@
 import type esbuild from "esbuild";
-import type { Config } from "../../config/config-schema";
+import type { Program } from "../../programs/base";
 
-export const nodePkgPolyfillsPlugin = (config: Config) => {
+export const nodePkgPolyfillsPlugin = (program: Program) => {
+  const config = program.config;
   return {
     name: "react-gnome-node-pkg-polyfills-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {

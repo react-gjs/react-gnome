@@ -1,4 +1,4 @@
-import type { GiVersions } from "../../config/config-schema";
+import type { Config } from "../../config/config-type";
 
 class GiImport {
   constructor(private name: string) {}
@@ -30,7 +30,7 @@ const Soup = new GiImport("Soup");
 const cairo = new GiImport("cairo");
 const xlib = new GiImport("xlib");
 
-export const getDefaultGiImports = (versions: GiVersions = {}) =>
+export const getDefaultGiImports = (versions: Config["giVersions"] = {}) =>
   [
     Gtk.get(versions.Gtk ?? "3.0"),
     Gdk.get(versions.Gdk),

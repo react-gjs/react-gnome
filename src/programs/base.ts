@@ -1,11 +1,18 @@
 import { Argument } from "clify.js";
 import type esbuild from "esbuild";
-import type { Config } from "../config/config-schema";
+import type { Config } from "../config/config-type";
 import type { AppResources } from "../utils/app-resources";
 import { EnvVars } from "../utils/env-vars";
 import { handleProgramError } from "../utils/handle-program-error";
 import { parseEnvVarConfig } from "../utils/parse-env-var-config";
 import { readConfig } from "../utils/read-config";
+import { validatePrefix } from "../utils/validate-prefix";
+
+type DeepReadonly<T> = {
+  readonly [P in keyof T]: T[P] extends object
+    ? DeepReadonly<T[P]>
+    : Readonly<T[P]>;
+};
 
 type MapArgRecord<A extends Record<string, Argument<any, any>>> = {
   [K in keyof A]: A[K]["value"];
@@ -26,7 +33,7 @@ const BuildModeArgument = Argument.define({
 
 export abstract class Program {
   envs = new EnvVars();
-  config!: Readonly<Config>;
+  config!: DeepReadonly<Config>;
   cwd = process.cwd();
   resources?: AppResources;
 
@@ -47,6 +54,17 @@ export abstract class Program {
     return this.config.applicationName.replace(/[^\w\d]/g, "");
   }
 
+  get appID() {
+    if (this.config.applicationPrefix) {
+      const prefix = this.config.applicationPrefix
+        .trim()
+        .replace(/(^\.+)|(\.+$)/g, "");
+      validatePrefix(prefix);
+      return `${prefix}.${this.config.applicationName}`;
+    }
+    return `org.gnome.${this.config.applicationName}`;
+  }
+
   abstract additionalPlugins(): {
     before?: esbuild.Plugin[];
     after?: esbuild.Plugin[];
@@ -55,9 +73,9 @@ export abstract class Program {
   private populateDefaultEnvVars() {
     parseEnvVarConfig(this);
 
-    this.envs.define("appName", this.config.applicationName);
+    this.envs.define("appName", this.appName);
     this.envs.define("appVersion", this.config.applicationVersion);
-    this.envs.define("appId", `org.gnome.${this.config.applicationName}`);
+    this.envs.define("appId", this.appID);
     this.envs.define("mode", this.isDev ? "development" : "production");
   }
 

@@ -1,4 +1,6 @@
-export const getInFile = (params: { appID: string; appName: string }) =>
+import { appIDToPath } from "../../utils/app-id-to-path";
+
+export const getInFile = (params: { appID: string }) =>
   /* js */ `
 #!@GJS@
 
@@ -13,7 +15,7 @@ Object.assign(globalThis, {
   MAIN_LOOP_NAME: "react-gnome-app:main-loop"
 });
 
-import('resource:///org/gnome/${params.appName}/js/main.js')
+import('resource:///${appIDToPath(params.appID)}/js/main.js')
   .then((main) => {
     imports.package.run(main)
   })

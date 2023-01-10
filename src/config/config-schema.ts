@@ -1,4 +1,3 @@
-import type { GetDataType } from "dilswer";
 import { DataType, OptionalField } from "dilswer";
 import type esbuild from "esbuild";
 
@@ -15,6 +14,7 @@ const RegexDataType = DataType.Custom((v): v is RegExp => {
 export const ConfigSchema = DataType.RecordOf({
   applicationName: DataType.String,
   applicationVersion: DataType.String,
+  applicationPrefix: DataType.String,
   entrypoint: DataType.String,
   envVars: OptionalField(
     DataType.RecordOf({
@@ -86,6 +86,10 @@ ConfigSchema.recordOf.applicationName.setDescription(
 
 ConfigSchema.recordOf.applicationVersion.setDescription(
   "The version of the application.\nThis is used to generate the bundle."
+);
+
+ConfigSchema.recordOf.applicationPrefix.setDescription(
+  "The prefix of the application ID. For example `com.example`. This value will be a part of the app id. It must only contain letters, dashes and dots.\nDefault is `org.gnome`."
 );
 
 ConfigSchema.recordOf.entrypoint.setDescription(
@@ -185,7 +189,3 @@ polyfills.recordOf.node.type.recordOf.path.type.setDescription(
 polyfills.recordOf.node.type.recordOf.fs.type.setDescription(
   "Whether the polyfill for the `fs`, `fs/promises`, `node:fs/promises`, and/or `node:fs` package should be included in the generated bundle. When enabled imports of `fs`, `fs/promises`, `node:fs/promises`, and `node:fs` will be replaced with the polyfill."
 );
-
-export type Config = GetDataType<typeof ConfigSchema>;
-
-export type GiVersions = Config["giVersions"];

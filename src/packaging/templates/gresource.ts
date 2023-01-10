@@ -1,11 +1,10 @@
-export const getGResourceXml = (params: {
-  appName: string;
-  files?: string[];
-}) =>
+import { appIDToPath } from "../../utils/app-id-to-path";
+
+export const getGResourceXml = (params: { appID: string; files?: string[] }) =>
   /* xml */ `
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/org/gnome/${params.appName}/js">
+  <gresource prefix="/${appIDToPath(params.appID)}/js">
     <file>main.js</file>${
       params.files
         ? "\n" +

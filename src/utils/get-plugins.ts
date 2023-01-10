@@ -6,10 +6,7 @@ import type { Program } from "../programs/base";
 export const getPlugins = (program: Program) => {
   const additionalPlugins = program.additionalPlugins();
 
-  const plugins = [
-    nodePkgPolyfillsPlugin(program.config),
-    reactGnomePlugin(program),
-  ];
+  const plugins = [nodePkgPolyfillsPlugin(program), reactGnomePlugin(program)];
 
   if (additionalPlugins.before) {
     plugins.push(...additionalPlugins.before);

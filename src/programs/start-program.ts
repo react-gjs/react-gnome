@@ -45,10 +45,9 @@ export class StartProgram extends BuildProgram {
       console.log(chalk.blueBright("Starting."));
     }
 
-    const appName = this.config.applicationName.replace(/[^\w\d]/g, "");
     const buildDirPath = this.getBuildDirPath();
 
-    this.resources = new AppResources(appName);
+    this.resources = new AppResources(this.appID);
 
     if (existsSync(buildDirPath))
       await new Promise<void>((resolve, reject) => {
