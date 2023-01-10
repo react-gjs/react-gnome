@@ -22,6 +22,10 @@ class ExternalImport {
 }
 
 export const reactGnomePlugin = (program: Program) => {
+  const externalPackages = new Set(program.config.externalPackages ?? []);
+  externalPackages.add("system");
+  externalPackages.add("gettext");
+
   return {
     name: "react-gnome-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
@@ -76,7 +80,7 @@ export const reactGnomePlugin = (program: Program) => {
       }));
 
       build.onResolve({ filter: /.*/ }, (args) => {
-        if (program.config.externalPackages?.includes(args.path)) {
+        if (externalPackages.has(args.path)) {
           return {
             path: args.path,
             namespace: "external-import",
