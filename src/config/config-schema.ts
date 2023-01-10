@@ -14,7 +14,7 @@ const RegexDataType = DataType.Custom((v): v is RegExp => {
 export const ConfigSchema = DataType.RecordOf({
   applicationName: DataType.String,
   applicationVersion: DataType.String,
-  applicationPrefix: DataType.String,
+  applicationPrefix: OptionalField(DataType.String),
   entrypoint: DataType.String,
   envVars: OptionalField(
     DataType.RecordOf({
@@ -90,7 +90,7 @@ ConfigSchema.recordOf.applicationVersion.setDescription(
   "The version of the application.\nThis is used to generate the bundle."
 );
 
-ConfigSchema.recordOf.applicationPrefix.setDescription(
+ConfigSchema.recordOf.applicationPrefix.type.setDescription(
   "The prefix of the application ID. For example `com.example`. This value will be a part of the app id. It must only contain letters, dashes and dots.\nDefault is `org.gnome`."
 );
 
