@@ -110,15 +110,15 @@ export class BuildProgram extends Program {
   ) {
     const appData = getAppData({
       appID: context.appID,
-      license: "GPL2", // TODO: Make this configurable
-      friendlyName: context.appName, // TODO: Make this configurable
+      license: this.config.license ?? "GPL2",
+      friendlyName: this.config.friendlyName ?? this.config.applicationName,
     });
     const dataBusname = getDataBusname({
       appID: context.appID,
     });
     const dataDesktopEntry = getDataDesktopEntry({
       appID: context.appID,
-      friendlyName: context.appName, // TODO: Make this configurable
+      friendlyName: this.config.friendlyName ?? this.config.applicationName,
     });
     const gschema = getDataGSchema({
       appID: context.appID,
@@ -189,7 +189,7 @@ export class BuildProgram extends Program {
       appID: context.appID,
       packageName: context.packageName,
       packageVersion: context.appVersion,
-      license: "GPL2", // TODO: Make this configurable
+      license: this.config.license ?? "GPL2",
     });
 
     const packageJson = getPackageJson({

@@ -33,6 +33,7 @@ export const ConfigSchema = DataType.RecordOf({
   ),
   esbuildPlugins: OptionalField(DataType.ArrayOf(EsbuildPluginDataType)),
   externalPackages: OptionalField(DataType.ArrayOf(DataType.String)),
+  friendlyName: OptionalField(DataType.String),
   giVersions: OptionalField(
     DataType.RecordOf({
       Gtk: OptionalField(DataType.Literal("3.0")),
@@ -57,8 +58,9 @@ export const ConfigSchema = DataType.RecordOf({
       xlib: OptionalField(DataType.String),
     })
   ),
-  outDir: DataType.String,
+  license: OptionalField(DataType.String),
   minify: OptionalField(DataType.Boolean),
+  outDir: DataType.String,
   polyfills: OptionalField(
     DataType.RecordOf({
       AbortController: OptionalField(DataType.Boolean),
@@ -81,7 +83,7 @@ export const ConfigSchema = DataType.RecordOf({
 });
 
 ConfigSchema.recordOf.applicationName.setDescription(
-  "The name of the application.\nThis is used to generate the name of the generated bundle."
+  "The name of the application. It is recommended for this name to only include letters, numbers, dashes and floors. Additional it is invalid to have the first or last letter of the name to be anything else than a letter or a number."
 );
 
 ConfigSchema.recordOf.applicationVersion.setDescription(
@@ -138,6 +140,14 @@ ConfigSchema.recordOf.envVars.type.recordOf.defaults.type.setDescription(
 
 ConfigSchema.recordOf.envVars.type.recordOf.envFilePath.type.setDescription(
   "The path to the .env file. Should be a relative path from the project root. If this option is specified but the file does not exist, build will fail with an error.\nDefault is `.env`."
+);
+
+ConfigSchema.recordOf.friendlyName.type.setDescription(
+  "The friendly name of the application.\nThis is the name you'd want to display to the user.\n If not specified, the application name will be used."
+);
+
+ConfigSchema.recordOf.license.type.setDescription(
+  "The license of the application.\nDefault is `GPL-2.0`."
 );
 
 const polyfills = ConfigSchema.recordOf.polyfills.type;
