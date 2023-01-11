@@ -1,4 +1,4 @@
-declare module "system:env" {
+declare module "gapp:env" {
   const envs: {
     [key: string]: string | number | boolean | null;
   } & {
