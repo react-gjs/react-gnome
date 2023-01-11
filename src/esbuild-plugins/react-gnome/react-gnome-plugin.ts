@@ -35,7 +35,7 @@ export const reactGnomePlugin = (program: Program) => {
         build.onLoad(
           {
             filter:
-              /(.*\.(jpg|jpeg|png|webp|mp4|svg|css|ui))|.*\.resource\.[\w\d]*/i,
+              /(.*\.(jpg|jpeg|png|webp|webm|svg|mpeg|mp4|css|ui))|(.*\.resource\.[\w\d]*)/i,
           },
           (args) => {
             const resource = program.resources!.registerResource(args.path);
