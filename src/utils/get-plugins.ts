@@ -1,7 +1,13 @@
+import type esbuild from "esbuild";
 import { nodePkgPolyfillsPlugin } from "../esbuild-plugins/node-pkg-polyfills/node-pkg-polyfills";
 import { reactGnomePlugin } from "../esbuild-plugins/react-gnome/react-gnome-plugin";
 import { watchLoggerPlugin } from "../esbuild-plugins/watch-logger/watch-logger-plugin";
 import type { Program } from "../programs/base";
+
+export type AdditionalPlugins = {
+  before?: esbuild.Plugin[];
+  after?: esbuild.Plugin[];
+};
 
 export const getPlugins = (program: Program) => {
   const additionalPlugins = program.additionalPlugins();

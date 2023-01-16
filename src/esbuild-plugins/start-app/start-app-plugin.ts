@@ -1,12 +1,14 @@
-import { execSync, spawn } from "child_process";
+import { spawn } from "child_process";
 import type esbuild from "esbuild";
+import type { Program } from "../../programs/base";
 
 export const startAppPlugin = (params: {
   getCwd: () => string;
   beforeStart?: () => any;
+  program: Program;
 }) => {
+  const { getCwd, program, beforeStart } = params;
   let cleanup = () => {};
-  const pid = process.pid;
 
   return {
     name: "react-gnome-start-app-esbuild-plugin",
@@ -14,13 +16,13 @@ export const startAppPlugin = (params: {
       build.onEnd(async () => {
         cleanup();
 
-        await params.beforeStart?.();
+        await beforeStart?.();
 
         // spawn the bash process
         const child = spawn("meson", ["compile", "-C", "_build", "run"], {
           stdio: "inherit",
           shell: true,
-          cwd: params.getCwd(),
+          cwd: getCwd(),
         });
 
         const onChildOutput = (data: any) => {
@@ -32,15 +34,7 @@ export const startAppPlugin = (params: {
         };
 
         const onExit = () => {
-          const subProcesses = execSync(`pgrep -P ${pid}`)
-            .toString()
-            .trim()
-            .split("\n");
-          for (const subProcess of subProcesses) {
-            const subProcessPid = parseInt(subProcess);
-            if (!isNaN(subProcessPid)) process.kill(subProcessPid, "SIGINT");
-          }
-          process.kill(process.pid, "SIGINT");
+          program.esbuildCtx.cancel();
         };
 
         child.stdout?.on("data", onChildOutput);

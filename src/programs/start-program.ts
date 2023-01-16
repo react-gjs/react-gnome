@@ -1,11 +1,11 @@
 import chalk from "chalk";
-import esbuild from "esbuild";
 import { existsSync } from "fs";
 import path from "path";
 import rimraf from "rimraf";
 import { startAppPlugin } from "../esbuild-plugins/start-app/start-app-plugin";
 import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
+import type { AdditionalPlugins } from "../utils/get-plugins";
 import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
 import { BuildProgram } from "./build-program";
@@ -15,12 +15,13 @@ export class StartProgram extends BuildProgram {
     return path.resolve(this.cwd, this.config.outDir, ".build");
   }
 
-  additionalPlugins() {
+  additionalPlugins(): AdditionalPlugins {
     return {
       before: [
         startAppPlugin({
           getCwd: () => this.getBuildDirPath(),
           beforeStart: this.beforeStart.bind(this),
+          program: this,
         }),
       ],
     };
@@ -51,19 +52,23 @@ export class StartProgram extends BuildProgram {
 
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
-    await esbuild.build({
-      target: "es6",
-      format: "esm",
-      inject: getPolyfills(this),
-      entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
-      outfile: path.resolve(buildDirPath, "src", "main.js"),
-      plugins: getPlugins(this),
-      minify: this.config.minify ?? (this.isDev ? false : true),
-      treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      jsx: "transform",
-      keepNames: true,
-      bundle: true,
-      watch: this.watchMode,
-    });
+    this.esbuildCtx.init(
+      {
+        target: "es6",
+        format: "esm",
+        inject: getPolyfills(this),
+        entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
+        outfile: path.resolve(buildDirPath, "src", "main.js"),
+        plugins: getPlugins(this),
+        minify: this.config.minify ?? (this.isDev ? false : true),
+        treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
+        jsx: "transform",
+        keepNames: true,
+        bundle: true,
+      },
+      this.watchMode
+    );
+
+    await this.esbuildCtx.start();
   }
 }

@@ -62,7 +62,7 @@
     "chalk": "^4.1.2",
     "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "1.5.0",
-    "esbuild": "^0.15.18",
+    "esbuild": "^0.17.0",
     "path-browserify": "^1.0.1",
     "rimraf": "^4.1.0",
     "tar": "^6.1.13",
