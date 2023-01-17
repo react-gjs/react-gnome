@@ -235,12 +235,7 @@ export class BuildProgram extends Program {
     this.resources = new AppResources(this.appID);
 
     if (existsSync(buildDirPath))
-      await new Promise<void>((resolve, reject) => {
-        rimraf(buildDirPath, {}, (e) => {
-          if (e) reject(e);
-          else resolve();
-        });
-      });
+      await rimraf(buildDirPath, {});
 
     await esbuild.build({
       target: "es2020",

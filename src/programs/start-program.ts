@@ -49,13 +49,7 @@ export class StartProgram extends BuildProgram {
 
     this.resources = new AppResources(this.appID);
 
-    if (existsSync(buildDirPath))
-      await new Promise<void>((resolve, reject) => {
-        rimraf(buildDirPath, {}, (e) => {
-          if (e) reject(e);
-          else resolve();
-        });
-      });
+    if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
     await esbuild.build({
       target: "es6",
