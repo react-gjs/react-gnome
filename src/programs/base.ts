@@ -1,8 +1,9 @@
 import { Argument } from "clify.js";
-import type esbuild from "esbuild";
 import type { Config } from "../config/config-type";
 import type { AppResources } from "../utils/app-resources";
 import { EnvVars } from "../utils/env-vars";
+import { ESBuild } from "../utils/esbuild";
+import type { AdditionalPlugins } from "../utils/get-plugins";
 import { handleProgramError } from "../utils/handle-program-error";
 import { parseEnvVarConfig } from "../utils/parse-env-var-config";
 import { readConfig } from "../utils/read-config";
@@ -37,6 +38,7 @@ export abstract class Program {
   config!: DeepReadonly<Config>;
   cwd = process.cwd();
   resources?: AppResources;
+  esbuildCtx = new ESBuild();
 
   readonly args = {
     watch: new WatchArgument(),
@@ -68,10 +70,7 @@ export abstract class Program {
     return `org.gnome.${this.config.applicationName}`;
   }
 
-  abstract additionalPlugins(): {
-    before?: esbuild.Plugin[];
-    after?: esbuild.Plugin[];
-  };
+  abstract additionalPlugins(): AdditionalPlugins;
 
   private populateDefaultEnvVars() {
     parseEnvVarConfig(this);
@@ -97,6 +96,10 @@ export abstract class Program {
       return await this.main(this);
     } catch (e) {
       handleProgramError(e);
+    } finally {
+      if (!this.esbuildCtx.isWatching) {
+        await this.esbuildCtx.dispose();
+      }
     }
   }
 
@@ -129,6 +132,10 @@ export abstract class Program {
       return await this.main(this);
     } catch (e) {
       handleProgramError(e);
+    } finally {
+      if (!this.esbuildCtx.isWatching) {
+        await this.esbuildCtx.dispose();
+      }
     }
   }
 }

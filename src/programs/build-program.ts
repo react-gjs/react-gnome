@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import esbuild from "esbuild";
 import { existsSync, readdirSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
@@ -237,7 +236,7 @@ export class BuildProgram extends Program {
     if (existsSync(buildDirPath))
       await rimraf(buildDirPath, {});
 
-    await esbuild.build({
+    await this.esbuildCtx.init({
       target: "es2020",
       format: "esm",
       inject: getPolyfills(this),
@@ -249,8 +248,9 @@ export class BuildProgram extends Program {
       jsx: "transform",
       keepNames: true,
       bundle: true,
-      watch: false,
     });
+
+    await this.esbuildCtx.start();
 
     const { packageName, appVersion } = await this.prepareBuildFiles(
       appName,
