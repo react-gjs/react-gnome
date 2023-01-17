@@ -52,7 +52,7 @@ export class StartProgram extends BuildProgram {
 
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
-    this.esbuildCtx.init(
+    await this.esbuildCtx.init(
       {
         target: "es6",
         format: "esm",

@@ -4,6 +4,10 @@ export class ESBuild {
   private ctx!: esbuild.BuildContext<esbuild.BuildOptions>;
   private watch?: boolean = false;
 
+  get isWatching() {
+    return this.watch;
+  }
+
   async init(options: esbuild.BuildOptions, watch?: boolean) {
     this.watch = watch;
     this.ctx = await esbuild.context(options);
@@ -18,15 +22,12 @@ export class ESBuild {
   }
 
   async dispose() {
-    if (this.ctx && !this.watch) {
+    if (this.ctx) {
       await this.ctx.dispose();
     }
   }
 
   async cancel() {
-    // TODO: this is an incoming feature in esbuild
-    // remove the ts-expect-error when it's released
-    // @ts-expect-error
     await this.ctx.cancel();
   }
 }

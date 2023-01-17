@@ -97,7 +97,7 @@ export abstract class Program {
     } catch (e) {
       handleProgramError(e);
     } finally {
-      if (this.esbuildCtx) {
+      if (!this.esbuildCtx.isWatching) {
         await this.esbuildCtx.dispose();
       }
     }
@@ -133,7 +133,7 @@ export abstract class Program {
     } catch (e) {
       handleProgramError(e);
     } finally {
-      if (this.esbuildCtx) {
+      if (!this.esbuildCtx.isWatching) {
         await this.esbuildCtx.dispose();
       }
     }

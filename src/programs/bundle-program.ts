@@ -17,7 +17,7 @@ export class BundleProgram extends Program {
       console.log(chalk.blueBright("Building..."));
     }
 
-    this.esbuildCtx.init(
+    await this.esbuildCtx.init(
       {
         target: "es6",
         format: "esm",
