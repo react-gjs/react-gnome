@@ -5177,6 +5177,7 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     prettier-plugin-jsdoc: ^0.4.2
     rimraf: ^4.1.0
     tar: ^6.1.13
+    termx-markup: ^1.0.0
     typescript: ^4.9.4
     whatwg-url-without-unicode: ^8.0.0-3
   peerDependencies:
@@ -5715,6 +5716,13 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     mkdirp: ^1.0.3
     yallist: ^4.0.0
   checksum: 8a278bed123aa9f53549b256a36b719e317c8b96fe86a63406f3c62887f78267cea9b22dc6f7007009738509800d4a4dccc444abd71d762287c90f35b002eb1c
+  languageName: node
+  linkType: hard
+
+"termx-markup@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "termx-markup@npm:1.0.0"
+  checksum: 157de1cc8a8fb97fed17bcc9ae1f99a338c3497245536fb21e47a661d2036ef32dda7eea2dc800982edbdfc7551a9ca60a18bd9e344df37ec1d82295e2288d7d
   languageName: node
   linkType: hard
 

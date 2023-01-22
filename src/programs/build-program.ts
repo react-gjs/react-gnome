@@ -233,8 +233,7 @@ export class BuildProgram extends Program {
 
     this.resources = new AppResources(this.appID);
 
-    if (existsSync(buildDirPath))
-      await rimraf(buildDirPath, {});
+    if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
     await this.esbuildCtx.init({
       target: "es2020",
