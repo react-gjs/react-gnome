@@ -1,6 +1,7 @@
 import { configure } from "clify.js";
 import { BuildProgram } from "./programs/build-program";
 import { BundleProgram } from "./programs/bundle-program";
+import { InitProgram } from "./programs/init-program";
 import { StartProgram } from "./programs/start-program";
 
 /** Invokes the CLI program that builds the app. */
@@ -12,6 +13,7 @@ export async function build() {
     const bundleCmd = main.addSubCommand("bundle", () => new BundleProgram());
     const buildCmd = main.addSubCommand("build", () => new BuildProgram());
     const startCmd = main.addSubCommand("start", () => new StartProgram());
+    const initCmd = main.addSubCommand("init", () => new InitProgram());
 
     bundleCmd.setDescription(
       "Create a bundled js file, without the tarball or meson configuration. This is useful if you want to manage the build process yourself."
@@ -20,6 +22,9 @@ export async function build() {
       "Create a tarball and meson configuration thats ready to be installed."
     );
     startCmd.setDescription("Build and run the app immediately after.");
+    initCmd.setDescription(
+      "Initialize a new project with the necessary files and scripts."
+    );
   });
 }
 
