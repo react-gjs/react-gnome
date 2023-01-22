@@ -19,22 +19,18 @@
   },
   "devDependencies": {
     "@ncpa0cpl/nodepack": "^2.0.1",
-    "@swc/core": "^1.3.26",
-    "@swc/jest": "^0.2.24",
-    "@types/rimraf": "^3.0.2",
+    "@swc/core": "latest",
     "@types/tar": "^6.1.3",
-    "@typescript-eslint/eslint-plugin": "^5.48.1",
-    "@typescript-eslint/parser": "^5.48.1",
-    "eslint": "^8.32.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.3",
-    "jest": "^29.3.1",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-prettier": "latest",
+    "husky": "latest",
     "ncpa0cpl": "ncpa0cpl/git-hook-tasks",
-    "prettier": "^2.8.3",
-    "prettier-plugin-jsdoc": "^0.4.2",
-    "termx-markup": "^1.0.0",
-    "typescript": "^4.9.4"
+    "prettier": "latest",
+    "prettier-plugin-jsdoc": "latest",
+    "typescript": "latest"
   },
   "version": "1.0.0",
   "scripts": {
@@ -60,16 +56,16 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
-    "chalk": "^4.1.2",
     "clify.js": "ncpa0cpl/clify.js#0.0.1",
     "dilswer": "1.5.0",
-    "esbuild": "^0.17.2",
+    "esbuild": "^0.17.4",
     "path-browserify": "^1.0.1",
-    "rimraf": "^4.1.0",
+    "rimraf": "^4.1.1",
     "tar": "^6.1.13",
+    "termx-markup": "1.1.0",
     "whatwg-url-without-unicode": "^8.0.0-3"
   },
   "peerDependencies": {
-    "ts-node": "^10.9.0"
+    "ts-node": "^10.9.1"
   }
 }

@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import path from "path";
+import { html, Output } from "termx-markup";
 import { getPlugins } from "../utils/get-plugins";
 import { getPolyfills } from "../utils/get-polyfills";
 import { Program } from "./base";
@@ -12,9 +12,11 @@ export class BundleProgram extends Program {
   /** @internal */
   async main() {
     if (this.watchMode) {
-      console.log(chalk.blueBright("Building in watch mode..."));
+      Output.print(
+        html` <span color="lightBlue"> Building in watch mode... </span> `
+      );
     } else {
-      console.log(chalk.blueBright("Building..."));
+      Output.print(html` <span color="lightBlue"> Building... </span> `);
     }
 
     await this.esbuildCtx.init(
@@ -37,7 +39,7 @@ export class BundleProgram extends Program {
     await this.esbuildCtx.start();
 
     if (!this.watchMode) {
-      console.log(chalk.greenBright("Build completed."));
+      Output.print(html` <span color="lightGreen">Build completed.</span> `);
     }
   }
 }

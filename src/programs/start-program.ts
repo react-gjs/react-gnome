@@ -1,7 +1,7 @@
-import chalk from "chalk";
 import { existsSync } from "fs";
 import path from "path";
 import rimraf from "rimraf";
+import { html, Output } from "termx-markup";
 import { startAppPlugin } from "../esbuild-plugins/start-app/start-app-plugin";
 import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
@@ -41,9 +41,11 @@ export class StartProgram extends BuildProgram {
   /** @internal */
   async main() {
     if (this.watchMode) {
-      console.log(chalk.blueBright("Starting in watch mode."));
+      Output.print(
+        html` <span color="lightBlue"> Starting in watch mode... </span> `
+      );
     } else {
-      console.log(chalk.blueBright("Starting."));
+      Output.print(html` <span color="lightBlue"> Starting. </span> `);
     }
 
     const buildDirPath = this.getBuildDirPath();

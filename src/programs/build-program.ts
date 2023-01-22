@@ -1,9 +1,9 @@
-import chalk from "chalk";
 import { existsSync, readdirSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import rimraf from "rimraf";
 import tar from "tar";
+import { html, Output } from "termx-markup";
 import { getAppData } from "../packaging/templates/data/appdata";
 import { getDataBusname } from "../packaging/templates/data/busname";
 import { getDataDesktopEntry } from "../packaging/templates/data/desktop-entry";
@@ -226,7 +226,7 @@ export class BuildProgram extends Program {
 
   /** @internal */
   async main() {
-    console.log(chalk.blueBright("Building package..."));
+    Output.print(html` <span color="lightBlue">Building package...</span> `);
 
     const appName = this.appName;
     const buildDirPath = path.resolve(this.cwd, this.config.outDir, ".build");
@@ -280,6 +280,6 @@ export class BuildProgram extends Program {
       );
     });
 
-    console.log(chalk.greenBright("Package created."));
+    Output.print(html`<span color="lightGreen">Package created.</span>`);
   }
 }

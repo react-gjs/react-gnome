@@ -1,5 +1,7 @@
-import chalk from "chalk";
 import type { ValidationError } from "dilswer/dist/types/validation-algorithms/validation-error/validation-error";
+import { html, Output } from "termx-markup";
+
+const Stderr = new Output(console.error);
 
 export const handleProgramError = (e: unknown) => {
   const isObject = (o: unknown): o is object =>
@@ -10,18 +12,37 @@ export const handleProgramError = (e: unknown) => {
   };
 
   if (isValidationError(e)) {
-    console.error(
-      chalk.redBright(
-        `Config file is invalid. Property "${chalk.yellowBright(
-          e.fieldPath
-        )}" is incorrect.`
-      )
+    Stderr.print(
+      html`
+        <span color="lightRed">
+          Config file is invalid. Property
+          <pre color="lightYellow"> ${e.fieldPath} </pre>
+          is incorrect.
+        </span>
+      `
     );
   } else if (isObject(e) && e instanceof Error) {
-    console.error("Build failed due to an error: ", chalk.redBright(e.message));
+    Stderr.print(
+      html`
+        <span>
+          <line> Build failed due to an error: </line>
+          <pad size="2">
+            <pre color="lightRed">${e.message}</pre>
+          </pad>
+          <br />
+          <pad size="2">
+            <pre color="lightYellow">${e.stack}</pre>
+          </pad>
+        </span>
+      `
+    );
   } else {
     console.error(e);
-    console.error(chalk.redBright("Build failed due to an unknown error."));
+    Stderr.print(
+      html`
+        <span color="lightRed"> Build failed due to an unknown error. </span>
+      `
+    );
   }
 
   process.exit(1);
