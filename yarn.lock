@@ -210,22 +210,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ncpa0cpl/nodepack@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@ncpa0cpl/nodepack@npm:2.0.1"
+"@ncpa0cpl/nodepack@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@ncpa0cpl/nodepack@npm:2.0.3"
   dependencies:
     "@ncpa0cpl/node-worker-bridge": ^0.0.3
-    "@ts-morph/bootstrap": ^0.16.0
-    dilswer: ^1.2.0
+    "@ts-morph/bootstrap": ^0.18.0
+    dilswer: ^1.5.0
     json-to-ts: ^1.7.0
     node-os-walk: ">=1.0.2"
     pretty-error: ^4.0.0
   peerDependencies:
-    esbuild: ^0.15.5
+    esbuild: ^0.17.4
   dependenciesMeta:
     json-to-ts:
       optional: true
-  checksum: 70cc3e0aee42bfe478e3d44993b1f0203dc79e10dd9c0319e08db639d914da2fd4bca96d5c1c8fbf2b754e1e8723a580d7cde28e9d53bcf73d7e1b498167de37
+  checksum: cb3684f1777804a7bb4db212f15b744e15aeb68a5806421d6e13331ab62c4f33de295952fec344e0f9f63406099e9095d815a0772eb7e190ccaa9080425ea4d7
   languageName: node
   linkType: hard
 
@@ -365,24 +365,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ts-morph/bootstrap@npm:^0.16.0":
-  version: 0.16.0
-  resolution: "@ts-morph/bootstrap@npm:0.16.0"
+"@ts-morph/bootstrap@npm:^0.18.0":
+  version: 0.18.0
+  resolution: "@ts-morph/bootstrap@npm:0.18.0"
   dependencies:
-    "@ts-morph/common": ~0.16.0
-  checksum: 58b9b990db577dccf41baa7932d9de7d4ea10cdcbf3bd87d647d6130556965bcf522bd2f5dc480695ce5e7d5a39eff4c10b230b411c3f4004d1cbd8509eb687b
+    "@ts-morph/common": ~0.18.0
+  checksum: fe56d3bcd5544ff051de7410de981c223d8be3a6c7a1fa87f0ea32f1f733ef1cb97194d7ce7d44331b81edc0b66c6451d6ed5cc437dd1e5907ff1ecb74ca74ee
   languageName: node
   linkType: hard
 
-"@ts-morph/common@npm:~0.16.0":
-  version: 0.16.0
-  resolution: "@ts-morph/common@npm:0.16.0"
+"@ts-morph/common@npm:~0.18.0":
+  version: 0.18.1
+  resolution: "@ts-morph/common@npm:0.18.1"
   dependencies:
-    fast-glob: ^3.2.11
+    fast-glob: ^3.2.12
     minimatch: ^5.1.0
     mkdirp: ^1.0.4
     path-browserify: ^1.0.1
-  checksum: 0ef97330a164a42b81b0499b042e91db8e39d705bb983ef83cbc80cc32ab36123e26baefb78203953d1a0c6e3b92cad9bc7a5e0ea409623a5e7db90cb3742112
+  checksum: 848fff5f7a6428d7c2f055de20cf8df864a967aac0cc03adc558d853442085a8fd9dec70429da24d67d263794b315edb0791c46d23ad9ae513251a7702df8031
   languageName: node
   linkType: hard
 
@@ -900,7 +900,7 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
-"dilswer@npm:1.5.0":
+"dilswer@npm:1.5.0, dilswer@npm:^1.5.0":
   version: 1.5.0
   resolution: "dilswer@npm:1.5.0"
   dependencies:
@@ -1325,7 +1325,7 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.9":
+"fast-glob@npm:^3.2.12, fast-glob@npm:^3.2.9":
   version: 3.2.12
   resolution: "fast-glob@npm:3.2.12"
   dependencies:
@@ -2532,7 +2532,7 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
   version: 0.0.0-use.local
   resolution: "react-gnome@workspace:."
   dependencies:
-    "@ncpa0cpl/nodepack": ^2.0.1
+    "@ncpa0cpl/nodepack": ^2.0.3
     "@swc/core": latest
     "@types/tar": ^6.1.3
     "@typescript-eslint/eslint-plugin": latest
