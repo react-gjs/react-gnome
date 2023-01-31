@@ -53,5 +53,14 @@ export const getPolyfills = (program: Program): string[] => {
     );
   }
 
+  if (program.config.customPolyfills) {
+    for (const customPoly of program.config.customPolyfills) {
+      // polyfills with an import name are handled by the
+      // `importPolyfillsPlugin`
+      if (!customPoly.importName)
+        polyfillPaths.push(path.resolve(program.cwd, customPoly.filepath));
+    }
+  }
+
   return polyfillPaths;
 };

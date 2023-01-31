@@ -79,6 +79,14 @@ export const ConfigSchema = DataType.RecordOf({
       ),
     })
   ),
+  customPolyfills: OptionalField(
+    DataType.ArrayOf(
+      DataType.RecordOf({
+        filepath: DataType.String,
+        importName: OptionalField(DataType.String),
+      })
+    )
+  ),
   treeShake: OptionalField(DataType.Boolean),
 });
 
@@ -212,4 +220,18 @@ polyfills.recordOf.node.type.recordOf.path.type.setDescription(
 
 polyfills.recordOf.node.type.recordOf.fs.type.setDescription(
   "Whether the polyfill for the `fs`, `fs/promises`, `node:fs/promises`, and/or `node:fs` package should be included in the generated bundle. When enabled imports of `fs`, `fs/promises`, `node:fs/promises`, and `node:fs` will be replaced with the polyfill."
+);
+
+const { customPolyfills } = ConfigSchema.recordOf;
+
+customPolyfills.type.setDescription(
+  "Custom polyfills that should be included in the generated bundle.\n\nThis is useful for polyfills that are not included in the polyfills provided by react-gnome."
+);
+
+customPolyfills.type.arrayOf[0].recordOf.filepath.setDescription(
+  "Path to the file containing the polyfill."
+);
+
+customPolyfills.type.arrayOf[0]!.recordOf.importName.type.setDescription(
+  "The name of the import that should be replaced with the polyfill (for example `node:fs`, `path`, `os`, etc.). If not specified, each exported member of polyfill will be injected into the global scope."
 );

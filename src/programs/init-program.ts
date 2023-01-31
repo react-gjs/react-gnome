@@ -75,7 +75,7 @@ export class InitProgram {
     scripts.build = `${pmRun} react-gnome build`;
     scripts.bundle = `${pmRun} react-gnome bundle`;
     scripts.start = `${pmRun} react-gnome start -m development -w`;
-    scripts.install = "meson install -C ./dist/.build/_build";
+    scripts["install-pkg"] = "meson install -C ./dist/.build/_build";
 
     packageJson.type = "module";
     packageJson.scripts = scripts;

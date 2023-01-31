@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PKG_JSON_MODULE=$(node -p "require('./package.json').type")
+PKG_JSON_MODULE=$(node -p "require('./package.json').type ?? 'commonjs'")
 HERE="$0"
 HERE_DIR=$(dirname -- "$HERE")
 

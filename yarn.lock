@@ -2546,7 +2546,6 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     eslint-plugin-prettier: latest
     husky: latest
     ncpa0cpl: ncpa0cpl/git-hook-tasks
-    path-browserify: ^1.0.1
     prettier: latest
     prettier-plugin-jsdoc: latest
     rimraf: ^4.1.2
