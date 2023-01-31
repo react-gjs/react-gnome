@@ -1,9 +1,7 @@
 "use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -17,10 +15,6 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/esbuild-plugins/watch-logger/watch-logger-plugin.ts
@@ -29,7 +23,7 @@ __export(watch_logger_plugin_exports, {
   watchLoggerPlugin: () => watchLoggerPlugin
 });
 module.exports = __toCommonJS(watch_logger_plugin_exports);
-var import_chalk = __toESM(require("chalk"));
+var import_termx_markup = require("termx-markup");
 var watchLoggerPlugin = () => {
   let isFirstBuild = true;
   return {
@@ -37,7 +31,9 @@ var watchLoggerPlugin = () => {
     setup(build) {
       build.onStart(() => {
         if (!isFirstBuild) {
-          console.log(import_chalk.default.yellowBright("Changes detected, rebuilding..."));
+          import_termx_markup.Output.print(
+            import_termx_markup.html`<span color="yellow">Changes detected, rebuilding...</span>`
+          );
         } else {
           isFirstBuild = false;
         }

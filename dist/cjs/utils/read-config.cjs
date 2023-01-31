@@ -18,30 +18,14 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 
 // src/utils/read-config.ts
 var read_config_exports = {};
@@ -52,14 +36,14 @@ module.exports = __toCommonJS(read_config_exports);
 var import_fs = __toESM(require("fs"));
 var import_path = __toESM(require("path"));
 var import_parse_config = require("../config/parse-config.cjs");
-var readConfig = (program) => __async(void 0, null, function* () {
+var readConfig = async (program) => {
   const cwdFiles = import_fs.default.readdirSync(program.cwd);
   const filename = cwdFiles.find((f) => f.startsWith("react-gnome.config."));
   if (!filename) {
     throw new Error("No config file found.");
   }
-  const config = yield (0, import_parse_config.parseConfig)(import_path.default.join(program.cwd, filename), {
+  const config = await (0, import_parse_config.parseConfig)(import_path.default.join(program.cwd, filename), {
     mode: program.isDev ? "development" : "production"
   });
   return config;
-});
+};

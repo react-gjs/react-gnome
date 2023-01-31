@@ -1,23 +1,53 @@
-import type { GetDataType } from "dilswer";
-import type esbuild from "esbuild";
-export declare const EsbuildPluginDataType: import("dilswer").Custom<(v: any) => v is esbuild.Plugin>;
+export declare const EsbuildPluginDataType: import("dilswer").RecordOf<{
+    name: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+    setup: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"function">;
+}>;
 export declare const ConfigSchema: import("dilswer").RecordOf<{
+    applicationName: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+    applicationVersion: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+    applicationPrefix: {
+        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+        readonly required: false;
+    };
     entrypoint: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
-    outDir: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+    envVars: {
+        readonly type: import("dilswer").RecordOf<{
+            allow: {
+                readonly type: import("dilswer").OneOf<[import("dilswer").ArrayOf<[import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">]>, import("dilswer/dist/types/data-types/data-types").InstanceOf<RegExpConstructor>]>;
+                readonly required: false;
+            };
+            defaults: {
+                readonly type: import("dilswer").Dict<[import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">, import("dilswer/dist/types/data-types/data-types").SimpleDataType<"number">, import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">]>;
+                readonly required: false;
+            };
+            disallow: {
+                readonly type: import("dilswer").OneOf<[import("dilswer").ArrayOf<[import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">]>, import("dilswer/dist/types/data-types/data-types").InstanceOf<RegExpConstructor>]>;
+                readonly required: false;
+            };
+            envFilePath: {
+                readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+                readonly required: false;
+            };
+            systemVars: {
+                readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+                readonly required: false;
+            };
+        }>;
+        readonly required: false;
+    };
+    esbuildPlugins: {
+        readonly type: import("dilswer").ArrayOf<[import("dilswer").RecordOf<{
+            name: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+            setup: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"function">;
+        }>]>;
+        readonly required: false;
+    };
     externalPackages: {
         readonly type: import("dilswer").ArrayOf<[import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">]>;
         readonly required: false;
     };
-    minify: {
-        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
-        readonly required: false;
-    };
-    treeShake: {
-        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
-        readonly required: false;
-    };
-    esbuildPlugins: {
-        readonly type: import("dilswer").ArrayOf<[import("dilswer").Custom<(v: any) => v is esbuild.Plugin>]>;
+    friendlyName: {
+        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
         readonly required: false;
     };
     giVersions: {
@@ -105,6 +135,15 @@ export declare const ConfigSchema: import("dilswer").RecordOf<{
         }>;
         readonly required: false;
     };
+    license: {
+        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+        readonly required: false;
+    };
+    minify: {
+        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+        readonly required: false;
+    };
+    outDir: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
     polyfills: {
         readonly type: import("dilswer").RecordOf<{
             AbortController: {
@@ -139,9 +178,24 @@ export declare const ConfigSchema: import("dilswer").RecordOf<{
                 readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
                 readonly required: false;
             };
+            node: {
+                readonly type: import("dilswer").RecordOf<{
+                    path: {
+                        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+                        readonly required: false;
+                    };
+                    fs: {
+                        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+                        readonly required: false;
+                    };
+                }>;
+                readonly required: false;
+            };
         }>;
         readonly required: false;
     };
+    treeShake: {
+        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+        readonly required: false;
+    };
 }>;
-export declare type Config = GetDataType<typeof ConfigSchema>;
-export declare type GiVersions = Config["giVersions"];

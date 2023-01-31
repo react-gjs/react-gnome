@@ -32,6 +32,10 @@ var FormData = class {
       });
     });
   }
+  /**
+   * Returns an array of key, value pairs for every entry in the
+   * list.
+   */
   entries() {
     const entries = this._entries;
     const generator = function* () {
@@ -43,9 +47,11 @@ var FormData = class {
     };
     return generator();
   }
+  /** Returns a list of keys in the list. */
   keys() {
     return this._entries.keys();
   }
+  /** Returns a list of values in the list. */
   values() {
     const entries = this._entries;
     const generator = function* () {

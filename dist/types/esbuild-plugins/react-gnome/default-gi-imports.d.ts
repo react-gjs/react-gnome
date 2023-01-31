@@ -1,2 +1,2 @@
-import type { GiVersions } from "../../config/config-schema";
-export declare const getDefaultGiImports: (versions?: GiVersions) => string;
+import type { Config } from "../../config/config-type";
+export declare const getDefaultGiImports: (versions?: Config["giVersions"]) => string;

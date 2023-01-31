@@ -1,4 +1,4 @@
-declare type FormDataEntryValueP = string;
+type FormDataEntryValueP = string;
 declare class FormData {
     private _entries;
     append(name: string, value: FormDataEntryValueP): void;

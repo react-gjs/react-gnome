@@ -1,30 +1,91 @@
 {
   "type": "object",
   "properties": {
+    "applicationName": {
+      "description": "The name of the application. It is recommended for this name to only include letters, numbers, dashes and floors. Additional it is invalid to have the first or last letter of the name to be anything else than a letter or a number.",
+      "type": "string"
+    },
+    "applicationVersion": {
+      "description": "The version of the application.\nThis is used to generate the bundle.",
+      "type": "string"
+    },
+    "applicationPrefix": {
+      "description": "The prefix of the application ID. For example `com.example`. This value will be a part of the app id. It must only contain letters, dashes and dots.\n\nDefault is `org.gnome`.",
+      "type": "string"
+    },
     "entrypoint": {
-      "description": "The entrypoint file of the application.\nCan be a relative path from the project root or an absolute path.",
+      "description": "The entrypoint file of the application. Should be a relative path from the project root.",
       "type": "string"
     },
-    "outDir": {
-      "description": "The output directory for the generated bundle.\nCan be a relative path from the project root or an absolute path.",
-      "type": "string"
-    },
-    "externalPackages": {
-      "type": "array",
-      "items": [
-        {
+    "envVars": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "title": "RegExp",
+              "description": "A Regular expression. Only supported in JavaScript config files."
+            }
+          ],
+          "description": "If system vars are enabled, an array of strings or a Regex of environment variables that can be included in the generated bundle.\n\nBy default allows all."
+        },
+        "defaults": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "description": "A dictionary of environment variables and values to use if the variable is not set in the system environment or .env file."
+        },
+        "disallow": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "title": "RegExp",
+              "description": "A Regular expression. Only supported in JavaScript config files."
+            }
+          ],
+          "description": "If system vars are enabled, an array of strings or a Regex of environment variables that should not be included in the generated bundle.\n\nBy default disallows none."
+        },
+        "envFilePath": {
+          "description": "The path to the .env file. Should be a relative path from the project root. If this option is specified but the file does not exist, build will fail with an error.\n\nDefault is `.env`.",
           "type": "string"
+        },
+        "systemVars": {
+          "description": "Whether the system environment variables should be included in the generated bundle.\n\nBy default is always disabled.",
+          "type": "boolean"
         }
-      ],
-      "description": "An array of packages that should be excluded from the bundle.\nThis is useful for packages that are already installed on the system and should not be bundled."
-    },
-    "minify": {
-      "description": "Whether the generated bundle should be minified.\nThis is useful for production builds.\nBy default is enabled in `production` mode and disabled in `development` mode.",
-      "type": "boolean"
-    },
-    "treeShake": {
-      "description": "Whether unused code should be removed from the bundle.\nThis is useful for production builds.\nBy default is enabled in `production` mode and disabled in `development` mode.",
-      "type": "boolean"
+      },
+      "required": [],
+      "title": "EnvVars",
+      "description": "Settings for environment variables injected into the generated bundle.",
+      "additionalProperties": false
     },
     "esbuildPlugins": {
       "type": "array",
@@ -34,12 +95,35 @@
           "properties": {
             "name": {
               "type": "string"
+            },
+            "setup": {
+              "title": "EsBuild Plugin Setup Function"
             }
           },
+          "required": [
+            "name",
+            "setup"
+          ],
+          "title": "EsbuildPlugin",
           "additionalProperties": false
         }
       ],
+      "title": "EsbuildPlugins",
       "description": "Esbuild plugins.\nPlugins can only be added via a JavaScript config file. If you are using a JSON config file and want to add a plugin, you will need to create a `react-gnome.config.js` file and use that instead."
+    },
+    "externalPackages": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        }
+      ],
+      "title": "ExternalPackages",
+      "description": "An array of packages that should be excluded from the bundle.\nThis is useful for packages that are already installed on the system and should not be bundled."
+    },
+    "friendlyName": {
+      "description": "The friendly name of the application.\nThis is the name you'd want to display to the user.\n If not specified, the application name will be used.",
+      "type": "string"
     },
     "giVersions": {
       "type": "object",
@@ -109,8 +193,21 @@
         }
       },
       "required": [],
+      "title": "GiVersions",
       "description": "The versions of the builtin libraries from the `gi://` namespace, that should be used in the generated bundle.",
       "additionalProperties": false
+    },
+    "license": {
+      "description": "The license of the application.\n\nDefault is `GPL-2.0`.",
+      "type": "string"
+    },
+    "minify": {
+      "description": "Whether the generated bundle should be minified.\nThis is useful for production builds.\n\nBy default is enabled in `production` mode and disabled in `development` mode.",
+      "type": "boolean"
+    },
+    "outDir": {
+      "description": "The output directory for the generated bundle. Should be a relative path from the project root.",
+      "type": "string"
     },
     "polyfills": {
       "type": "object",
@@ -146,17 +243,42 @@
         "fetch": {
           "description": "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope.",
           "type": "boolean"
+        },
+        "node": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "description": "Whether the polyfill for the `path` and/or `node:path` package should be included in the generated bundle. When enabled imports of `path` and `node:path` will be replaced with the polyfill.",
+              "type": "boolean"
+            },
+            "fs": {
+              "description": "Whether the polyfill for the `fs`, `fs/promises`, `node:fs/promises`, and/or `node:fs` package should be included in the generated bundle. When enabled imports of `fs`, `fs/promises`, `node:fs/promises`, and `node:fs` will be replaced with the polyfill.",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "NodePolyfills",
+          "description": "Polyfill options for some specific Node.js builtin packages.",
+          "additionalProperties": false
         }
       },
       "required": [],
+      "title": "Polyfills",
       "description": "Polyfills that should be included in the generated bundle.",
       "additionalProperties": false
+    },
+    "treeShake": {
+      "description": "Whether unused code should be removed from the bundle.\nThis is useful for production builds.\n\nBy default is enabled in `production` mode and disabled in `development` mode.",
+      "type": "boolean"
     }
   },
   "required": [
+    "applicationName",
+    "applicationVersion",
     "entrypoint",
     "outDir"
   ],
+  "title": "Config",
   "additionalProperties": false,
   "$schema": "http://json-schema.org/draft-06/schema#"
 }

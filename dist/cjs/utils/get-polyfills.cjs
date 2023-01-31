@@ -18,6 +18,10 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
@@ -32,42 +36,42 @@ module.exports = __toCommonJS(get_polyfills_exports);
 var import_path = __toESM(require("path"));
 var import_get_dirpath = require("../get-dirpath/get-dirpath.cjs");
 var getPolyfills = (program) => {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
-  if ((_a = program.config.polyfills) == null ? void 0 : _a.XMLHttpRequest) {
-    program.config.polyfills.URL = true;
+  const polyfills = { ...program.config.polyfills };
+  if (polyfills?.XMLHttpRequest) {
+    polyfills.URL = true;
   }
-  if ((_b = program.config.polyfills) == null ? void 0 : _b.URL) {
-    program.config.polyfills.Buffer = true;
+  if (polyfills?.URL) {
+    polyfills.Buffer = true;
   }
-  const polyfills = [];
+  const polyfillPaths = [];
   const rootPath = (0, import_get_dirpath.getDirPath)();
-  if ((_c = program.config.polyfills) == null ? void 0 : _c.fetch) {
-    polyfills.push(import_path.default.resolve(rootPath, "polyfills/esm/fetch.mjs"));
+  if (polyfills?.fetch) {
+    polyfillPaths.push(import_path.default.resolve(rootPath, "polyfills/esm/fetch.mjs"));
   }
-  if ((_d = program.config.polyfills) == null ? void 0 : _d.Buffer) {
-    polyfills.push(import_path.default.resolve(rootPath, "polyfills/esm/buffer.mjs"));
+  if (polyfills?.Buffer) {
+    polyfillPaths.push(import_path.default.resolve(rootPath, "polyfills/esm/buffer.mjs"));
   }
-  if ((_e = program.config.polyfills) == null ? void 0 : _e.Blob) {
-    polyfills.push(import_path.default.resolve(rootPath, "polyfills/esm/blob.mjs"));
+  if (polyfills?.Blob) {
+    polyfillPaths.push(import_path.default.resolve(rootPath, "polyfills/esm/blob.mjs"));
   }
-  if ((_f = program.config.polyfills) == null ? void 0 : _f.URL) {
-    polyfills.push(import_path.default.resolve(rootPath, "polyfills/esm/url.mjs"));
+  if (polyfills?.URL) {
+    polyfillPaths.push(import_path.default.resolve(rootPath, "polyfills/esm/url.mjs"));
   }
-  if ((_g = program.config.polyfills) == null ? void 0 : _g.FormData) {
-    polyfills.push(import_path.default.resolve(rootPath, "polyfills/esm/form-data.mjs"));
+  if (polyfills?.FormData) {
+    polyfillPaths.push(import_path.default.resolve(rootPath, "polyfills/esm/form-data.mjs"));
   }
-  if ((_h = program.config.polyfills) == null ? void 0 : _h.XMLHttpRequest) {
-    polyfills.push(
+  if (polyfills?.XMLHttpRequest) {
+    polyfillPaths.push(
       import_path.default.resolve(rootPath, "polyfills/esm/xml-http-request.mjs")
     );
   }
-  if ((_i = program.config.polyfills) == null ? void 0 : _i.base64) {
-    polyfills.push(import_path.default.resolve(rootPath, "polyfills/esm/base64.mjs"));
+  if (polyfills?.base64) {
+    polyfillPaths.push(import_path.default.resolve(rootPath, "polyfills/esm/base64.mjs"));
   }
-  if ((_j = program.config.polyfills) == null ? void 0 : _j.AbortController) {
-    polyfills.push(
+  if (polyfills?.AbortController) {
+    polyfillPaths.push(
       import_path.default.resolve(rootPath, "polyfills/esm/abort-controller.mjs")
     );
   }
-  return polyfills;
+  return polyfillPaths;
 };

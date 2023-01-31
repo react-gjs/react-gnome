@@ -4,6 +4,11 @@ var [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
   ((Events2) => {
     Events2["Abort"] = "abort";
   })(Events || (Events = {}));
+  class Event {
+    constructor(type) {
+      this.type = type;
+    }
+  }
   class EventController {
     listeners = /* @__PURE__ */ new Map();
     constructor() {

@@ -1,6 +1,6 @@
 import type esbuild from "esbuild";
-import type { Config } from "../../config/config-schema";
-export declare const reactGnomePlugin: (config: Config) => {
+import type { Program } from "../../programs/base";
+export declare const reactGnomePlugin: (program: Program) => {
     name: string;
     setup(build: esbuild.PluginBuild): void;
 };

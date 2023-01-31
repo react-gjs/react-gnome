@@ -1,9 +1,7 @@
 "use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -17,10 +15,6 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/utils/handle-program-error.ts
@@ -29,24 +23,45 @@ __export(handle_program_error_exports, {
   handleProgramError: () => handleProgramError
 });
 module.exports = __toCommonJS(handle_program_error_exports);
-var import_chalk = __toESM(require("chalk"));
+var import_termx_markup = require("termx-markup");
+var Stderr = new import_termx_markup.Output(console.error);
 var handleProgramError = (e) => {
   const isObject = (o) => typeof o === "object" && o != null;
   const isValidationError = (e2) => {
     return isObject(e2) && e2 instanceof Error && "fieldPath" in e2 || false;
   };
   if (isValidationError(e)) {
-    console.error(
-      import_chalk.default.redBright(
-        `Config file is invalid. Property "${import_chalk.default.yellowBright(
-          e.fieldPath
-        )}" is incorrect.`
-      )
+    Stderr.print(
+      import_termx_markup.html`
+        <span color="lightRed">
+          Config file is invalid. Property
+          <pre color="lightYellow"> ${e.fieldPath} </pre>
+          is incorrect.
+        </span>
+      `
     );
   } else if (isObject(e) && e instanceof Error) {
-    console.error("Build failed due to an error: ", import_chalk.default.redBright(e.message));
+    Stderr.print(
+      import_termx_markup.html`
+        <span>
+          <line> Build failed due to an error: </line>
+          <pad size="2">
+            <pre color="lightRed">${e.message}</pre>
+          </pad>
+          <br />
+          <pad size="2">
+            <pre color="lightYellow">${e.stack}</pre>
+          </pad>
+        </span>
+      `
+    );
   } else {
-    console.error(import_chalk.default.redBright("Build failed due to an unknown error."));
+    console.error(e);
+    Stderr.print(
+      import_termx_markup.html`
+        <span color="lightRed"> Build failed due to an unknown error. </span>
+      `
+    );
   }
   process.exit(1);
 };

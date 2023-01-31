@@ -149,6 +149,7 @@ var XMLHttpRequestPolyfill = (() => {
     }
   }
   return class XMLHttpRequest {
+    // #region enum
     DONE = 4 /* DONE */;
     HEADERS_RECEIVED = 2 /* HEADERS_RECEIVED */;
     LOADING = 3 /* LOADING */;
@@ -159,7 +160,10 @@ var XMLHttpRequestPolyfill = (() => {
     static LOADING = 3 /* LOADING */;
     static OPENED = 1 /* OPENED */;
     static UNSENT = 0 /* UNSENT */;
+    // #endregion
+    // #region unused
     withCredentials;
+    // #endregion
     _requestConfig = {
       method: "GET",
       url: "",
@@ -215,6 +219,7 @@ var XMLHttpRequestPolyfill = (() => {
       return this._statusText ?? "";
     }
     timeout = 6e4;
+    // #region handlers
     onabort = (ev) => {
     };
     onerror = (ev) => {
@@ -229,6 +234,7 @@ var XMLHttpRequestPolyfill = (() => {
     };
     ontimeout = (ev) => {
     };
+    // #endregion
     _parseResponseData() {
       switch (this.responseType) {
         case "json":

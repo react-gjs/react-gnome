@@ -1,5 +1,5 @@
 // src/esbuild-plugins/watch-logger/watch-logger-plugin.ts
-import chalk from "chalk";
+import { html, Output } from "termx-markup";
 var watchLoggerPlugin = () => {
   let isFirstBuild = true;
   return {
@@ -7,7 +7,9 @@ var watchLoggerPlugin = () => {
     setup(build) {
       build.onStart(() => {
         if (!isFirstBuild) {
-          console.log(chalk.yellowBright("Changes detected, rebuilding..."));
+          Output.print(
+            html`<span color="yellow">Changes detected, rebuilding...</span>`
+          );
         } else {
           isFirstBuild = false;
         }

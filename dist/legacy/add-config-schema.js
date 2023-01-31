@@ -18,30 +18,14 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 
 // src/add-config-schema.ts
 var add_config_schema_exports = {};
@@ -59,7 +43,7 @@ var isInsideNodeModules = (location) => {
   const parentDir = import_path.default.dirname(location);
   return parentDir.endsWith("node_modules");
 };
-var findProjectRoot = () => __async(void 0, null, function* () {
+var findProjectRoot = async () => {
   let location = import_path.default.resolve(__dirname, "../..");
   let i = 0;
   while (true) {
@@ -68,23 +52,23 @@ var findProjectRoot = () => __async(void 0, null, function* () {
       throw new Error("Project root directory not found!");
     }
     if (!isInsideNodeModules(location)) {
-      const files = yield import_promises.default.readdir(location);
+      const files = await import_promises.default.readdir(location);
       if (files.some((f) => f === "package.json"))
         return location;
     }
     location = import_path.default.resolve(location, "..");
   }
-});
+};
 var CONFIG_FILE_NAME = "react-gnome.config.json";
-var addConfigSchema = () => __async(void 0, null, function* () {
-  const cwd = yield findProjectRoot();
+var addConfigSchema = async () => {
+  const cwd = await findProjectRoot();
   const vscodeDir = import_path.default.resolve(cwd, ".vscode");
   const vscodeSettingsFile = import_path.default.resolve(vscodeDir, "settings.json");
-  yield import_promises.default.mkdir(vscodeDir, { recursive: true });
+  await import_promises.default.mkdir(vscodeDir, { recursive: true });
   let settings = {};
-  const vscodeFiles = yield import_promises.default.readdir(vscodeDir);
+  const vscodeFiles = await import_promises.default.readdir(vscodeDir);
   if (vscodeFiles.includes("settings.json")) {
-    const f = yield import_promises.default.readFile(vscodeSettingsFile, { encoding: "utf-8" });
+    const f = await import_promises.default.readFile(vscodeSettingsFile, { encoding: "utf-8" });
     settings = JSON.parse(f);
   }
   if (!settings["json.schemas"]) {
@@ -106,7 +90,7 @@ var addConfigSchema = () => __async(void 0, null, function* () {
       fileMatch: [CONFIG_FILE_NAME],
       url: "./" + import_path.default.relative(cwd, configPath)
     });
-    yield import_promises.default.writeFile(vscodeSettingsFile, JSON.stringify(settings, null, 2));
+    await import_promises.default.writeFile(vscodeSettingsFile, JSON.stringify(settings, null, 2));
   }
-});
+};
 addConfigSchema();

@@ -1,5 +1,10 @@
-import type { Program } from "../build";
+import type esbuild from "esbuild";
+import type { Program } from "../programs/base";
+export type AdditionalPlugins = {
+    before?: esbuild.Plugin[];
+    after?: esbuild.Plugin[];
+};
 export declare const getPlugins: (program: Program) => {
     name: string;
-    setup(build: import("esbuild").PluginBuild): void;
+    setup(build: esbuild.PluginBuild): void;
 }[];
