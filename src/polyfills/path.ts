@@ -1,6 +1,35 @@
-// Code stolen from: https://github.com/browserify/path-browserify/blob/master/index.js
+/**
+ * Code stolen from:
+ * https://github.com/browserify/path-browserify/blob/master/index.js
+ *
+ * MIT License
+ *
+ * Copyright (c) 2013 James Halliday
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
-const posix_default = (() => {
+namespace posix_default {
   type PathObject = {
     root?: string;
     dir?: string;
@@ -99,7 +128,7 @@ const posix_default = (() => {
   }
 
   // path.resolve([from ...], to)
-  function resolve(...args: string[]) {
+  export function resolve(...args: string[]) {
     let resolvedPath = "";
     let resolvedAbsolute = false;
     let cwd;
@@ -139,7 +168,7 @@ const posix_default = (() => {
     }
   }
 
-  function normalize(path: string) {
+  export function normalize(path: string) {
     __assertPath(path);
 
     if (path.length === 0) return ".";
@@ -157,12 +186,12 @@ const posix_default = (() => {
     return path;
   }
 
-  function isAbsolute(path: string) {
+  export function isAbsolute(path: string) {
     __assertPath(path);
     return path.length > 0 && path.charCodeAt(0) === 47 /*/*/;
   }
 
-  function join(...args: string[]) {
+  export function join(...args: string[]) {
     if (args.length === 0) return ".";
     let joined;
     for (let i = 0; i < args.length; ++i) {
@@ -177,7 +206,7 @@ const posix_default = (() => {
     return posix.normalize(joined);
   }
 
-  function relative(from: string, to: string) {
+  export function relative(from: string, to: string) {
     __assertPath(from);
     __assertPath(to);
 
@@ -259,11 +288,7 @@ const posix_default = (() => {
     }
   }
 
-  function _makeLong(path: string) {
-    return path;
-  }
-
-  function dirname(path: string) {
+  export function dirname(path: string) {
     __assertPath(path);
     if (path.length === 0) return ".";
     let code = path.charCodeAt(0);
@@ -288,7 +313,7 @@ const posix_default = (() => {
     return path.slice(0, end);
   }
 
-  function basename(path: string, ext: string) {
+  export function basename(path: string, ext: string) {
     if (ext !== undefined && typeof ext !== "string")
       throw new TypeError('"ext" argument must be a string');
     __assertPath(path);
@@ -361,7 +386,7 @@ const posix_default = (() => {
     }
   }
 
-  function extname(path: string) {
+  export function extname(path: string) {
     __assertPath(path);
     let startDot = -1;
     let startPart = 0;
@@ -411,7 +436,7 @@ const posix_default = (() => {
     return path.slice(startDot, end);
   }
 
-  function format(pathObject: string) {
+  export function format(pathObject: string) {
     if (pathObject === null || typeof pathObject !== "object") {
       throw new TypeError(
         'The "pathObject" argument must be of type Object. Received type ' +
@@ -421,7 +446,7 @@ const posix_default = (() => {
     return __format(SEPARATOR_CHAR, pathObject);
   }
 
-  function parse(path: string) {
+  export function parse(path: string) {
     __assertPath(path);
 
     const ret = { root: "", dir: "", base: "", ext: "", name: "" };
@@ -504,34 +529,14 @@ const posix_default = (() => {
     return ret;
   }
 
-  const sep = SEPARATOR_CHAR;
+  export const sep = SEPARATOR_CHAR;
 
-  const delimiter = ":";
+  export const delimiter = ":";
 
-  const win32 = null;
+  export const win32 = null;
 
-  const posix = {
-    resolve,
-    normalize,
-    isAbsolute,
-    join,
-    relative,
-    _makeLong,
-    dirname,
-    basename,
-    extname,
-    format,
-    parse,
-    sep,
-    delimiter,
-    win32,
-    posix: null as any,
-  };
-
-  posix.posix = posix;
-
-  return posix;
-})();
+  export const posix = posix_default;
+}
 
 export default posix_default;
 
@@ -540,7 +545,6 @@ export const normalize = posix_default.normalize;
 export const isAbsolute = posix_default.isAbsolute;
 export const join = posix_default.join;
 export const relative = posix_default.relative;
-export const _makeLong = posix_default._makeLong;
 export const dirname = posix_default.dirname;
 export const basename = posix_default.basename;
 export const extname = posix_default.extname;
