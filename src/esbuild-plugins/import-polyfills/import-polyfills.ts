@@ -35,6 +35,15 @@ export const importPolyfillsPlugin = (program: Program) => {
             }
           );
         }
+
+        if (nodeFills.os) {
+          build.onResolve({ filter: /^(os)|(node:os)$/ }, () => {
+            return {
+              path: path.resolve(rootPath, "polyfills/esm/node-os.mjs"),
+              namespace: NAMESPACE,
+            };
+          });
+        }
       }
 
       if (program.config.customPolyfills) {
