@@ -3,6 +3,8 @@ import path from "path";
 import { getDirPath } from "../../get-dirpath/get-dirpath";
 import type { Program } from "../../programs/base";
 
+const NAMESPACE = "react-gnome-polyfills";
+
 export const importPolyfillsPlugin = (program: Program) => {
   const config = program.config;
   return {
@@ -17,30 +19,44 @@ export const importPolyfillsPlugin = (program: Program) => {
           build.onResolve({ filter: /^(path)|(node:path)$/ }, () => {
             return {
               path: path.resolve(rootPath, "polyfills/esm/path.mjs"),
-              namespace: "rgpolyfill",
+              namespace: NAMESPACE,
             };
           });
         }
 
-        if (program.config.customPolyfills) {
-          for (const customPoly of program.config.customPolyfills) {
-            if (customPoly.importName) {
-              build.onResolve({ filter: /.*/ }, (arg) => {
-                if (customPoly.importName === arg.path) {
-                  return {
-                    path: customPoly.filepath,
-                    namespace: "rgpolyfill",
-                  };
-                }
-              });
+        if (nodeFills.querystring) {
+          build.onResolve(
+            { filter: /^(querystring)|(node:querystring)$/ },
+            () => {
+              return {
+                path: path.resolve(rootPath, "polyfills/esm/querystring.mjs"),
+                namespace: NAMESPACE,
+              };
             }
+          );
+        }
+      }
+
+      if (program.config.customPolyfills) {
+        for (const customPoly of program.config.customPolyfills) {
+          if (customPoly.importName) {
+            build.onResolve({ filter: /.*/ }, (arg) => {
+              if (customPoly.importName === arg.path) {
+                return {
+                  path: customPoly.filepath,
+                  namespace: NAMESPACE,
+                };
+              }
+            });
           }
         }
+      }
 
+      if (config.polyfills?.node || program.config.customPolyfills) {
         build.onLoad(
           {
             filter: /.*/,
-            namespace: "rgpolyfill",
+            namespace: NAMESPACE,
           },
           (args) => {
             return {

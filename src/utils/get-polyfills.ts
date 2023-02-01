@@ -9,7 +9,7 @@ export const getPolyfills = (program: Program): string[] => {
     polyfills.URL = true;
   }
 
-  if (polyfills?.URL) {
+  if (polyfills?.URL || polyfills.node?.querystring) {
     polyfills.Buffer = true;
   }
 
