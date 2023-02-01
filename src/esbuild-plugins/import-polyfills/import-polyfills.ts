@@ -69,7 +69,12 @@ export const importPolyfillsPlugin = (program: Program) => {
           },
           (args) => {
             return {
-              contents: `export * from "${args.path}";`,
+              contents: /* js */ `
+                import * as _mod from "${args.path}";
+                const _default = _mod.default ?? _mod;
+                export default _default;
+                export * from "${args.path}";
+              `.trim(),
               resolveDir: program.cwd,
             };
           }
