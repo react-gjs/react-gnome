@@ -1,0 +1,32 @@
+// src/build.ts
+import { configure } from "clify.js";
+import { BuildProgram } from "./programs/build-program.mjs";
+import { BundleProgram } from "./programs/bundle-program.mjs";
+import { InitProgram } from "./programs/init-program.mjs";
+import { StartProgram } from "./programs/start-program.mjs";
+async function build() {
+  configure((main) => {
+    main.setDisplayName("react-gnome");
+    main.setDescription("Build GTK apps with React.");
+    const bundleCmd = main.addSubCommand("bundle", () => new BundleProgram());
+    const buildCmd = main.addSubCommand("build", () => new BuildProgram());
+    const startCmd = main.addSubCommand("start", () => new StartProgram());
+    const initCmd = main.addSubCommand("init", () => new InitProgram());
+    bundleCmd.setDescription(
+      "Create a bundled js file, without the tarball or meson configuration. This is useful if you want to manage the build process yourself."
+    );
+    buildCmd.setDescription(
+      "Create a tarball and meson configuration thats ready to be installed."
+    );
+    startCmd.setDescription("Build and run the app immediately after.");
+    initCmd.setDescription(
+      "Initialize a new project with the necessary files and scripts."
+    );
+  });
+}
+export {
+  BuildProgram,
+  BundleProgram,
+  StartProgram,
+  build
+};

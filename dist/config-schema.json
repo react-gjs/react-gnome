@@ -1,0 +1,315 @@
+{
+  "type": "object",
+  "properties": {
+    "applicationName": {
+      "description": "The name of the application. It is recommended for this name to only include letters, numbers, dashes and floors. Additional it is invalid to have the first or last letter of the name to be anything else than a letter or a number.",
+      "type": "string"
+    },
+    "applicationVersion": {
+      "description": "The version of the application.\nThis is used to generate the bundle.",
+      "type": "string"
+    },
+    "applicationPrefix": {
+      "description": "The prefix of the application ID. For example `com.example`. This value will be a part of the app id. It must only contain letters, dashes and dots.\n\nDefault is `org.gnome`.",
+      "type": "string"
+    },
+    "entrypoint": {
+      "description": "The entrypoint file of the application. Should be a relative path from the project root.",
+      "type": "string"
+    },
+    "envVars": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "title": "RegExp",
+              "description": "A Regular expression. Only supported in JavaScript config files."
+            }
+          ],
+          "description": "If system vars are enabled, an array of strings or a Regex of environment variables that can be included in the generated bundle.\n\nBy default allows all."
+        },
+        "defaults": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "description": "A dictionary of environment variables and values to use if the variable is not set in the system environment or .env file."
+        },
+        "disallow": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "title": "RegExp",
+              "description": "A Regular expression. Only supported in JavaScript config files."
+            }
+          ],
+          "description": "If system vars are enabled, an array of strings or a Regex of environment variables that should not be included in the generated bundle.\n\nBy default disallows none."
+        },
+        "envFilePath": {
+          "description": "The path to the .env file. Should be a relative path from the project root. If this option is specified but the file does not exist, build will fail with an error.\n\nDefault is `.env`.",
+          "type": "string"
+        },
+        "systemVars": {
+          "description": "Whether the system environment variables should be included in the generated bundle.\n\nBy default is always disabled.",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "EnvVars",
+      "description": "Settings for environment variables injected into the generated bundle.",
+      "additionalProperties": false
+    },
+    "esbuildPlugins": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "setup": {
+              "title": "EsBuild Plugin Setup Function"
+            }
+          },
+          "required": [
+            "name",
+            "setup"
+          ],
+          "title": "EsbuildPlugin",
+          "additionalProperties": false
+        }
+      ],
+      "title": "EsbuildPlugins",
+      "description": "Esbuild plugins.\nPlugins can only be added via a JavaScript config file. If you are using a JSON config file and want to add a plugin, you will need to create a `react-gnome.config.js` file and use that instead."
+    },
+    "externalPackages": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        }
+      ],
+      "title": "ExternalPackages",
+      "description": "An array of packages that should be excluded from the bundle.\nThis is useful for packages that are already installed on the system and should not be bundled."
+    },
+    "friendlyName": {
+      "description": "The friendly name of the application.\nThis is the name you'd want to display to the user.\n If not specified, the application name will be used.",
+      "type": "string"
+    },
+    "giVersions": {
+      "type": "object",
+      "properties": {
+        "Gtk": {
+          "type": "string",
+          "enum": [
+            "3.0"
+          ]
+        },
+        "Gdk": {
+          "type": "string"
+        },
+        "Gio": {
+          "type": "string"
+        },
+        "GLib": {
+          "type": "string"
+        },
+        "GObject": {
+          "type": "string"
+        },
+        "Pango": {
+          "type": "string"
+        },
+        "Atk": {
+          "type": "string"
+        },
+        "Cairo": {
+          "type": "string"
+        },
+        "GModule": {
+          "type": "string"
+        },
+        "GdkPixbuf": {
+          "type": "string"
+        },
+        "Cally": {
+          "type": "string"
+        },
+        "Clutter": {
+          "type": "string"
+        },
+        "ClutterX11": {
+          "type": "string"
+        },
+        "Cogl": {
+          "type": "string"
+        },
+        "Graphene": {
+          "type": "string"
+        },
+        "Gst": {
+          "type": "string"
+        },
+        "HarfBuzz": {
+          "type": "string"
+        },
+        "Soup": {
+          "type": "string"
+        },
+        "cairo": {
+          "type": "string"
+        },
+        "xlib": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "title": "GiVersions",
+      "description": "The versions of the builtin libraries from the `gi://` namespace, that should be used in the generated bundle.",
+      "additionalProperties": false
+    },
+    "license": {
+      "description": "The license of the application.\n\nDefault is `GPL-2.0`.",
+      "type": "string"
+    },
+    "minify": {
+      "description": "Whether the generated bundle should be minified.\nThis is useful for production builds.\n\nBy default is enabled in `production` mode and disabled in `development` mode.",
+      "type": "boolean"
+    },
+    "outDir": {
+      "description": "The output directory for the generated bundle. Should be a relative path from the project root.",
+      "type": "string"
+    },
+    "polyfills": {
+      "type": "object",
+      "properties": {
+        "AbortController": {
+          "description": "Whether the polyfill for an `AbortController` should be included in the generated bundle. When enabled the `AbortController`, `AbortSignal` and `AbortError` classes will become available in the global scope.",
+          "type": "boolean"
+        },
+        "Blob": {
+          "description": "Whether the polyfill for a `Blob` should be included in the generated bundle. When enabled the `Blob` class will become available in the global scope.",
+          "type": "boolean"
+        },
+        "Buffer": {
+          "description": "Whether the polyfill for a `Buffer` should be included in the generated bundle. When enabled the `Buffer` class will become available in the global scope.",
+          "type": "boolean"
+        },
+        "FormData": {
+          "description": "Whether the polyfill for a `FormData` should be included in the generated bundle. When enabled the `FormData` class will become available in the global scope.",
+          "type": "boolean"
+        },
+        "URL": {
+          "description": "Whether the polyfill for a `URL` should be included in the generated bundle. When enabled the `URL` class will become available in the global scope.",
+          "type": "boolean"
+        },
+        "XMLHttpRequest": {
+          "description": "Whether the polyfill for a `XMLHttpRequest` should be included in the generated bundle. When enabled the `XMLHttpRequest` class will become available in the global scope.",
+          "type": "boolean"
+        },
+        "base64": {
+          "description": "Whether the polyfill for `atob()` and `btoa()` functions should be included in the generated bundle. When enabled the `atob()` and `btoa()` will become available in the global scope.",
+          "type": "boolean"
+        },
+        "fetch": {
+          "description": "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope.",
+          "type": "boolean"
+        },
+        "node": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "description": "Whether the polyfill for the `path` and/or `node:path` package should be included in the generated bundle. When enabled imports of `path` and `node:path` will be replaced with the polyfill.",
+              "type": "boolean"
+            },
+            "fs": {
+              "description": "Whether the polyfill for the `fs`, `fs/promises`, `node:fs/promises`, and/or `node:fs` package should be included in the generated bundle. When enabled imports of `fs`, `fs/promises`, `node:fs/promises`, and `node:fs` will be replaced with the polyfill.",
+              "type": "boolean"
+            },
+            "querystring": {
+              "description": "Whether the polyfill for the `querystring` and/or `node:querystring` package should be included in the generated bundle. When enabled imports of `querystring` and `node:querystring` will be replaced with the polyfill.",
+              "type": "boolean"
+            },
+            "os": {
+              "description": "Whether the polyfill for the `os` and/or `node:os` package should be included in the generated bundle. When enabled imports of `os` and `node:os` will be replaced with the polyfill.",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "NodePolyfills",
+          "description": "Polyfill options for some specific Node.js builtin packages.",
+          "additionalProperties": false
+        }
+      },
+      "required": [],
+      "title": "Polyfills",
+      "description": "Polyfills that should be included in the generated bundle.",
+      "additionalProperties": false
+    },
+    "customPolyfills": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "filepath": {
+              "description": "Path to the file containing the polyfill.",
+              "type": "string"
+            },
+            "importName": {
+              "description": "The name of the import that should be replaced with the polyfill (for example `node:fs`, `path`, `os`, etc.). If not specified, each exported member of polyfill will be injected into the global scope.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "filepath"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Custom polyfills that should be included in the generated bundle.\n\nThis is useful for polyfills that are not included in the polyfills provided by react-gnome."
+    },
+    "treeShake": {
+      "description": "Whether unused code should be removed from the bundle.\nThis is useful for production builds.\n\nBy default is enabled in `production` mode and disabled in `development` mode.",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "applicationName",
+    "applicationVersion",
+    "entrypoint",
+    "outDir"
+  ],
+  "title": "Config",
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-06/schema#"
+}

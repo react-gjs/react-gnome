@@ -1,11 +1,9 @@
 node_modules
 coverage
-dist
 yarn-error.log
 .npmrc
 install-state.gz
 .yarn/cache
 .yarn/unplugged
 .yarn/install-state.gz
-/polyfills/
 /gest/dist
