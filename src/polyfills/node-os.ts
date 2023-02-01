@@ -13,10 +13,10 @@ namespace os_default {
     const decoder = new TextDecoder();
 
     if (!ok) {
-      throw new Error(decoder.decode(stderr as any as Uint8Array));
+      throw new Error(decoder.decode(stderr as any as Uint8Array).trim());
     }
 
-    return decoder.decode(stdout as any as Uint8Array);
+    return decoder.decode(stdout as any as Uint8Array).trim();
   };
 
   const __memoized = <F extends () => any>(fn: F): F => {
@@ -152,8 +152,8 @@ namespace os_default {
   export function userInfo() {
     const username = GLib.get_user_name();
     return {
-      uid: __command("id", username, "-u"),
-      gid: __command("id", username, "-g"),
+      uid: Number(__command("id", username, "-u")),
+      gid: Number(__command("id", username, "-g")),
       username: GLib.get_user_name(),
       homedir: GLib.get_home_dir(),
       shell: GLib.getenv("SHELL"),
