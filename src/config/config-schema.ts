@@ -76,6 +76,7 @@ export const ConfigSchema = DataType.RecordOf({
           path: OptionalField(DataType.Boolean),
           fs: OptionalField(DataType.Boolean),
           querystring: OptionalField(DataType.Boolean),
+          os: OptionalField(DataType.Boolean),
         })
       ),
     })
@@ -225,6 +226,10 @@ polyfills.recordOf.node.type.recordOf.fs.type.setDescription(
 
 polyfills.recordOf.node.type.recordOf.querystring.type.setDescription(
   "Whether the polyfill for the `querystring` and/or `node:querystring` package should be included in the generated bundle. When enabled imports of `querystring` and `node:querystring` will be replaced with the polyfill."
+);
+
+polyfills.recordOf.node.type.recordOf.os.type.setDescription(
+  "Whether the polyfill for the `os` and/or `node:os` package should be included in the generated bundle. When enabled imports of `os` and `node:os` will be replaced with the polyfill."
 );
 
 const { customPolyfills } = ConfigSchema.recordOf;
