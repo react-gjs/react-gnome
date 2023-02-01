@@ -1,4 +1,4 @@
-const [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
+namespace AbortControllerPolyfill {
   enum Events {
     Abort = "abort",
   }
@@ -48,14 +48,14 @@ const [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
     }
   }
 
-  class AbortError extends Error {
+  export class AbortError extends Error {
     constructor(message: string) {
       super(message);
       this.name = "AbortError";
     }
   }
 
-  class AbortSignal {
+  export class AbortSignal {
     static abort(reason?: any) {
       const signal = new AbortSignal();
       signal._abort(reason ?? new AbortError("Signal was aborted."));
@@ -118,7 +118,7 @@ const [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
     }
   }
 
-  class AbortController {
+  export class AbortController {
     private readonly _signal = new AbortSignal();
 
     get signal(): AbortSignal {
@@ -129,12 +129,8 @@ const [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
       this._signal["_abort"]();
     }
   }
+}
 
-  return [AbortSignal, AbortController, AbortError];
-})();
-
-export {
-  AbortSignalPolyfill as AbortSignal,
-  AbortControllerPolyfill as AbortController,
-  AbortError,
-};
+export const AbortController = AbortControllerPolyfill.AbortController;
+export const AbortSignal = AbortControllerPolyfill.AbortSignal;
+export const AbortError = AbortControllerPolyfill.AbortError;
