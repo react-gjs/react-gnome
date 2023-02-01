@@ -241,8 +241,7 @@ const XMLHttpRequestPolyfill = (() => {
     };
 
     private _currentReadyState: ReadyState = ReadyState.UNSENT;
-    private _responseBlob: GLib.Bytes | null = null;
-    private _responseText: string | null = null;
+    private _responseBuffer: Uint8Array | null = null;
     private _responseType: ResponseType | null = null;
     private _responseURL: string | null = null;
     private _contentType: ContentType | null = null;
@@ -268,7 +267,11 @@ const XMLHttpRequestPolyfill = (() => {
     }
 
     get responseText(): string | null {
-      return this._responseText;
+      const decoder = new TextDecoder();
+      if (this._responseBuffer) {
+        return decoder.decode(this._responseBuffer);
+      }
+      return null;
     }
 
     get responseXML(): string | null {
@@ -315,14 +318,14 @@ const XMLHttpRequestPolyfill = (() => {
     private _parseResponseData() {
       switch (this.responseType) {
         case "json":
-          return JSON.parse(this._responseText!);
+          return JSON.parse(this.responseText!);
         case "arraybuffer":
-          return stringToTypedArray(this._responseText!);
+          return this._responseBuffer!.slice();
         case "blob":
-          return this._responseBlob;
+          return new Blob([this._responseBuffer!]);
         case "text":
         case "":
-          return this._responseText!;
+          return this.responseText!;
       }
     }
 
@@ -510,7 +513,6 @@ const XMLHttpRequestPolyfill = (() => {
 
         const response = await new Promise<{
           rawResponseData: GLib.Bytes;
-          responseData: string;
           responseType: string | null;
           responseUrl: string;
           statusCode: number;
@@ -523,7 +525,6 @@ const XMLHttpRequestPolyfill = (() => {
 
               resolve({
                 rawResponseData: msg.response_body_data,
-                responseData: msg.response_body.data,
                 responseType: contentType,
                 responseUrl: msg.uri.to_string(true),
                 statusCode: msg.status_code,
@@ -545,8 +546,7 @@ const XMLHttpRequestPolyfill = (() => {
           : null;
         this._status = response.statusCode;
         this._statusText = response.statusText;
-        this._responseText = response.responseData;
-        this._responseBlob = response.rawResponseData;
+        this._responseBuffer = response.rawResponseData.unref_to_array() as any;
 
         this._finishRequest(response.statusCode);
       } catch (e) {
@@ -589,8 +589,7 @@ const XMLHttpRequestPolyfill = (() => {
       this._contentType = contentType ? new ContentType(contentType) : null;
       this._status = status_code;
       this._statusText = reason_phrase;
-      this._responseText = message.response_body.data;
-      this._responseBlob = message.response_body_data;
+      this._responseBuffer = message.response_body_data.unref_to_array() as any;
       this._responseURL = message.uri.to_string(true);
 
       this._finishRequest(status_code);

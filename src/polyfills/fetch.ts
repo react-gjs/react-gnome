@@ -26,6 +26,10 @@
 import Soup from "gi://Soup";
 
 async function fetch(url: RequestInfo, options: Partial<Request> = {} as any) {
+  if (url == null) {
+    throw new Error("URL must be specified.");
+  }
+
   if (typeof url === "object") {
     options = url;
     if (!options.url) {
@@ -67,9 +71,9 @@ async function fetch(url: RequestInfo, options: Partial<Request> = {} as any) {
     message.set_request("application/json", Soup.MemoryUse.COPY, options.body);
   }
 
-  const responseBody = await new Promise<string>((resolve) => {
+  const responseBuffer = await new Promise<Uint8Array>((resolve) => {
     httpSession.queue_message(message, (_, msg) => {
-      resolve(msg.response_body.data);
+      resolve(msg.response_body_data.unref_to_array() as any);
     });
   });
 
@@ -111,17 +115,17 @@ async function fetch(url: RequestInfo, options: Partial<Request> = {} as any) {
     ok,
     type: "basic",
     async json() {
+      const decoder = new TextDecoder();
+      const responseBody = decoder.decode(responseBuffer);
       return JSON.parse(responseBody);
     },
     async text() {
+      const decoder = new TextDecoder();
+      const responseBody = decoder.decode(responseBuffer);
       return responseBody;
     },
     async arrayBuffer() {
-      const array = new Uint8Array(responseBody.length);
-      for (let i = 0; i < responseBody.length; i++) {
-        array[i] = responseBody.charCodeAt(i);
-      }
-      return array.buffer;
+      return responseBuffer.buffer;
     },
   };
 }
