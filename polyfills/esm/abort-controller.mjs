@@ -1,5 +1,6 @@
 // src/polyfills/abort-controller.ts
-var [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
+var AbortControllerPolyfill;
+((AbortControllerPolyfill2) => {
   let Events;
   ((Events2) => {
     Events2["Abort"] = "abort";
@@ -51,14 +52,15 @@ var [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
       this.name = "AbortError";
     }
   }
-  class AbortSignal {
+  AbortControllerPolyfill2.AbortError = AbortError2;
+  class AbortSignal2 {
     static abort(reason) {
-      const signal = new AbortSignal();
+      const signal = new AbortSignal2();
       signal._abort(reason ?? new AbortError2("Signal was aborted."));
       return signal;
     }
     static timeout(time) {
-      const signal = new AbortSignal();
+      const signal = new AbortSignal2();
       setTimeout(() => {
         if (!signal.aborted)
           signal._abort(new AbortError2("Timeout"));
@@ -102,8 +104,9 @@ var [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
       this._events.remove(event, listener);
     }
   }
-  class AbortController {
-    _signal = new AbortSignal();
+  AbortControllerPolyfill2.AbortSignal = AbortSignal2;
+  class AbortController2 {
+    _signal = new AbortSignal2();
     get signal() {
       return this._signal;
     }
@@ -111,10 +114,13 @@ var [AbortSignalPolyfill, AbortControllerPolyfill, AbortError] = (() => {
       this._signal["_abort"]();
     }
   }
-  return [AbortSignal, AbortController, AbortError2];
-})();
+  AbortControllerPolyfill2.AbortController = AbortController2;
+})(AbortControllerPolyfill || (AbortControllerPolyfill = {}));
+var AbortController = AbortControllerPolyfill.AbortController;
+var AbortSignal = AbortControllerPolyfill.AbortSignal;
+var AbortError = AbortControllerPolyfill.AbortError;
 export {
-  AbortControllerPolyfill as AbortController,
+  AbortController,
   AbortError,
-  AbortSignalPolyfill as AbortSignal
+  AbortSignal
 };

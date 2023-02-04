@@ -188,10 +188,28 @@ export declare const ConfigSchema: import("dilswer").RecordOf<{
                         readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
                         readonly required: false;
                     };
+                    querystring: {
+                        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+                        readonly required: false;
+                    };
+                    os: {
+                        readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+                        readonly required: false;
+                    };
                 }>;
                 readonly required: false;
             };
         }>;
+        readonly required: false;
+    };
+    customPolyfills: {
+        readonly type: import("dilswer").ArrayOf<[import("dilswer").RecordOf<{
+            filepath: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+            importName: {
+                readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+                readonly required: false;
+            };
+        }>]>;
         readonly required: false;
     };
     treeShake: {

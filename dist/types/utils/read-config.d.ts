@@ -95,8 +95,14 @@ export declare const readConfig: (program: Program) => Promise<{
         node?: {
             path?: boolean | undefined;
             fs?: boolean | undefined;
+            querystring?: boolean | undefined;
+            os?: boolean | undefined;
         } | undefined;
     } | undefined;
+    customPolyfills?: {
+        importName?: string | undefined;
+        filepath: string;
+    }[] | undefined;
     treeShake?: boolean | undefined;
     applicationName: string;
     applicationVersion: string;

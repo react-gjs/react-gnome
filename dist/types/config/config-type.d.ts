@@ -88,6 +88,14 @@ export declare type NodePolyfills = {
    * Whether the polyfill for the `fs`, `fs/promises`, `node:fs/promises`, and/or `node:fs` package should be included in the generated bundle. When enabled imports of `fs`, `fs/promises`, `node:fs/promises`, and `node:fs` will be replaced with the polyfill.
    */
   fs?: boolean;
+  /**
+   * Whether the polyfill for the `querystring` and/or `node:querystring` package should be included in the generated bundle. When enabled imports of `querystring` and `node:querystring` will be replaced with the polyfill.
+   */
+  querystring?: boolean;
+  /**
+   * Whether the polyfill for the `os` and/or `node:os` package should be included in the generated bundle. When enabled imports of `os` and `node:os` will be replaced with the polyfill.
+   */
+  os?: boolean;
 };
 
 /**
@@ -198,6 +206,21 @@ export declare type Config = {
    * Polyfills that should be included in the generated bundle.
    */
   polyfills?: Polyfills;
+  /**
+   * Custom polyfills that should be included in the generated bundle.
+   * 
+   * This is useful for polyfills that are not included in the polyfills provided by react-gnome.
+   */
+  customPolyfills?: Array<{
+    /**
+     * Path to the file containing the polyfill.
+     */
+    filepath: string;
+    /**
+     * The name of the import that should be replaced with the polyfill (for example `node:fs`, `path`, `os`, etc.). If not specified, each exported member of polyfill will be injected into the global scope.
+     */
+    importName?: string;
+  }>;
   /**
    * Whether unused code should be removed from the bundle.
    * This is useful for production builds.

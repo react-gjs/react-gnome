@@ -133,11 +133,28 @@ export default resource;`
         );
         const imports = [(0, import_default_gi_imports.getDefaultGiImports)(program.config.giVersions)];
         imports.push(...externalImports.map((e) => e.toImportStatement()));
+        const gtkInit = program.config.giVersions?.Gtk === "4.0" ? (
+          // eslint-disable-next-line quotes
+          /* js */
+          `Gtk.init();`
+        ) : (
+          // eslint-disable-next-line quotes
+          /* js */
+          `Gtk.init(null);`
+        );
         await import_promises.default.writeFile(
           build.initialOptions.outfile,
-          [...imports, `export function main() {
+          [
+            ...imports,
+            /* js */
+            `
+export function main() {
+${gtkInit}
+
 ${outputFile}
-}`].join("\n")
+};
+`
+          ].join("\n")
         );
       });
     }

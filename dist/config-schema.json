@@ -254,6 +254,14 @@
             "fs": {
               "description": "Whether the polyfill for the `fs`, `fs/promises`, `node:fs/promises`, and/or `node:fs` package should be included in the generated bundle. When enabled imports of `fs`, `fs/promises`, `node:fs/promises`, and `node:fs` will be replaced with the polyfill.",
               "type": "boolean"
+            },
+            "querystring": {
+              "description": "Whether the polyfill for the `querystring` and/or `node:querystring` package should be included in the generated bundle. When enabled imports of `querystring` and `node:querystring` will be replaced with the polyfill.",
+              "type": "boolean"
+            },
+            "os": {
+              "description": "Whether the polyfill for the `os` and/or `node:os` package should be included in the generated bundle. When enabled imports of `os` and `node:os` will be replaced with the polyfill.",
+              "type": "boolean"
             }
           },
           "required": [],
@@ -266,6 +274,29 @@
       "title": "Polyfills",
       "description": "Polyfills that should be included in the generated bundle.",
       "additionalProperties": false
+    },
+    "customPolyfills": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "filepath": {
+              "description": "Path to the file containing the polyfill.",
+              "type": "string"
+            },
+            "importName": {
+              "description": "The name of the import that should be replaced with the polyfill (for example `node:fs`, `path`, `os`, etc.). If not specified, each exported member of polyfill will be injected into the global scope.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "filepath"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Custom polyfills that should be included in the generated bundle.\n\nThis is useful for polyfills that are not included in the polyfills provided by react-gnome."
     },
     "treeShake": {
       "description": "Whether unused code should be removed from the bundle.\nThis is useful for production builds.\n\nBy default is enabled in `production` mode and disabled in `development` mode.",

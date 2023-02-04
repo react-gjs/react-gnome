@@ -6,7 +6,7 @@ var getPolyfills = (program) => {
   if (polyfills?.XMLHttpRequest) {
     polyfills.URL = true;
   }
-  if (polyfills?.URL) {
+  if (polyfills?.URL || polyfills.node?.querystring) {
     polyfills.Buffer = true;
   }
   const polyfillPaths = [];
@@ -38,6 +38,12 @@ var getPolyfills = (program) => {
     polyfillPaths.push(
       path.resolve(rootPath, "polyfills/esm/abort-controller.mjs")
     );
+  }
+  if (program.config.customPolyfills) {
+    for (const customPoly of program.config.customPolyfills) {
+      if (!customPoly.importName)
+        polyfillPaths.push(path.resolve(program.cwd, customPoly.filepath));
+    }
   }
   return polyfillPaths;
 };
