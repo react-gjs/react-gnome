@@ -114,9 +114,25 @@ export const reactGnomePlugin = (program: Program) => {
 
         imports.push(...externalImports.map((e) => e.toImportStatement()));
 
+        const gtkInit =
+          (program.config.giVersions?.Gtk as string) === "4.0"
+            ? // eslint-disable-next-line quotes
+              /* js */ `Gtk.init();`
+            : // eslint-disable-next-line quotes
+              /* js */ `Gtk.init(null);`;
+
         await fs.writeFile(
           build.initialOptions.outfile!,
-          [...imports, `export function main() {\n${outputFile}\n}`].join("\n")
+          [
+            ...imports,
+            /* js */ `
+export function main() {
+${gtkInit}
+
+${outputFile}
+};
+`,
+          ].join("\n")
         );
       });
     },
