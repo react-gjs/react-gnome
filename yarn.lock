@@ -778,12 +778,12 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
-"clify.js@ncpa0cpl/clify.js#0.0.2":
+"clify.js@ncpa0cpl/clify.js#0.0.4":
   version: 1.0.3
-  resolution: "clify.js@https://github.com/ncpa0cpl/clify.js.git#commit=765946e4eda4f1b8dc7e07945890286db6ed226d"
+  resolution: "clify.js@https://github.com/ncpa0cpl/clify.js.git#commit=fe91dede1322b302fbc7ca8f5695ce37ccfb8bf4"
   dependencies:
     chalk: ^4.1.2
-  checksum: 3ccc6b441b0d1440d6dff4ac68afeb4c02736008e9871ffc3dee796671071b1cd94b861de492425497ccdf9e2a0c574b4c88a5fae233b5af0b4ff541d1ebfe86
+  checksum: 49e6940bd8ec93ba5b74d1965d44168be5d30373e058930716dd59a94b5de241d21173b0eba2f25ee858b92b27e15651c27bdb95ce303bf073a0ca61d85d4d9b
   languageName: node
   linkType: hard
 
@@ -2538,7 +2538,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     "@typescript-eslint/eslint-plugin": latest
     "@typescript-eslint/parser": latest
     buffer: ^6.0.3
-    clify.js: "ncpa0cpl/clify.js#0.0.2"
+    clify.js: "ncpa0cpl/clify.js#0.0.4"
     dilswer: 1.5.0
     esbuild: ^0.17.5
     eslint: latest
@@ -2883,11 +2883,11 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
 
 "typescript@patch:typescript@latest#~builtin<compat/typescript>":
   version: 4.9.4
-  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=701156"
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=23ec76"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
+  checksum: 3e2ab0772908676d9b9cb83398c70003a3b08e1c6b3b122409df9f4b520f2fdaefa20c3d7d57dce283fed760ac94b3ce94d4a7fa875127b67852904425a1f0dc
   languageName: node
   linkType: hard
 
