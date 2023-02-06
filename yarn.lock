@@ -1469,6 +1469,24 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
+git-hook-tasks@ncpa0cpl/git-hook-tasks:
+  version: 1.0.0
+  resolution: "git-hook-tasks@https://github.com/ncpa0cpl/git-hook-tasks.git#commit=475046a2550d299c6e807dad502a83dbbc25a0d6"
+  dependencies:
+    async-await-queue: ^1.2.1
+    chalk: ^4.0.0
+    clify.js: ncpa0cpl/clify.js
+    dilswer: ^1.2.0
+    node-os-walk: ^1.0.0
+    strip-ansi: ^6.0.1
+  peerDependencies:
+    husky: ^8.0.1
+  bin:
+    git-hook-tasks: dist/bin/bin.js
+  checksum: 126a7004a73673ed1d9bd98c968b2a05108484adcde62b3bdae1d42cb2cf9509ab922e2b1779ce99c2e4700c9afde86bcdd89883887c8aa820f0a275be19740b
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:^5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -2273,24 +2291,6 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
-ncpa0cpl@ncpa0cpl/git-hook-tasks:
-  version: 1.0.0
-  resolution: "ncpa0cpl@https://github.com/ncpa0cpl/git-hook-tasks.git#commit=37e5f9723a3c6d38b555bbb81ad493cd08df68aa"
-  dependencies:
-    async-await-queue: ^1.2.1
-    chalk: ^4.0.0
-    clify.js: ncpa0cpl/clify.js
-    dilswer: ^1.2.0
-    node-os-walk: ^1.0.0
-    strip-ansi: ^6.0.1
-  peerDependencies:
-    husky: ^8.0.1
-  bin:
-    git-hook-tasks: dist/bin/bin.js
-  checksum: d3b5ca7522bdc56ab9aa3bd48ab1c2ef2b90322a284a7b600e0f21e43a5dae2333fde655cc9a2e462ec754724fcf2d56c0687472a839c439095ad04523c6d2eb
-  languageName: node
-  linkType: hard
-
 "node-os-walk@npm:>=1.0.2, node-os-walk@npm:^1.0.0":
   version: 1.0.2
   resolution: "node-os-walk@npm:1.0.2"
@@ -2544,8 +2544,8 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
     eslint: latest
     eslint-config-prettier: latest
     eslint-plugin-prettier: latest
+    git-hook-tasks: ncpa0cpl/git-hook-tasks
     husky: latest
-    ncpa0cpl: ncpa0cpl/git-hook-tasks
     prettier: latest
     prettier-plugin-jsdoc: latest
     rimraf: ^4.1.2
@@ -2883,11 +2883,11 @@ ncpa0cpl@ncpa0cpl/git-hook-tasks:
 
 "typescript@patch:typescript@latest#~builtin<compat/typescript>":
   version: 4.9.4
-  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=701156"
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=23ec76"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
+  checksum: 3e2ab0772908676d9b9cb83398c70003a3b08e1c6b3b122409df9f4b520f2fdaefa20c3d7d57dce283fed760ac94b3ce94d4a7fa875127b67852904425a1f0dc
   languageName: node
   linkType: hard
 

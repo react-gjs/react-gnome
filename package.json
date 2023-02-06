@@ -1,6 +1,6 @@
 {
   "name": "react-gnome",
-  "packageManager": "yarn@3.2.4",
+  "packageManager": "yarn@3.4.1",
   "bin": "./bin/react-gnome.sh",
   "main": "./dist/legacy/index.js",
   "types": "./dist/types/index.d.ts",
@@ -26,8 +26,8 @@
     "eslint": "latest",
     "eslint-config-prettier": "latest",
     "eslint-plugin-prettier": "latest",
+    "git-hook-tasks": "ncpa0cpl/git-hook-tasks",
     "husky": "latest",
-    "ncpa0cpl": "ncpa0cpl/git-hook-tasks",
     "prettier": "latest",
     "prettier-plugin-jsdoc": "latest",
     "typescript": "latest"

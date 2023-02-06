@@ -1,6 +1,7 @@
 {
   "packageManager": "yarn",
   "parallel": true,
+  "parallelPoolSize": 4,
   "hooks": {
     "pre-push": [
       {
@@ -14,6 +15,10 @@
       {
         "name": "Prettier",
         "script": "test:prettier"
+      },
+      {
+        "name": "Unit Tests",
+        "script": "test:unit"
       }
     ],
     "pre-commit": [],

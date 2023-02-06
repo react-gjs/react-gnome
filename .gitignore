@@ -4,8 +4,8 @@ dist
 yarn-error.log
 .npmrc
 install-state.gz
-.yarn
-.yarn/*
+.yarn/cache
+.yarn/unplugged
 .yarn/install-state.gz
 /polyfills/
 /gest/dist
