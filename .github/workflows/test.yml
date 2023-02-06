@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 18
       - name: Install dependencies
-        run: ./.yarn/yarn.cjs install --immutable
+        run: ./.yarn/yarn.cjs install --immutable --mode=skip-build
       - name: Building Gest Runner
         run: ./.yarn/yarn.cjs build:gest
       - name: Run tests
@@ -29,3 +29,5 @@ jobs:
         # - ESLint lint
         # - TypeScript type check
         run: ./.yarn/yarn.cjs git-hook-tasks pre-push
+      - name: Print Error Logs
+        run: "node print-err-logs.cjs"

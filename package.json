@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
-    "clify.js": "ncpa0cpl/clify.js#0.0.1",
+    "clify.js": "ncpa0cpl/clify.js#0.0.2",
     "dilswer": "1.5.0",
     "esbuild": "^0.17.5",
     "rimraf": "^4.1.2",

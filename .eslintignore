@@ -19,3 +19,4 @@ scripts
 bin
 build.js
 gest
+print-err-logs.cjs
