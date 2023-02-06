@@ -42,7 +42,7 @@
     "test:tsc": "tsc --noEmit",
     "build": "node ./scripts/build.cjs",
     "build:gest": "node ./scripts/build-gest.cjs",
-    "postinstall": "node ./dist/legacy/add-config-schema.js"
+    "postinstall": "bash -c \"if [ ! -e .no-postinstall ]; then node ./dist/legacy/add-config-schema.js; fi\""
   },
   "keywords": [],
   "repository": {
