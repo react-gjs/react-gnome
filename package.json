@@ -1,6 +1,6 @@
 {
   "name": "react-gnome",
-  "packageManager": "yarn@3.4.1",
+  "packageManager": "yarn@3.2.4",
   "bin": "./bin/react-gnome.sh",
   "main": "./dist/legacy/index.js",
   "types": "./dist/types/index.d.ts",

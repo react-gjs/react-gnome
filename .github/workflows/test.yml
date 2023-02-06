@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+      - name: Install global Yarn
+        run: npm install -g yarn
       - name: Install dependencies
         run: ./.yarn/yarn.cjs install --immutable --mode=skip-build
       - name: Building Gest Runner
