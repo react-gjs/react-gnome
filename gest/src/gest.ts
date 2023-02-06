@@ -1191,8 +1191,8 @@ async function main() {
 
 MarkupFormatter.defineColor("customBlack", "#1b1c26");
 
-Gtk.init(null);
 setTimeout(() => {
   main();
 }, 0);
+
 Gtk.main();
