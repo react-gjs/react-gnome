@@ -702,11 +702,7 @@ try {
   }) {
     const { input, output, mainSetup, fileSetup } = params;
 
-    const args = [
-      "/home/owner/Documents/react-gtk/gest/dist/esm/test-builder.mjs",
-      input,
-      output,
-    ];
+    const args = [_join(cwd, "gest/dist/esm/test-builder.mjs"), input, output];
 
     if (mainSetup) {
       args.push(mainSetup);
