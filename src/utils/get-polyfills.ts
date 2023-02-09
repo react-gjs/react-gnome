@@ -2,7 +2,7 @@ import path from "path";
 import { getDirPath } from "../get-dirpath/get-dirpath";
 import type { Program } from "../programs/base";
 
-export const getPolyfills = (program: Program): string[] => {
+export const getGlobalPolyfills = (program: Program): string[] => {
   const polyfills = { ...program.config.polyfills };
 
   if (polyfills?.XMLHttpRequest) {
@@ -51,6 +51,10 @@ export const getPolyfills = (program: Program): string[] => {
     polyfillPaths.push(
       path.resolve(rootPath, "polyfills/esm/abort-controller.mjs")
     );
+  }
+
+  if (polyfills?.WebSocket) {
+    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/websocket.mjs"));
   }
 
   if (program.config.customPolyfills) {

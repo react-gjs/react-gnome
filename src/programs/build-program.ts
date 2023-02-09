@@ -23,7 +23,7 @@ import { getPostInstallScript } from "../packaging/templates/post-install-script
 import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
 import { getPlugins } from "../utils/get-plugins";
-import { getPolyfills } from "../utils/get-polyfills";
+import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { pascalToKebab } from "../utils/pascal-to-kebab";
 import { Program } from "./base";
 
@@ -238,7 +238,7 @@ export class BuildProgram extends Program {
     await this.esbuildCtx.init({
       target: "es2020",
       format: "esm",
-      inject: getPolyfills(this),
+      inject: getGlobalPolyfills(this),
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(buildDirPath, "src", "main.js"),
       plugins: getPlugins(this),
