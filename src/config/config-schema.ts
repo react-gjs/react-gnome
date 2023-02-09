@@ -71,6 +71,7 @@ export const ConfigSchema = DataType.RecordOf({
       XMLHttpRequest: OptionalField(DataType.Boolean),
       base64: OptionalField(DataType.Boolean),
       fetch: OptionalField(DataType.Boolean),
+      WebSocket: OptionalField(DataType.Boolean),
       node: OptionalField(
         DataType.RecordOf({
           path: OptionalField(DataType.Boolean),
@@ -210,6 +211,10 @@ polyfills.recordOf.base64.type.setDescription(
 
 polyfills.recordOf.fetch.type.setDescription(
   "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope."
+);
+
+polyfills.recordOf.WebSocket.type.setDescription(
+  "Whether the polyfill for a `WebSocket` should be included in the generated bundle. When enabled the `WebSocket` class will become available in the global scope."
 );
 
 polyfills.recordOf.node.type.setDescription(

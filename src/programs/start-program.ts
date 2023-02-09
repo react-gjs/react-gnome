@@ -7,7 +7,7 @@ import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
 import type { AdditionalPlugins } from "../utils/get-plugins";
 import { getPlugins } from "../utils/get-plugins";
-import { getPolyfills } from "../utils/get-polyfills";
+import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { BuildProgram } from "./build-program";
 
 export class StartProgram extends BuildProgram {
@@ -58,7 +58,7 @@ export class StartProgram extends BuildProgram {
       {
         target: "es6",
         format: "esm",
-        inject: getPolyfills(this),
+        inject: getGlobalPolyfills(this),
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(buildDirPath, "src", "main.js"),
         plugins: getPlugins(this),

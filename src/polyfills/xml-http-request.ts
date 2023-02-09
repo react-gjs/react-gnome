@@ -36,6 +36,12 @@ const XMLHttpRequestPolyfill = (() => {
 
   type ResponseType = "" | "arraybuffer" | "blob" | "json" | "text";
 
+  type EventListener =
+    | ((ev: ProgressEvent) => void)
+    | {
+        handleEvent: (ev: ProgressEvent) => void;
+      };
+
   enum RequestEvents {
     READY_STATE_CHANGE = "readystatechange",
     ABORT = "abort",
@@ -77,8 +83,7 @@ const XMLHttpRequestPolyfill = (() => {
   }
 
   class EventController {
-    private listeners: Map<RequestEvents, Array<(ev: ProgressEvent) => void>> =
-      new Map();
+    private listeners: Map<RequestEvents, Array<EventListener>> = new Map();
 
     constructor(request: RequestWithEventHandlers) {
       this.add(RequestEvents.ABORT, (e) => request.onabort?.(e));
@@ -94,14 +99,14 @@ const XMLHttpRequestPolyfill = (() => {
       );
     }
 
-    add(event: RequestEvents, listener: (ev: ProgressEvent) => void) {
+    add(event: RequestEvents, listener: EventListener) {
       if (!this.listeners.has(event)) {
         this.listeners.set(event, []);
       }
       this.listeners.get(event)!.push(listener);
     }
 
-    remove(event: RequestEvents, listener: (ev: ProgressEvent) => void) {
+    remove(event: RequestEvents, listener: EventListener) {
       if (!this.listeners.has(event)) {
         return;
       }
@@ -118,7 +123,8 @@ const XMLHttpRequestPolyfill = (() => {
       }
       this.listeners.get(event)!.forEach(async (listener) => {
         try {
-          await listener(ev);
+          if (typeof listener === "function") await listener(ev);
+          else await listener.handleEvent(ev);
         } catch (e) {
           console.error(e);
         }
@@ -644,17 +650,11 @@ const XMLHttpRequestPolyfill = (() => {
       }
     }
 
-    addEventListener(
-      type: RequestEvents,
-      listener: (event: ProgressEvent) => void
-    ) {
+    addEventListener(type: RequestEvents, listener: EventListener) {
       this._eventController.add(type, listener);
     }
 
-    removeEventListener(
-      type: RequestEvents,
-      listener: (event: ProgressEvent) => void
-    ) {
+    removeEventListener(type: RequestEvents, listener: EventListener) {
       this._eventController.remove(type, listener);
     }
   };

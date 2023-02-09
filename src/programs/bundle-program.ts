@@ -1,7 +1,7 @@
 import path from "path";
 import { html, Output } from "termx-markup";
 import { getPlugins } from "../utils/get-plugins";
-import { getPolyfills } from "../utils/get-polyfills";
+import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { Program } from "./base";
 
 export class BundleProgram extends Program {
@@ -23,7 +23,7 @@ export class BundleProgram extends Program {
       {
         target: "es6",
         format: "esm",
-        inject: getPolyfills(this),
+        inject: getGlobalPolyfills(this),
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
         plugins: getPlugins(this),
