@@ -53,7 +53,7 @@ export const ConfigSchema = DataType.RecordOf({
       Graphene: OptionalField(DataType.String),
       Gst: OptionalField(DataType.String),
       HarfBuzz: OptionalField(DataType.String),
-      Soup: OptionalField(DataType.String),
+      Soup: OptionalField(DataType.Literal("2.4")),
       cairo: OptionalField(DataType.String),
       xlib: OptionalField(DataType.String),
     })
