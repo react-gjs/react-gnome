@@ -2,7 +2,7 @@ import type esbuild from "esbuild";
 import fs from "fs/promises";
 import type { Program } from "../../programs/base";
 import { generateUniqueName } from "../../utils/generate-unique-name";
-import { getDefaultGiImports } from "./default-gi-imports";
+import { GiImports } from "./default-gi-imports";
 
 class ExternalImport {
   importName: string;
@@ -13,7 +13,7 @@ class ExternalImport {
   }
 
   toImportStatement() {
-    return `import * as ${this.importName} from "${this.path}";`;
+    return `import ${this.importName} from "${this.path}";`;
   }
 
   toExportStatement() {
@@ -29,6 +29,7 @@ export const reactGnomePlugin = (program: Program) => {
   return {
     name: "react-gnome-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
+      const gi = new GiImports(program.config.giVersions);
       const externalImports: ExternalImport[] = [];
 
       if (program.resources)
@@ -69,6 +70,8 @@ export const reactGnomePlugin = (program: Program) => {
         }
       );
 
+      // #region gi imports
+
       build.onResolve({ filter: /^gi?:\/\// }, (args) => ({
         path: args.path.replace(/^gi?:/, ""),
         namespace: "gi",
@@ -78,6 +81,25 @@ export const reactGnomePlugin = (program: Program) => {
         path: args.path.replace(/^gi?:/, ""),
         namespace: "gi",
       }));
+
+      build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
+        const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
+
+        const vmatch = args.path.match(/^\/\/.+?\?version=(.+?)$/);
+        const version = vmatch ? vmatch[1] : undefined;
+
+        if (!name) {
+          throw new Error(`Invalid gi import: ${args.path}`);
+        }
+
+        gi.add(name, version);
+
+        return {
+          contents: `export default ${name};`,
+        };
+      });
+
+      // #endregion gi imports
 
       build.onResolve({ filter: /.*/ }, (args) => {
         if (externalPackages.has(args.path)) {
@@ -89,30 +111,25 @@ export const reactGnomePlugin = (program: Program) => {
       });
 
       build.onLoad({ filter: /.*/, namespace: "external-import" }, (args) => {
-        const externalImport = new ExternalImport(args.path);
-        externalImports.push(externalImport);
+        let externalImport = externalImports.find((e) => e.path === args.path);
+
+        if (!externalImport) {
+          externalImport = new ExternalImport(args.path);
+          externalImports.push(externalImport);
+        }
 
         return {
           contents: externalImport.toExportStatement(),
         };
       });
 
-      build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
-        const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
-        return {
-          contents: `export default ${name};`,
-        };
-      });
-
       build.onEnd(async () => {
-        const outputFile = await fs.readFile(
-          build.initialOptions.outfile!,
-          "utf8"
-        );
+        const bundle = await fs.readFile(build.initialOptions.outfile!, "utf8");
 
-        const imports = [getDefaultGiImports(program.config.giVersions)];
-
-        imports.push(...externalImports.map((e) => e.toImportStatement()));
+        const imports = [
+          gi.toJavaScript(),
+          ...externalImports.map((e) => e.toImportStatement()),
+        ];
 
         const gtkInit =
           (program.config.giVersions?.Gtk as string) === "4.0"
@@ -128,8 +145,7 @@ export const reactGnomePlugin = (program: Program) => {
             /* js */ `
 export function main() {
 ${gtkInit}
-
-${outputFile}
+${bundle}
 };
 `,
           ].join("\n")
