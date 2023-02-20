@@ -58,7 +58,7 @@
     "buffer": "^6.0.3",
     "clify.js": "ncpa0cpl/clify.js#0.0.4",
     "dilswer": "1.5.0",
-    "esbuild": "^0.17.5",
+    "esbuild": "^0.17.9",
     "rimraf": "^4.1.2",
     "tar": "^6.1.13",
     "termx-markup": "1.1.0",
