@@ -29,6 +29,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import GLib from "gi://GLib";
+
 namespace posix_default {
   type PathObject = {
     root?: string;
@@ -137,7 +139,7 @@ namespace posix_default {
       let path;
       if (i >= 0) path = args[i];
       else {
-        if (cwd === undefined) cwd = process.cwd();
+        if (cwd === undefined) cwd = GLib.get_current_dir();
         path = cwd;
       }
 
@@ -153,7 +155,8 @@ namespace posix_default {
     }
 
     // At this point the path should be resolved to a full absolute path, but
-    // handle relative paths to be safe (might happen when process.cwd() fails)
+    // handle relative paths to be safe (might happen when
+    // GLib.get_current_dir() fails)
 
     // Normalize the path
     resolvedPath = __normalizeStringPosix(resolvedPath, !resolvedAbsolute);
