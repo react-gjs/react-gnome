@@ -210,9 +210,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ncpa0cpl/nodepack@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "@ncpa0cpl/nodepack@npm:2.0.3"
+"@ncpa0cpl/nodepack@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@ncpa0cpl/nodepack@npm:2.1.0"
   dependencies:
     "@ncpa0cpl/node-worker-bridge": ^0.0.3
     "@ts-morph/bootstrap": ^0.18.0
@@ -225,7 +225,7 @@ __metadata:
   dependenciesMeta:
     json-to-ts:
       optional: true
-  checksum: cb3684f1777804a7bb4db212f15b744e15aeb68a5806421d6e13331ab62c4f33de295952fec344e0f9f63406099e9095d815a0772eb7e190ccaa9080425ea4d7
+  checksum: 96809ac14c3f033dd6d5e474f8f19db16277437926b235742f826d9b8e658fbed477ac373654befbc72544aba9c6b5f98937edaf09f5fbe131f602f243479c76
   languageName: node
   linkType: hard
 
@@ -2532,7 +2532,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   version: 0.0.0-use.local
   resolution: "react-gnome@workspace:."
   dependencies:
-    "@ncpa0cpl/nodepack": ^2.0.3
+    "@ncpa0cpl/nodepack": ^2.1.0
     "@swc/core": latest
     "@types/tar": ^6.1.4
     "@typescript-eslint/eslint-plugin": latest
