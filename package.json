@@ -18,7 +18,7 @@
     "./polyfills/*": "./polyfills/esm/*.mjs"
   },
   "devDependencies": {
-    "@ncpa0cpl/nodepack": "^2.0.3",
+    "@ncpa0cpl/nodepack": "^2.1.0",
     "@swc/core": "latest",
     "@types/tar": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "latest",
