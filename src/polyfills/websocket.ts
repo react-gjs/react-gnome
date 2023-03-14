@@ -1,5 +1,5 @@
 import GLib from "gi://GLib";
-import Soup from "gi://Soup";
+import Soup from "gi://Soup?version=2.4";
 import type { EventListener } from "./shared/event-emitter";
 import { Event, EventEmitter } from "./shared/event-emitter";
 import { _async } from "./shared/utils";
@@ -53,7 +53,7 @@ namespace WsPolyfill {
     }
 
     get url(): string {
-      return this.#uriObject.to_string();
+      return this.#uriObject.to_string()!;
     }
 
     onclose: ((this: WebSocket, ev: Event) => any) | null = null;
@@ -67,7 +67,7 @@ namespace WsPolyfill {
       this.#emitter.add(WebSocketEventType.MESSAGE, (e) => this.onmessage?.(e));
       this.#emitter.add(WebSocketEventType.OPEN, (e) => this.onopen?.(e));
 
-      this.#uriObject = GLib.uri_parse(url.toString(), GLib.UriFlags.NONE);
+      this.#uriObject = GLib.uri_parse(url.toString(), GLib.UriFlags.NONE)!;
 
       this.#startConnection(Array.isArray(protocols) ? protocols : [protocols]);
     }
@@ -124,7 +124,7 @@ namespace WsPolyfill {
             null,
             (_, response) => {
               try {
-                const connection = session.websocket_connect_finish(response);
+                const connection = session.websocket_connect_finish(response)!;
                 p.resolve(connection);
               } catch (e) {
                 p.reject(e);
