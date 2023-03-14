@@ -1,9 +1,17 @@
 import { DataType, OptionalField } from "dilswer";
+import type { Plugin as EsbuildPlugin } from "esbuild";
 
-export const EsbuildPluginDataType = DataType.RecordOf({
-  name: DataType.String,
-  setup: DataType.Function,
-}).setTitle("EsbuildPlugin");
+export const EsbuildPluginDataType = DataType.Custom(
+  (v): v is EsbuildPlugin =>
+    typeof v === "object" && v !== null && "name" in v && "setup" in v
+)
+  .setTitle("EsbuildPlugin")
+  .setExtra({
+    extraType: "external-import",
+    path: "esbuild",
+    typeName: "EsbuildPlugin",
+    originalName: "Plugin",
+  });
 
 const RegexDataType = DataType.InstanceOf(RegExp);
 
