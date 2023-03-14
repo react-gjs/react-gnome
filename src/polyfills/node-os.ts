@@ -150,7 +150,7 @@ namespace os_default {
   }
 
   export function userInfo() {
-    const username = GLib.get_user_name();
+    const username = GLib.get_user_name()!;
     return {
       uid: Number(__command("id", username, "-u")),
       gid: Number(__command("id", username, "-g")),
