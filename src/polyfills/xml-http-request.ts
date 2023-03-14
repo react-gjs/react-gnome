@@ -1,5 +1,5 @@
 import type GLib from "gi://GLib";
-import Soup from "gi://Soup";
+import Soup from "gi://Soup?version=2.4";
 
 const XMLHttpRequestPolyfill = (() => {
   type RequestWithEventHandlers = {
@@ -415,7 +415,7 @@ const XMLHttpRequestPolyfill = (() => {
       }
 
       this._requestHeaders.forEach((value, key) => {
-        message.request_headers.append(key, value);
+        message.request_headers!.append(key, value);
       });
 
       if (this._body) {
@@ -479,8 +479,8 @@ const XMLHttpRequestPolyfill = (() => {
               const { response_headers } = message;
 
               this._responseHeaders.clear();
-              response_headers.foreach((name, value) => {
-                this._responseHeaders.set(name, value);
+              response_headers!.foreach((name, value) => {
+                this._responseHeaders.set(name!, value!);
               });
 
               this._setReadyState(ReadyState.HEADERS_RECEIVED);
@@ -527,14 +527,14 @@ const XMLHttpRequestPolyfill = (() => {
           try {
             httpSession.queue_message(message, (_, msg) => {
               const contentType =
-                msg.response_headers.get_one("Content-Type") ?? null;
+                msg!.response_headers!.get_one("Content-Type") ?? null;
 
               resolve({
-                rawResponseData: msg.response_body_data,
+                rawResponseData: msg!.response_body_data,
                 responseType: contentType,
-                responseUrl: msg.uri.to_string(true),
-                statusCode: msg.status_code,
-                statusText: msg.reason_phrase,
+                responseUrl: msg!.uri.to_string(true)!,
+                statusCode: msg!.status_code,
+                statusText: msg!.reason_phrase!,
               });
             });
           } catch (e) {
@@ -582,13 +582,13 @@ const XMLHttpRequestPolyfill = (() => {
       const { status_code, reason_phrase, response_headers } = message;
 
       this._responseHeaders.clear();
-      response_headers.foreach((name, value) => {
-        this._responseHeaders.set(name, value);
+      response_headers!.foreach((name, value) => {
+        this._responseHeaders.set(name!, value!);
       });
 
       this._setReadyState(ReadyState.HEADERS_RECEIVED);
 
-      const contentType = response_headers.get_content_type() as any as
+      const contentType = response_headers!.get_content_type() as any as
         | string
         | null;
 
