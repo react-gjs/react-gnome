@@ -1,5 +1,5 @@
 const { build } = require("@ncpa0cpl/nodepack");
-const { toJsonSchema, toTsType } = require("dilswer");
+const { toJsonSchema, toTsType, getMetadata } = require("dilswer");
 const path = require("path");
 const fs = require("fs/promises");
 
@@ -72,12 +72,15 @@ async function main() {
     const configTsType = toTsType(ConfigSchema, {
       mode: "named-expanded",
       onDuplicateName: "rename",
+      getExternalTypeImport: (type) => {
+        const metadata = getMetadata(type);
+        if (metadata.extra && metadata.extra.extraType === "external-import") {
+          return metadata.extra;
+        }
+      },
     });
 
-    await fs.writeFile(
-      p("dist/types/config/config-type.d.ts"),
-      configTsType.replace(/export type/g, "export declare type")
-    );
+    await fs.writeFile(p("dist/types/config/config-type.d.ts"), configTsType);
   } catch (e) {
     console.error(e);
     process.exit(1);
