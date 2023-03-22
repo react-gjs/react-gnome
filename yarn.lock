@@ -1496,10 +1496,10 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   languageName: node
   linkType: hard
 
-"gjs-esm-types@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "gjs-esm-types@npm:0.0.2"
-  checksum: e2b871cfc092151d50942a41af86b6572b7d8c2b0134cfbebf55d73e1980fbf07145ec6d6f26aeaa60dd3a51d1f1e6dcf36f8715fdb219ea1e8232c5c3a7072a
+"gjs-esm-types@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "gjs-esm-types@npm:0.0.3"
+  checksum: d76e99d3dba47132c1c74fc725c8778a62465f50301e3019035ec3c3a8f77d27241e67cba0bc84a3fcd69ee684ce381ac5d1e3c1c25cbaa3d254489cd3f2aa0a
   languageName: node
   linkType: hard
 
@@ -2606,7 +2606,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     eslint-config-prettier: latest
     eslint-plugin-prettier: latest
     git-hook-tasks: ncpa0cpl/git-hook-tasks
-    gjs-esm-types: ^0.0.2
+    gjs-esm-types: ^0.0.3
     husky: latest
     prettier: latest
     prettier-plugin-jsdoc: latest
