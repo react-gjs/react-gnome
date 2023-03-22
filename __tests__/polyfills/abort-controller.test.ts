@@ -1,4 +1,4 @@
-import { describe, expect, it, match } from "gest-globals";
+import { describe, expect, it, match } from "@reactgjs/gest";
 import {
   AbortController,
   AbortSignal,

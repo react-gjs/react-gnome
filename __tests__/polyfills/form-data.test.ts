@@ -1,4 +1,4 @@
-import { describe, expect, it } from "gest-globals";
+import { describe, expect, it } from "@reactgjs/gest";
 import { FormData } from "../../src/polyfills/form-data";
 
 export default describe("FormData", () => {

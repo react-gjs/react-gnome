@@ -1,9 +1,0 @@
-{
-  "extends": "../tsconfig.json",
-  "compilerOptions": {
-    "target": "ESNext",
-    "outDir": "./",
-    "rootDir": "./polyfills"
-  },
-  "include": ["./polyfills/**/*"]
-}
