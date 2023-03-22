@@ -1,4 +1,4 @@
-import type GLib from "gi://GLib";
+import type GLib from "gi://GLib?version=2.0";
 import Soup from "gi://Soup?version=2.4";
 
 const XMLHttpRequestPolyfill = (() => {
@@ -64,11 +64,6 @@ const XMLHttpRequestPolyfill = (() => {
   function typedArrayToString(array: TypedArray | ArrayBuffer): string {
     const decoder = new TextDecoder();
     return decoder.decode(array);
-  }
-
-  function stringToTypedArray(str: string): Uint8Array {
-    const encoder = new TextEncoder();
-    return encoder.encode(str);
   }
 
   class ProgressEvent<T = any> {
@@ -190,7 +185,7 @@ const XMLHttpRequestPolyfill = (() => {
     }
 
     isOfType(type: string) {
-      const [mainType, subType] = this.content[0]!.split("/");
+      const [mainType] = this.content[0]!.split("/");
       return mainType === type;
     }
 

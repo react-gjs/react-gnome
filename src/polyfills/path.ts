@@ -29,7 +29,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import GLib from "gi://GLib";
+import GLib from "gi://GLib?version=2.0";
 
 namespace posix_default {
   type PathObject = {

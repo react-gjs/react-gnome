@@ -1,4 +1,4 @@
-import GLib from "gi://GLib";
+import GLib from "gi://GLib?version=2.0";
 import Soup from "gi://Soup?version=2.4";
 import type { EventListener } from "./shared/event-emitter";
 import { Event, EventEmitter } from "./shared/event-emitter";
