@@ -1,4 +1,4 @@
-import GLib from "gi://GLib";
+import GLib from "gi://GLib?version=2.0";
 
 namespace os_default {
   const __command = (program: string, ...args: string[]) => {

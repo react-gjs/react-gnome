@@ -1,4 +1,4 @@
-import GLib from "gi://GLib";
+import GLib from "gi://GLib?version=2.0";
 
 export function atob(data: string) {
   const decodedData = GLib.base64_decode(data);

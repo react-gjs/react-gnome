@@ -75,7 +75,7 @@ class FormData {
     const entries = this._entries;
 
     const generator = function* (): Generator<string> {
-      for (const [key, value] of entries) {
+      for (const [, value] of entries) {
         for (const v of value) {
           yield v;
         }
