@@ -17,32 +17,15 @@
     },
     "./polyfills/*": "./polyfills/esm/*.mjs"
   },
-  "devDependencies": {
-    "@ncpa0cpl/nodepack": "^2.1.1",
-    "@swc/core": "latest",
-    "@types/tar": "^6.1.4",
-    "@typescript-eslint/eslint-plugin": "latest",
-    "@typescript-eslint/parser": "latest",
-    "eslint": "latest",
-    "eslint-config-prettier": "latest",
-    "eslint-plugin-prettier": "latest",
-    "git-hook-tasks": "ncpa0cpl/git-hook-tasks",
-    "gjs-esm-types": "^0.0.3",
-    "husky": "latest",
-    "prettier": "latest",
-    "prettier-plugin-jsdoc": "latest",
-    "typescript": "latest"
-  },
   "version": "1.0.0",
   "scripts": {
     "fix:lint": "eslint --fix .",
     "fix:prettier": "prettier -w ./src .",
-    "test:unit": "gjs -m ./gest/dist/esm/gest.mjs --verbose",
+    "test:unit": "gest --verbose",
     "test:lint": "eslint .",
     "test:prettier": "prettier -c ./src && prettier -c ./__tests__",
     "test:tsc": "tsc --noEmit",
     "build": "node ./scripts/build.cjs",
-    "build:gest": "node ./scripts/build-gest.cjs",
     "postinstall": "bash -c \"if [ ! -e .no-postinstall ]; then node ./dist/legacy/add-config-schema.js; fi\""
   },
   "keywords": [],
@@ -64,6 +47,22 @@
     "tar": "^6.1.13",
     "termx-markup": "1.1.0",
     "whatwg-url-without-unicode": "^8.0.0-3"
+  },
+  "devDependencies": {
+    "@ncpa0cpl/nodepack": "^2.1.2",
+    "@reactgjs/gest": "^0.0.1",
+    "@types/tar": "^6.1.4",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-prettier": "latest",
+    "git-hook-tasks": "ncpa0cpl/git-hook-tasks",
+    "gjs-esm-types": "^0.0.3",
+    "husky": "latest",
+    "prettier": "latest",
+    "prettier-plugin-jsdoc": "latest",
+    "typescript": "latest"
   },
   "peerDependencies": {
     "ts-node": "^10.9.1"
