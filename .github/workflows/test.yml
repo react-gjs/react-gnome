@@ -28,13 +28,13 @@ jobs:
           node-version: 18
       - name: Install dependencies
         run: ./.yarn/yarn.cjs install --immutable --mode=skip-build
-      - name: Building Gest Runner
-        run: ./.yarn/yarn.cjs build:gest
+      - name: Run TypeScript
+        run: ./.yarn/yarn.cjs test:tsc
       - name: Run Linter
         run: ./.yarn/yarn.cjs test:lint
       - name: Run Prettier Check
         run: ./.yarn/yarn.cjs test:prettier
       - name: Run Unit Test
         run: ./.yarn/yarn.cjs test:unit
-      - name: Print Error Logs
-        run: "node print-err-logs.cjs"
+      - name: Attempt Build
+        run: ./.yarn/yarn.cjs build
