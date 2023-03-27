@@ -43,7 +43,7 @@
     "clify.js": "ncpa0cpl/clify.js#0.0.4",
     "dilswer": "2.0.2",
     "esbuild": "^0.17.14",
-    "rimraf": "^4.4.0",
+    "rimraf": "^4.4.1",
     "tar": "^6.1.13",
     "termx-markup": "1.1.0",
     "whatwg-url-without-unicode": "^8.0.0-3"
