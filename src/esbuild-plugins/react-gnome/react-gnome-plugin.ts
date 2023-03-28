@@ -1,5 +1,6 @@
 import type esbuild from "esbuild";
 import fs from "fs/promises";
+import path from "path";
 import type { Program } from "../../programs/base";
 import { generateUniqueName } from "../../utils/generate-unique-name";
 import { GiImports } from "./default-gi-imports";
@@ -32,19 +33,77 @@ export const reactGnomePlugin = (program: Program) => {
       const gi = new GiImports(program.config.giVersions);
       const externalImports: ExternalImport[] = [];
 
-      if (program.resources)
+      if (program.resources) {
         build.onLoad(
           {
             filter:
-              /(.*\.(jpg|jpeg|png|webp|webm|svg|mpeg|mp4|css|ui))|(.*\.resource\.[\w\d]*)/i,
+              /(.*\.(jpg|jpeg|png|webp|webm|svg|mpeg|mp4|ui))|(.*\.resource\.[\w\d]*)/i,
           },
           (args) => {
             const resource = program.resources!.registerResource(args.path);
             return {
-              contents: `const resource = "${resource.resourceString}";\nexport default resource;`,
+              contents: /* js */ `
+                const resource = ${JSON.stringify(resource.resourceString)};
+                export default resource;
+              `,
             };
           }
         );
+
+        if (program.type === "start") {
+          build.onLoad(
+            {
+              filter: /.*\.css$/i,
+            },
+            async (args) => {
+              const resource = program.resources!.registerResource(args.path);
+              const content = await fs.readFile(
+                path.resolve(args.path),
+                "utf-8"
+              );
+              return {
+                contents: /* js */ `
+                import "react-gjs-renderer"; // renderer mus be imported before styles are added
+
+                const resource = ${JSON.stringify(resource.resourceString)};
+
+                if(applicationCss) {
+                  const css = ${JSON.stringify(content)};
+
+                  applicationCss.addStyles(css);
+                }
+
+                export default resource;
+              `,
+              };
+            }
+          );
+        } else {
+          build.onLoad(
+            {
+              filter: /.*\.css$/i,
+            },
+            (args) => {
+              const resource = program.resources!.registerResource(args.path);
+              return {
+                contents: /* js */ `
+                import "react-gjs-renderer"; // renderer mus be imported before styles are added
+
+                const resource = ${JSON.stringify(resource.resourceString)};
+
+                if(applicationCss) {
+                  applicationCss.addStyles({ 
+                    resource: resource.substring("resource://".length),
+                  });
+                }
+
+                export default resource;
+              `,
+              };
+            }
+          );
+        }
+      }
 
       build.onResolve(
         {
@@ -53,7 +112,7 @@ export const reactGnomePlugin = (program: Program) => {
         (args) => {
           return {
             namespace: "gapp",
-            path: args.path.replace(/^gapp:/, ""),
+            path: "env",
           };
         }
       );

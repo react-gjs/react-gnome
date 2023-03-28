@@ -13,6 +13,8 @@ const PackageManagerArg = Argument.define({
 });
 
 export class InitProgram {
+  readonly type = "init";
+
   packageManager = new PackageManagerArg();
 
   run() {

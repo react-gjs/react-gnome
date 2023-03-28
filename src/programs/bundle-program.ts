@@ -5,6 +5,8 @@ import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { Program } from "./base";
 
 export class BundleProgram extends Program {
+  readonly type = "bundle";
+
   additionalPlugins() {
     return {};
   }
