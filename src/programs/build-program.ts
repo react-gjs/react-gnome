@@ -35,6 +35,8 @@ type PackagingContext = {
 };
 
 export class BuildProgram extends Program {
+  readonly type: "build" | "bundle" | "init" | "start" = "build";
+
   additionalPlugins() {
     return {};
   }

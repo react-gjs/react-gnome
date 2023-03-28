@@ -11,6 +11,8 @@ import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { BuildProgram } from "./build-program";
 
 export class StartProgram extends BuildProgram {
+  readonly type = "start";
+
   protected getBuildDirPath() {
     return path.resolve(this.cwd, this.config.outDir, ".build");
   }

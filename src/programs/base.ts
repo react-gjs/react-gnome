@@ -34,6 +34,7 @@ const BuildModeArgument = Argument.define({
 });
 
 export abstract class Program {
+  type: "build" | "bundle" | "init" | "start" = "build";
   envs = new EnvVars();
   config!: DeepReadonly<Config>;
   cwd = process.cwd();
