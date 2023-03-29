@@ -3,13 +3,13 @@
 /**
  * This script works as a proxy to the real Yarn script file.
  *
- * It will look up the currently used yarn release (as specified in
- * the `.yarnrc.yml` file, or one of the scripts in the
+ * It will look up the currently used yarn release (as specified
+ * in the `.yarnrc.yml` file, or one of the scripts in the
  * `.yarn/releases` folder) and execute it.
  *
- * This makes it easier to update the Yarn version down the line, as
- * we don't need to update each workflow depending on the Yarn along
- * with it.
+ * This makes it easier to update the Yarn version down the line,
+ * as we don't need to update each workflow depending on the Yarn
+ * along with it.
  */
 
 const fs = require("fs");
@@ -49,6 +49,10 @@ if (yarnPath === "") {
   process.exit(1);
 }
 
-childProcess.spawnSync("node", [yarnPath, ...args], {
+const proc = childProcess.spawn("node", [yarnPath, ...args], {
   stdio: "inherit",
+});
+
+proc.on("exit", (code) => {
+  process.exit(code);
 });
