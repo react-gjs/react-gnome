@@ -62,7 +62,8 @@
     "husky": "latest",
     "prettier": "latest",
     "prettier-plugin-jsdoc": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "ws": "^8.13.0"
   },
   "peerDependencies": {
     "ts-node": "^10.9.1"
