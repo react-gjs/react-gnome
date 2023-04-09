@@ -16,6 +16,18 @@ namespace WsPolyfill {
     OPEN = "open",
   }
 
+  class WebSocketConnectionError extends Error {
+    constructor(
+      public statusCode: number,
+      public statusText: string,
+      public responseBody: any,
+      public err: any
+    ) {
+      super("WebSocket connection failed.");
+      this.name = "WebSocketConnectionError";
+    }
+  }
+
   export class WebSocket {
     static readonly CONNECTING = 0;
     static readonly OPEN = 1;
@@ -32,7 +44,7 @@ namespace WsPolyfill {
     #extensions = "";
     #protocol = "";
     #readyState: number = WebSocket.CONNECTING;
-    #uriObject: GLib.Uri;
+    #uri: string;
 
     binaryType: BinaryType = "arraybuffer";
 
@@ -53,7 +65,7 @@ namespace WsPolyfill {
     }
 
     get url(): string {
-      return this.#uriObject.to_string()!;
+      return this.#uri;
     }
 
     onclose: ((this: WebSocket, ev: Event) => any) | null = null;
@@ -67,7 +79,7 @@ namespace WsPolyfill {
       this.#emitter.add(WebSocketEventType.MESSAGE, (e) => this.onmessage?.(e));
       this.#emitter.add(WebSocketEventType.OPEN, (e) => this.onopen?.(e));
 
-      this.#uriObject = GLib.uri_parse(url.toString(), GLib.UriFlags.NONE)!;
+      this.#uri = url.toString();
 
       this.#startConnection(Array.isArray(protocols) ? protocols : [protocols]);
     }
@@ -113,8 +125,12 @@ namespace WsPolyfill {
 
     async #startConnection(protocols: string[]) {
       try {
+        const uri = new Soup.URI(this.#uri);
         const session = new Soup.Session();
-        const message = Soup.Message.new("GET", this.#uriObject.to_string())!;
+        const message = new Soup.Message({
+          method: "GET",
+          uri,
+        })!;
 
         const connection = await _async<Soup.WebsocketConnection>((p) => {
           session.websocket_connect_async(
@@ -127,7 +143,14 @@ namespace WsPolyfill {
                 const connection = session.websocket_connect_finish(response)!;
                 p.resolve(connection);
               } catch (e) {
-                p.reject(e);
+                p.reject(
+                  new WebSocketConnectionError(
+                    message.status_code,
+                    message.reason_phrase ?? "",
+                    message.response_body.data,
+                    e
+                  )
+                );
               }
             }
           );
