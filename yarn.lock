@@ -2741,6 +2741,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     termx-markup: 1.1.0
     typescript: latest
     whatwg-url-without-unicode: ^8.0.0-3
+    ws: ^8.13.0
   peerDependencies:
     ts-node: ^10.9.1
   bin:
@@ -3193,6 +3194,21 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
   checksum: 159da4805f7e84a3d003d8841557196034155008f817172d4e986bd591f74aa82aa7db55929a54222309e01079a65a92a9e6414da5a6aa4b01ee44a511ac3ee5
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.13.0":
+  version: 8.13.0
+  resolution: "ws@npm:8.13.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 53e991bbf928faf5dc6efac9b8eb9ab6497c69feeb94f963d648b7a3530a720b19ec2e0ec037344257e05a4f35bd9ad04d9de6f289615ffb133282031b18c61c
   languageName: node
   linkType: hard
 
