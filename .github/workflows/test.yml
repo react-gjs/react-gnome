@@ -21,7 +21,7 @@ jobs:
           echo "Starting update"
           sudo apt-get update -o Acquire::ForceIPv4=true -y
           echo "Installing GJS"
-          sudo apt-get install -o Acquire::ForceIPv4=true -y gjs
+          sudo apt-get install -o Acquire::ForceIPv4=true -y gjs libsoup2.4-dev
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
