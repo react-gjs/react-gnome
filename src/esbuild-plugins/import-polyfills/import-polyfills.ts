@@ -1,50 +1,43 @@
 import type esbuild from "esbuild";
-import path from "path";
-import { getDirPath } from "../../get-dirpath/get-dirpath";
 import type { Program } from "../../programs/base";
+import { createNodePolyfillMap } from "./create-node-polyfill-map";
 
-const NAMESPACE = "react-gnome-polyfills";
+export const POLYFILL_IMPORT_NS = "react-gnome-polyfills";
+
+const NodePolyfills = createNodePolyfillMap([
+  {
+    matcher: /^(fs)|(node:fs)$/,
+    configFlag: (c) => !!c.polyfills?.node?.fs,
+    filename: "fs.mjs",
+  },
+  {
+    matcher: /^(fs\/promises)|(node:fs\/promises)$/,
+    configFlag: (c) => !!c.polyfills?.node?.fs,
+    filename: "fs-promises.mjs",
+  },
+  {
+    matcher: /^(path)|(node:path)$/,
+    configFlag: (c) => !!c.polyfills?.node?.path,
+    filename: "path.mjs",
+  },
+  {
+    matcher: /^(querystring)|(node:querystring)$/,
+    configFlag: (c) => !!c.polyfills?.node?.querystring,
+    filename: "querystring.mjs",
+  },
+  {
+    matcher: /^(os)|(node:os)$/,
+    configFlag: (c) => !!c.polyfills?.node?.os,
+    filename: "os.mjs",
+  },
+]);
 
 export const importPolyfillsPlugin = (program: Program) => {
   const config = program.config;
   return {
     name: "react-gnome-import-polyfills-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
-      const rootPath = getDirPath();
-
-      if (config.polyfills?.node) {
-        const nodeFills = config.polyfills.node;
-
-        if (nodeFills.path) {
-          build.onResolve({ filter: /^(path)|(node:path)$/ }, () => {
-            return {
-              path: path.resolve(rootPath, "polyfills/esm/path.mjs"),
-              namespace: NAMESPACE,
-            };
-          });
-        }
-
-        if (nodeFills.querystring) {
-          build.onResolve(
-            { filter: /^(querystring)|(node:querystring)$/ },
-            () => {
-              return {
-                path: path.resolve(rootPath, "polyfills/esm/querystring.mjs"),
-                namespace: NAMESPACE,
-              };
-            }
-          );
-        }
-
-        if (nodeFills.os) {
-          build.onResolve({ filter: /^(os)|(node:os)$/ }, () => {
-            return {
-              path: path.resolve(rootPath, "polyfills/esm/node-os.mjs"),
-              namespace: NAMESPACE,
-            };
-          });
-        }
-      }
+      NodePolyfills.addResolvers(program, build);
 
       if (program.config.customPolyfills) {
         for (const customPoly of program.config.customPolyfills) {
@@ -53,7 +46,7 @@ export const importPolyfillsPlugin = (program: Program) => {
               if (customPoly.importName === arg.path) {
                 return {
                   path: customPoly.filepath,
-                  namespace: NAMESPACE,
+                  namespace: POLYFILL_IMPORT_NS,
                 };
               }
             });
@@ -65,7 +58,7 @@ export const importPolyfillsPlugin = (program: Program) => {
         build.onLoad(
           {
             filter: /.*/,
-            namespace: NAMESPACE,
+            namespace: POLYFILL_IMPORT_NS,
           },
           (args) => {
             return {
