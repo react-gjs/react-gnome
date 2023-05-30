@@ -10,7 +10,7 @@ import { readConfig } from "../utils/read-config";
 import { validateAppName } from "../utils/validate-app-name";
 import { validatePrefix } from "../utils/validate-prefix";
 
-type DeepReadonly<T> = {
+export type DeepReadonly<T> = {
   readonly [P in keyof T]: T[P] extends object
     ? DeepReadonly<T[P]>
     : Readonly<T[P]>;
