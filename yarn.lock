@@ -364,14 +364,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ncpa0cpl/nodepack@npm:^2.1.3":
-  version: 2.1.3
-  resolution: "@ncpa0cpl/nodepack@npm:2.1.3"
+"@ncpa0cpl/nodepack@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@ncpa0cpl/nodepack@npm:2.2.0"
   dependencies:
     "@ncpa0cpl/node-worker-bridge": ^0.0.3
     "@ts-morph/bootstrap": ^0.19.0
-    dilswer: 2.0.2
+    dilswer: 2.1.1
     json-to-ts: ^1.7.0
+    lodash.mergewith: ^4.6.2
     node-os-walk: ">=1.0.2"
     pretty-error: ^4.0.0
   peerDependencies:
@@ -379,7 +380,7 @@ __metadata:
   dependenciesMeta:
     json-to-ts:
       optional: true
-  checksum: 459657aec364b29d1ac1a4b52914ca89e9b72fe4b9d2e2d3d4047576c6e65a606b2d37e7645c323477ca9abcccebe8b4df6932e229dcd35ef3f59b4eb4927647
+  checksum: adf00c49dce49e2687cff6889e097510700cba07cbab9330930c27a9ab2a8ad69bba270c9542685f94d64497783d932cc2f0f3ec71e26d5760058d2111e6e1bc
   languageName: node
   linkType: hard
 
@@ -960,15 +961,6 @@ clify.js@ncpa0cpl/clify.js:
   version: 5.1.0
   resolution: "diff@npm:5.1.0"
   checksum: c7bf0df7c9bfbe1cf8a678fd1b2137c4fb11be117a67bc18a0e03ae75105e8533dbfb1cda6b46beb3586ef5aed22143ef9d70713977d5fb1f9114e21455fba90
-  languageName: node
-  linkType: hard
-
-"dilswer@npm:2.0.2":
-  version: 2.0.2
-  resolution: "dilswer@npm:2.0.2"
-  dependencies:
-    "@types/json-schema": ^7.0.11
-  checksum: 53c0b1e348dc4e86a9d9869e22b5f6ded65c104a0af033d6d1bd70d58c61af123da1887de68fb2be9563e6909f565af25e6dae1ef8f0547306457c866cfd402e
   languageName: node
   linkType: hard
 
@@ -2065,6 +2057,13 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   languageName: node
   linkType: hard
 
+"lodash.mergewith@npm:^4.6.2":
+  version: 4.6.2
+  resolution: "lodash.mergewith@npm:4.6.2"
+  checksum: a6db2a9339752411f21b956908c404ec1e088e783a65c8b29e30ae5b3b6384f82517662d6f425cc97c2070b546cc2c7daaa8d33f78db7b6e9be06cd834abdeb8
+  languageName: node
+  linkType: hard
+
 "lodash.sortby@npm:^4.7.0":
   version: 4.7.0
   resolution: "lodash.sortby@npm:4.7.0"
@@ -2749,7 +2748,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   version: 0.0.0-use.local
   resolution: "react-gnome@workspace:."
   dependencies:
-    "@ncpa0cpl/nodepack": ^2.1.3
+    "@ncpa0cpl/nodepack": ^2.2.0
     "@reactgjs/gest": ^0.3.2
     "@types/tar": ^6.1.4
     "@typescript-eslint/eslint-plugin": latest
