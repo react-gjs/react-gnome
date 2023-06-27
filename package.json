@@ -45,7 +45,7 @@
     "esbuild": "^0.18.9",
     "rimraf": "^4.4.1",
     "tar": "^6.1.14",
-    "termx-markup": "1.1.0",
+    "termx-markup": "1.1.1",
     "whatwg-url-without-unicode": "^8.0.0-3"
   },
   "devDependencies": {
