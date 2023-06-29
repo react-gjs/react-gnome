@@ -42,7 +42,7 @@
     "buffer": "^6.0.3",
     "clify.js": "ncpa0cpl/clify.js#0.0.4",
     "dilswer": "2.1.1",
-    "esbuild": "^0.17.19",
+    "esbuild": "^0.18.10",
     "fs-gjs": "^1.0.0",
     "rimraf": "^4.4.1",
     "tar": "^6.1.14",
