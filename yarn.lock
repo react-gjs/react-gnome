@@ -371,12 +371,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ncpa0cpl/nodepack@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "@ncpa0cpl/nodepack@npm:2.2.1"
+"@ncpa0cpl/nodepack@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "@ncpa0cpl/nodepack@npm:2.2.2"
   dependencies:
     "@ncpa0cpl/node-worker-bridge": ^0.0.3
-    "@ts-morph/bootstrap": ^0.19.0
+    "@ts-morph/bootstrap": ^0.20.0
     dilswer: 2.1.1
     json-to-ts: ^1.7.0
     lodash.mergewith: ^4.6.2
@@ -387,7 +387,7 @@ __metadata:
   dependenciesMeta:
     json-to-ts:
       optional: true
-  checksum: 31bf3564037b4971ee425e6c41616f12bd9fe3aad225b7f09cfdffdadcde3d306111cf7a0b9127834239416444d9370e64cf70ba1f92799a58cba81778232375
+  checksum: a8fa66541afc2a9abdce7fedef333687a0590578406c2f066cd784e0034d598f55345f0cd7fab493564214f6a9811774a2a31b347e9c13de3fdc603d8a9487e8
   languageName: node
   linkType: hard
 
@@ -429,24 +429,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ts-morph/bootstrap@npm:^0.19.0":
-  version: 0.19.0
-  resolution: "@ts-morph/bootstrap@npm:0.19.0"
+"@ts-morph/bootstrap@npm:^0.20.0":
+  version: 0.20.0
+  resolution: "@ts-morph/bootstrap@npm:0.20.0"
   dependencies:
-    "@ts-morph/common": ~0.19.0
-  checksum: 29fac15059c813ae3f6c6f966e0eceddb8b32a3d43d60f43083e54d9e37db50d00bbd451e867a24915861f58f580ebceeb0044e18462e8e2810229c4bef723d3
+    "@ts-morph/common": ~0.20.0
+  checksum: 998d9378728f27a59cfcc8348a84400b7089f08c4cc91406f11cd07f2e2734498b3181bb54b3893f40934a2a6daf8df0a09dd01c0398431d124cda65e0306150
   languageName: node
   linkType: hard
 
-"@ts-morph/common@npm:~0.19.0":
-  version: 0.19.0
-  resolution: "@ts-morph/common@npm:0.19.0"
+"@ts-morph/common@npm:~0.20.0":
+  version: 0.20.0
+  resolution: "@ts-morph/common@npm:0.20.0"
   dependencies:
     fast-glob: ^3.2.12
     minimatch: ^7.4.3
     mkdirp: ^2.1.6
     path-browserify: ^1.0.1
-  checksum: 6b02a63ded0ce77e2bf86e135c17a6d5126307bbb926a4085d3cc2acaf28cb732780cf8d16961e9600efcc599876f706a2c9e8d135f7668704bb04a1a6fd37ec
+  checksum: eb02480971fbe045b4dd099d1ddb262d47d657197fefb73a4a2c89523975bfb0b23050207d49d19e853ef23bffdcb9d89a778f52f6b3385ae5bcf63322523700
   languageName: node
   linkType: hard
 
@@ -2764,7 +2764,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   version: 0.0.0-use.local
   resolution: "react-gnome@workspace:."
   dependencies:
-    "@ncpa0cpl/nodepack": ^2.2.1
+    "@ncpa0cpl/nodepack": ^2.2.2
     "@reactgjs/gest": ^0.3.2
     "@types/tar": ^6.1.4
     "@typescript-eslint/eslint-plugin": latest
