@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@ncpa0cpl/nodepack": "^2.2.2",
-    "@reactgjs/gest": "^0.3.2",
+    "@reactgjs/gest": "^0.4.1",
     "@types/tar": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
