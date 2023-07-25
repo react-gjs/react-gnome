@@ -109,7 +109,7 @@ namespace WsPolyfill {
         const origin = message.get_origin();
 
         if (type === Soup.WebsocketDataType.TEXT) {
-          const text = new TextDecoder().decode(data.unref_to_array());
+          const text = new TextDecoder().decode(data.toArray());
           this.#emitter.emit(
             WebSocketEventType.MESSAGE,
             Event.create({ origin, data: text })
@@ -117,7 +117,7 @@ namespace WsPolyfill {
         } else {
           this.#emitter.emit(
             WebSocketEventType.MESSAGE,
-            Event.create({ origin, data: data.unref_to_array() })
+            Event.create({ origin, data: data.toArray() })
           );
         }
       });

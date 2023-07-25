@@ -28,12 +28,11 @@ const NodePolyfills = createNodePolyfillMap([
   {
     matcher: /^(os)|(node:os)$/,
     configFlag: (c) => !!c.polyfills?.node?.os,
-    filename: "os.mjs",
+    filename: "node-os.mjs",
   },
 ]);
 
 export const importPolyfillsPlugin = (program: Program) => {
-  const config = program.config;
   return {
     name: "react-gnome-import-polyfills-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
@@ -54,7 +53,7 @@ export const importPolyfillsPlugin = (program: Program) => {
         }
       }
 
-      if (config.polyfills?.node || program.config.customPolyfills) {
+      if (program.config.customPolyfills) {
         build.onLoad(
           {
             filter: /.*/,

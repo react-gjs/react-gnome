@@ -73,7 +73,7 @@ async function fetch(url: RequestInfo, options: Partial<Request> = {} as any) {
 
   const responseBuffer = await new Promise<Uint8Array>((resolve) => {
     httpSession.queue_message(message, (_, msg) => {
-      resolve(msg!.response_body_data.unref_to_array() as any);
+      resolve(msg!.response_body_data.toArray() as any);
     });
   });
 
