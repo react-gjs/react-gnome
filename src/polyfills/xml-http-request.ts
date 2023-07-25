@@ -547,7 +547,7 @@ const XMLHttpRequestPolyfill = (() => {
           : null;
         this._status = response.statusCode;
         this._statusText = response.statusText;
-        this._responseBuffer = response.rawResponseData.unref_to_array() as any;
+        this._responseBuffer = response.rawResponseData.toArray() as any;
 
         this._finishRequest(response.statusCode);
       } catch (e) {
@@ -590,7 +590,7 @@ const XMLHttpRequestPolyfill = (() => {
       this._contentType = contentType ? new ContentType(contentType) : null;
       this._status = status_code;
       this._statusText = reason_phrase;
-      this._responseBuffer = message.response_body_data.unref_to_array() as any;
+      this._responseBuffer = message.response_body_data.toArray() as any;
       this._responseURL = message.uri.to_string(true);
 
       this._finishRequest(status_code);

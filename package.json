@@ -15,7 +15,7 @@
       "import": "./dist/esm/build.mjs",
       "require": "./dist/cjs/build.cjs"
     },
-    "./polyfills/*": "./polyfills/esm/*.mjs"
+    "./polyfills/esm/*.mjs": "./polyfills/esm/*.mjs"
   },
   "version": "1.0.0",
   "scripts": {
