@@ -26,6 +26,7 @@ import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { pascalToKebab } from "../utils/pascal-to-kebab";
 import { Program } from "./base";
+import { defaultBuildOptions } from "./default-build-options";
 
 type PackagingContext = {
   appID: string;
@@ -238,17 +239,13 @@ export class BuildProgram extends Program {
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
     await this.esbuildCtx.init({
-      target: "es2020",
-      format: "esm",
+      ...defaultBuildOptions,
       inject: getGlobalPolyfills(this),
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(buildDirPath, "src", "main.js"),
       plugins: getPlugins(this),
       minify: this.config.minify ?? (this.isDev ? false : true),
       treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      jsx: "transform",
-      keepNames: true,
-      bundle: true,
     });
 
     await this.esbuildCtx.start();
