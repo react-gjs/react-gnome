@@ -355,7 +355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ncpa0cpl/mutex.js@npm:^1.0.1":
+"@ncpa0cpl/mutex.js@npm:~1.0.1":
   version: 1.0.1
   resolution: "@ncpa0cpl/mutex.js@npm:1.0.1"
   checksum: 166e59df9ea3bb504b91ce8dd3fe2f06bbe4e24813a3e148f0bf63b994a8cba3706164ddec105469cecc35d63609e2ea44ffb87f85293cee0737283b6c5575ec
@@ -1554,12 +1554,12 @@ clify.js@ncpa0cpl/clify.js:
   languageName: node
   linkType: hard
 
-"fs-gjs@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "fs-gjs@npm:1.0.0"
+"fs-gjs@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "fs-gjs@npm:1.0.1"
   dependencies:
-    "@ncpa0cpl/mutex.js": ^1.0.1
-  checksum: 758aca8d310b2dc3a9dcd9bff569dd75a10cb5fe13457f44cd2dbde5d58a3e732ec72b4c302f02a1ce0bff7b1def4f5ed60846af8deedd52b32fdd756d6f57af
+    "@ncpa0cpl/mutex.js": ~1.0.1
+  checksum: 420872283a3ff34231844ee427fee9f2c45b27a027aa0adf74cce2f753bfcfceb999246e17b6ba8e53ff85aae21468ac6b5f76a21cd4cb2df637b41e101dcf11
   languageName: node
   linkType: hard
 
@@ -2776,7 +2776,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     eslint: latest
     eslint-config-prettier: latest
     eslint-plugin-prettier: latest
-    fs-gjs: ^1.0.0
+    fs-gjs: ^1.0.1
     git-hook-tasks: ncpa0cpl/git-hook-tasks
     gjs-esm-types: ^0.0.4
     husky: latest
