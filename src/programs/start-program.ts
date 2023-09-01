@@ -9,6 +9,7 @@ import type { AdditionalPlugins } from "../utils/get-plugins";
 import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { BuildProgram } from "./build-program";
+import { defaultBuildOptions } from "./default-build-options";
 
 export class StartProgram extends BuildProgram {
   readonly type = "start";
@@ -58,17 +59,13 @@ export class StartProgram extends BuildProgram {
 
     await this.esbuildCtx.init(
       {
-        target: "es6",
-        format: "esm",
+        ...defaultBuildOptions,
         inject: getGlobalPolyfills(this),
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(buildDirPath, "src", "main.js"),
         plugins: getPlugins(this),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-        jsx: "transform",
-        keepNames: true,
-        bundle: true,
       },
       this.watchMode
     );

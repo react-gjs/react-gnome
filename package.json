@@ -42,15 +42,15 @@
     "buffer": "^6.0.3",
     "clify.js": "ncpa0cpl/clify.js#0.0.4",
     "dilswer": "2.1.1",
-    "esbuild": "^0.18.16",
-    "fs-gjs": "^1.0.0",
+    "esbuild": "^0.19.2",
+    "fs-gjs": "^1.0.1",
     "rimraf": "^4.4.1",
     "tar": "^6.1.14",
     "termx-markup": "1.1.1",
     "whatwg-url-without-unicode": "^8.0.0-3"
   },
   "devDependencies": {
-    "@ncpa0cpl/nodepack": "^2.2.2",
+    "@ncpa0cpl/nodepack": "^2.3.0",
     "@reactgjs/gest": "^0.4.1",
     "@types/tar": "^6.1.4",
     "@typescript-eslint/eslint-plugin": "latest",

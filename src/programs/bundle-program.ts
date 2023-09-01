@@ -3,6 +3,7 @@ import { html, Output } from "termx-markup";
 import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { Program } from "./base";
+import { defaultBuildOptions } from "./default-build-options";
 
 export class BundleProgram extends Program {
   readonly type = "bundle";
@@ -23,17 +24,13 @@ export class BundleProgram extends Program {
 
     await this.esbuildCtx.init(
       {
-        target: "es6",
-        format: "esm",
+        ...defaultBuildOptions,
         inject: getGlobalPolyfills(this),
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
         plugins: getPlugins(this),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-        jsx: "transform",
-        keepNames: true,
-        bundle: true,
       },
       this.watchMode
     );
