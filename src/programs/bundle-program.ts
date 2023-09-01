@@ -3,7 +3,7 @@ import { html, Output } from "termx-markup";
 import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { Program } from "./base";
-import { defaultBuildOptions } from "./default-build-options";
+import { createBuildOptions } from "./default-build-options";
 
 export class BundleProgram extends Program {
   readonly type = "bundle";
@@ -27,15 +27,14 @@ export class BundleProgram extends Program {
     const polyfills = await getGlobalPolyfills(this);
 
     await this.esbuildCtx.init(
-      {
-        ...defaultBuildOptions,
+      createBuildOptions({
         banner: { js: polyfills.bundle },
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
         plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      },
+      }),
       this.watchMode,
     );
 
