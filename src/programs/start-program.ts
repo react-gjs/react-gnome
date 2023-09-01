@@ -9,7 +9,7 @@ import type { AdditionalPlugins } from "../utils/get-plugins";
 import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
 import { BuildProgram } from "./build-program";
-import { defaultBuildOptions } from "./default-build-options";
+import { createBuildOptions } from "./default-build-options";
 
 export class StartProgram extends BuildProgram {
   readonly type = "start";
@@ -62,15 +62,14 @@ export class StartProgram extends BuildProgram {
     const polyfills = await getGlobalPolyfills(this);
 
     await this.esbuildCtx.init(
-      {
-        ...defaultBuildOptions,
+      createBuildOptions({
         banner: { js: polyfills.bundle },
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(buildDirPath, "src", "main.js"),
         plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      },
+      }),
       this.watchMode,
     );
 
