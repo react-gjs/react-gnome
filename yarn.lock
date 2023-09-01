@@ -2784,7 +2784,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     prettier-plugin-jsdoc: latest
     rimraf: ^4.4.1
     tar: ^6.1.14
-    termx-markup: 1.1.1
+    termx-markup: 2.0.1
     typescript: latest
     whatwg-url-without-unicode: ^8.0.0-3
     ws: ^8.13.0
@@ -3051,10 +3051,10 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   languageName: node
   linkType: hard
 
-"termx-markup@npm:1.1.1":
-  version: 1.1.1
-  resolution: "termx-markup@npm:1.1.1"
-  checksum: e0f5c52bcc414e99a7eb1fe6f5591ff368a7634ecab888b9bd7856c6d6225fcc44f837b243677b48fd5317f2d3657a86c507d8d3a4900059f93f8c9713e04ab0
+"termx-markup@npm:2.0.1":
+  version: 2.0.1
+  resolution: "termx-markup@npm:2.0.1"
+  checksum: 61ce6ebc366eab9d8ae440a0b4a0e84947b6d6e8f97a71bb21058f03fb6d2f6acbd942ad2371624b2880ad8e5f4b2dcb4c5edfe5fdc0ff95db2a690795e50ab6
   languageName: node
   linkType: hard
 
