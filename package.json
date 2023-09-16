@@ -42,7 +42,7 @@
     "buffer": "^6.0.3",
     "clify.js": "ncpa0cpl/clify.js#0.0.4",
     "dilswer": "2.1.1",
-    "esbuild": "^0.19.2",
+    "esbuild": "^0.19.3",
     "fs-gjs": "^1.0.1",
     "rimraf": "^4.4.1",
     "tar": "^6.2.0",
@@ -64,7 +64,7 @@
     "prettier": "latest",
     "prettier-plugin-jsdoc": "latest",
     "typescript": "latest",
-    "ws": "^8.13.0"
+    "ws": "^8.14.1"
   },
   "peerDependencies": {
     "ts-node": "^10.9.1"
