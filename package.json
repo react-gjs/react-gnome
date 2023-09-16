@@ -45,14 +45,14 @@
     "esbuild": "^0.19.3",
     "fs-gjs": "^1.0.1",
     "rimraf": "^4.4.1",
-    "tar": "^6.1.14",
+    "tar": "^6.2.0",
     "termx-markup": "1.1.1",
     "whatwg-url-without-unicode": "^8.0.0-3"
   },
   "devDependencies": {
     "@ncpa0cpl/nodepack": "^2.3.0",
     "@reactgjs/gest": "^0.5.0",
-    "@types/tar": "^6.1.4",
+    "@types/tar": "^6.1.6",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
     "eslint": "latest",

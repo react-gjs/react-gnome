@@ -503,13 +503,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/tar@npm:^6.1.4":
-  version: 6.1.4
-  resolution: "@types/tar@npm:6.1.4"
+"@types/tar@npm:^6.1.6":
+  version: 6.1.6
+  resolution: "@types/tar@npm:6.1.6"
   dependencies:
     "@types/node": "*"
     minipass: ^4.0.0
-  checksum: 48a1f6b8665ed03f37f74966cfe991a33d6e85cee28aaa6ef42c7ca8448cdbc1e2ca96b473b6b53f1d7bd91423ae0dcfe54a295607d7ac4b4cbb9dbf167df7fa
+  checksum: d4bcb5a06d8e4b6eac564f22274d72f6a14c614eaf5f6c6c270f3a43c197da2797a7c707bc0377cd2e6d8c429f277e1ca446121546c86021e9782034a306eafb
   languageName: node
   linkType: hard
 
@@ -2766,7 +2766,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   dependencies:
     "@ncpa0cpl/nodepack": ^2.3.0
     "@reactgjs/gest": ^0.5.0
-    "@types/tar": ^6.1.4
+    "@types/tar": ^6.1.6
     "@typescript-eslint/eslint-plugin": latest
     "@typescript-eslint/parser": latest
     buffer: ^6.0.3
@@ -2783,7 +2783,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     prettier: latest
     prettier-plugin-jsdoc: latest
     rimraf: ^4.4.1
-    tar: ^6.1.14
+    tar: ^6.2.0
     termx-markup: 1.1.1
     typescript: latest
     whatwg-url-without-unicode: ^8.0.0-3
@@ -3037,9 +3037,9 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   languageName: node
   linkType: hard
 
-"tar@npm:^6.1.14":
-  version: 6.1.14
-  resolution: "tar@npm:6.1.14"
+"tar@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "tar@npm:6.2.0"
   dependencies:
     chownr: ^2.0.0
     fs-minipass: ^2.0.0
@@ -3047,7 +3047,7 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     minizlib: ^2.1.1
     mkdirp: ^1.0.3
     yallist: ^4.0.0
-  checksum: a1be0815a9bdc97dfca7c6c2d71d1b836f8ba9314684e2c412832f0f59cc226d4c13da303d6bc30925e82f634cc793f40da79ae72f3e96fb87c23d0f4efd5207
+  checksum: db4d9fe74a2082c3a5016630092c54c8375ff3b280186938cfd104f2e089c4fd9bad58688ef6be9cf186a889671bf355c7cda38f09bbf60604b281715ca57f5c
   languageName: node
   linkType: hard
 
