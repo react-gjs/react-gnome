@@ -1665,7 +1665,7 @@ namespace __UrlPolyfillImplementation {
     return output;
   }
 
-  function serializeURLOrigin(url: UrlObject) {
+  function serializeURLOrigin(url: UrlObject): string {
     // https://url.spec.whatwg.org/#concept-url-origin
     switch (url.scheme) {
       case "blob":
