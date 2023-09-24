@@ -45,6 +45,6 @@ export const getPackageJson = (params: {
       },
     },
     null,
-    2
+    2,
   );
 };

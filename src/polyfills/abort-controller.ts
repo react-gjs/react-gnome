@@ -89,7 +89,7 @@ namespace AbortControllerPolyfill {
     constructor() {
       this._events.add(
         Events.Abort,
-        () => this.onabort && this.onabort(new Event(Events.Abort))
+        () => this.onabort && this.onabort(new Event(Events.Abort)),
       );
     }
 

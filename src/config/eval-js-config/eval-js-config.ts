@@ -1,5 +1,5 @@
 import type { ConfigContext } from "../parse-config";
 
 export declare const evalJsConfigFile: (
-  config: string
+  config: string,
 ) => Promise<(context: ConfigContext) => unknown>;

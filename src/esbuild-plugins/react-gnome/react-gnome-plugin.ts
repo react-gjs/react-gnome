@@ -47,7 +47,7 @@ export const reactGnomePlugin = (program: Program) => {
                 export default resource;
               `,
             };
-          }
+          },
         );
 
         if (program.type === "start") {
@@ -59,7 +59,7 @@ export const reactGnomePlugin = (program: Program) => {
               const resource = program.resources!.registerResource(args.path);
               const content = await fs.readFile(
                 path.resolve(args.path),
-                "utf-8"
+                "utf-8",
               );
               return {
                 contents: /* js */ `
@@ -76,7 +76,7 @@ export const reactGnomePlugin = (program: Program) => {
                 export default resource;
               `,
               };
-            }
+            },
           );
         } else {
           build.onLoad(
@@ -100,7 +100,7 @@ export const reactGnomePlugin = (program: Program) => {
                 export default resource;
               `,
               };
-            }
+            },
           );
         }
       }
@@ -114,7 +114,7 @@ export const reactGnomePlugin = (program: Program) => {
             namespace: "gapp",
             path: "env",
           };
-        }
+        },
       );
 
       build.onLoad(
@@ -126,7 +126,7 @@ export const reactGnomePlugin = (program: Program) => {
           return {
             contents: program.envs.toJavascriptModule(),
           };
-        }
+        },
       );
 
       // #region gi imports
@@ -207,7 +207,7 @@ ${gtkInit}
 ${bundle}
 };
 `,
-          ].join("\n")
+          ].join("\n"),
         );
       });
     },

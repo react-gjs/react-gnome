@@ -38,13 +38,13 @@ namespace fs {
 
   type Depromisified<
     A extends any[] = any[],
-    R = any
+    R = any,
   > = undefined extends Last<A>
     ? Depromisified<Poped<A>, R> & FnWithCallback<A, R>
     : FnWithCallback<A, R>;
 
   function _depromisify<A extends any[], R>(
-    fn: AsyncFunction<A, R>
+    fn: AsyncFunction<A, R>,
   ): Depromisified<A, R> {
     return Object.assign(
       function (...args: [...A, Callback<R>]) {
@@ -61,10 +61,10 @@ namespace fs {
         fn(...args).then(
           (result) =>
             result !== undefined ? callback(null, result) : callback(null),
-          (error) => callback(error)
+          (error) => callback(error),
         );
       },
-      { __promisify__: fn }
+      { __promisify__: fn },
     ) as any;
   }
 
@@ -152,7 +152,7 @@ namespace fs {
   }
 
   function _ensureWriteableData(
-    data: any
+    data: any,
   ): asserts data is Uint8Array | Buffer | string {
     if (typeof data === "string") {
       return;
@@ -163,7 +163,7 @@ namespace fs {
     }
 
     throw new Error(
-      "Cannot write to the file. Written data must be a string, Buffer or Uint8Array."
+      "Cannot write to the file. Written data must be a string, Buffer or Uint8Array.",
     );
   }
 
@@ -181,7 +181,7 @@ namespace fs {
 
   export const accessSync: typeof fst.accessSync = (
     path,
-    mode = constants.F_OK
+    mode = constants.F_OK,
   ) => {
     try {
       const info = SyncFs.fileInfo(path.toString());
@@ -190,7 +190,7 @@ namespace fs {
         throw new FsError(
           "Permission denied [read]",
           "EACCES",
-          path.toString()
+          path.toString(),
         );
       }
 
@@ -198,7 +198,7 @@ namespace fs {
         throw new FsError(
           "Permission denied [write]",
           "EACCES",
-          path.toString()
+          path.toString(),
         );
       }
 
@@ -206,7 +206,7 @@ namespace fs {
         throw new FsError(
           "Permission denied [execute]",
           "EACCES",
-          path.toString()
+          path.toString(),
         );
       }
     } catch (err) {
@@ -218,7 +218,7 @@ namespace fs {
         "No such file or directory.",
         "ENOENT",
         path.toString(),
-        err
+        err,
       );
     }
   };
@@ -226,7 +226,7 @@ namespace fs {
   export const writeFileSync: typeof fst.writeFileSync = (
     path,
     data,
-    options
+    options,
   ) => {
     _ensureWriteableData(data);
 
@@ -244,7 +244,7 @@ namespace fs {
   export const appendFileSync: typeof fst.appendFileSync = (
     path,
     data,
-    options
+    options,
   ) => {
     _ensureWriteableData(data);
 
@@ -351,13 +351,13 @@ namespace fs {
 
   export const statSync: typeof fst.statSync = (path): any => {
     return _fileInfoToStats(
-      SyncFs.fileInfo(path.toString(), { followSymlinks: true })
+      SyncFs.fileInfo(path.toString(), { followSymlinks: true }),
     );
   };
 
   export const lstatSync: typeof fst.lstatSync = (path): any => {
     return _fileInfoToStats(
-      SyncFs.fileInfo(path.toString(), { followSymlinks: false })
+      SyncFs.fileInfo(path.toString(), { followSymlinks: false }),
     );
   };
 

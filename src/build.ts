@@ -4,7 +4,9 @@ import { BundleProgram } from "./programs/bundle-program";
 import { InitProgram } from "./programs/init-program";
 import { StartProgram } from "./programs/start-program";
 
-/** Invokes the CLI program that builds the app. */
+/**
+ * Invokes the CLI program that builds the app.
+ */
 export async function build() {
   configure((main) => {
     main.setDisplayName("react-gnome");
@@ -16,14 +18,14 @@ export async function build() {
     const initCmd = main.addSubCommand("init", () => new InitProgram());
 
     bundleCmd.setDescription(
-      "Create a bundled js file, without the tarball or meson configuration. This is useful if you want to manage the build process yourself."
+      "Create a bundled js file, without the tarball or meson configuration. This is useful if you want to manage the build process yourself.",
     );
     buildCmd.setDescription(
-      "Create a tarball and meson configuration thats ready to be installed."
+      "Create a tarball and meson configuration thats ready to be installed.",
     );
     startCmd.setDescription("Build and run the app immediately after.");
     initCmd.setDescription(
-      "Initialize a new project with the necessary files and scripts."
+      "Initialize a new project with the necessary files and scripts.",
     );
   });
 }

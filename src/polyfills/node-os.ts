@@ -7,7 +7,7 @@ namespace os_default {
       [program, ...args],
       null,
       GLib.SpawnFlags.SEARCH_PATH,
-      null
+      null,
     );
 
     const decoder = new TextDecoder();

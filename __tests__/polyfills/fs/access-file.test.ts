@@ -26,9 +26,9 @@ const executableFile =
   GLib.get_current_dir() + "/__tests__/polyfills/fs/files/executable";
 
 const mustCall = <
-  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void
+  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void,
 >(
-  run: (cb: F) => any
+  run: (cb: F) => any,
 ) => {
   return new Promise<FunctionMock<F>>((resolve, reject) => {
     const t = setTimeout(() => {
@@ -79,7 +79,7 @@ export default describe("fs.access", () => {
       expect(mock1).toHaveBeenCalledWithLast(null);
 
       const mock2 = await mustCall((cb) =>
-        fs.access(thisFile, fs.constants.R_OK, cb)
+        fs.access(thisFile, fs.constants.R_OK, cb),
       );
       expect(mock2).toHaveBeenCalledWithLast(null);
     });
@@ -89,7 +89,7 @@ export default describe("fs.access", () => {
       expect(mock1).toHaveBeenCalledWithLast(null);
 
       const mock2 = await mustCall((cb) =>
-        fs.access(readOnlyFile, fs.constants.W_OK, cb)
+        fs.access(readOnlyFile, fs.constants.W_OK, cb),
       );
       expect(mock2).toHaveBeenCalledWithLast(match.instanceOf(Error));
     });
@@ -99,13 +99,13 @@ export default describe("fs.access", () => {
       expect(mock1).toHaveBeenCalledWithLast(null);
 
       const mock2 = await mustCall((cb) =>
-        fs.access(nonReadableFile, fs.constants.R_OK, cb)
+        fs.access(nonReadableFile, fs.constants.R_OK, cb),
       );
       expect(mock2).toHaveBeenCalledWithLast(
         match.allOf(match.instanceOf(Error), {
           code: "EACCES",
           path: nonReadableFile,
-        })
+        }),
       );
     });
 
@@ -115,25 +115,25 @@ export default describe("fs.access", () => {
         match.allOf(match.instanceOf(Error), {
           code: "ENOENT",
           path: nonExistentFile,
-        })
+        }),
       );
     });
 
     it("should correctly report access to a non-executable file", async () => {
       const mock = await mustCall((cb) =>
-        fs.access(thisFile, fs.constants.X_OK, cb)
+        fs.access(thisFile, fs.constants.X_OK, cb),
       );
       expect(mock).toHaveBeenCalledWithLast(
         match.allOf(match.instanceOf(Error), {
           code: "EACCES",
           path: thisFile,
-        })
+        }),
       );
     });
 
     it("should correctly report access to an executable file", async () => {
       const mock = await mustCall((cb) =>
-        fs.access(executableFile, fs.constants.X_OK, cb)
+        fs.access(executableFile, fs.constants.X_OK, cb),
       );
       expect(mock).toHaveBeenCalledWithLast(null);
     });
@@ -143,14 +143,14 @@ export default describe("fs.access", () => {
       expect(() => fs.access(thisFile)).toThrowMatch(
         match.allOf(match.instanceOf(TypeError), {
           code: "ERR_INVALID_ARG_TYPE",
-        })
+        }),
       );
 
       // @ts-expect-error
       expect(() => fs.access(thisFile, fs.constants.R_OK)).toThrowMatch(
         match.allOf(match.instanceOf(TypeError), {
           code: "ERR_INVALID_ARG_TYPE",
-        })
+        }),
       );
     });
   });
@@ -171,7 +171,7 @@ export default describe("fs.access", () => {
       expect(result1).toBe(undefined);
 
       expect(() => fs.accessSync(readOnlyFile, fs.constants.W_OK)).toThrowMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
 
@@ -180,12 +180,12 @@ export default describe("fs.access", () => {
       expect(result1).toBe(undefined);
 
       expect(() =>
-        fs.accessSync(nonReadableFile, fs.constants.R_OK)
+        fs.accessSync(nonReadableFile, fs.constants.R_OK),
       ).toThrowMatch(
         match.allOf(match.instanceOf(Error), {
           code: "EACCES",
           path: nonReadableFile,
-        })
+        }),
       );
     });
 
@@ -194,13 +194,13 @@ export default describe("fs.access", () => {
         match.allOf(match.instanceOf(Error), {
           code: "ENOENT",
           path: nonExistentFile,
-        })
+        }),
       );
     });
 
     it("should correctly report access to a non-executable file", () => {
       expect(() => fs.accessSync(thisFile, fs.constants.X_OK)).toThrowMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
 
@@ -226,7 +226,7 @@ export default describe("fs.access", () => {
       expect(result1).toBe(undefined);
 
       await expect(fs.access(readOnlyFile, fs.constants.W_OK)).toRejectMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
 
@@ -238,7 +238,7 @@ export default describe("fs.access", () => {
         match.allOf(match.instanceOf(Error), {
           code: "EACCES",
           path: nonReadableFile,
-        })
+        }),
       );
     });
 
@@ -247,13 +247,13 @@ export default describe("fs.access", () => {
         match.allOf(match.instanceOf(Error), {
           code: "ENOENT",
           path: nonExistentFile,
-        })
+        }),
       );
     });
 
     it("should correctly report access to a non-executable file", async () => {
       await expect(fs.access(thisFile, fs.constants.X_OK)).toRejectMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
 

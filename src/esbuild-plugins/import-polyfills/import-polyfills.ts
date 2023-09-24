@@ -69,7 +69,7 @@ export const importPolyfillsPlugin = (program: Program) => {
               `.trim(),
               resolveDir: program.cwd,
             };
-          }
+          },
         );
       }
     },

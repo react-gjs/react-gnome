@@ -21,7 +21,7 @@ namespace WsPolyfill {
       public statusCode: number,
       public statusText: string,
       public responseBody: any,
-      public err: any
+      public err: any,
     ) {
       super("WebSocket connection failed.");
       this.name = "WebSocketConnectionError";
@@ -112,12 +112,12 @@ namespace WsPolyfill {
           const text = new TextDecoder().decode(data.toArray());
           this.#emitter.emit(
             WebSocketEventType.MESSAGE,
-            Event.create({ origin, data: text })
+            Event.create({ origin, data: text }),
           );
         } else {
           this.#emitter.emit(
             WebSocketEventType.MESSAGE,
-            Event.create({ origin, data: data.toArray() })
+            Event.create({ origin, data: data.toArray() }),
           );
         }
       });
@@ -148,11 +148,11 @@ namespace WsPolyfill {
                     message.status_code,
                     message.reason_phrase ?? "",
                     message.response_body.data,
-                    e
-                  )
+                    e,
+                  ),
                 );
               }
-            }
+            },
           );
         });
 
@@ -192,21 +192,21 @@ namespace WsPolyfill {
     close(code?: number, reason?: string): void {
       this.#connection!.close(
         code ?? Soup.WebsocketCloseCode.NORMAL,
-        reason ?? null
+        reason ?? null,
       );
     }
 
     addEventListener(
       type: WebSocketEventType,
       listener: WebSocketEventListener,
-      options?: boolean | AddEventListenerOptions
+      options?: boolean | AddEventListenerOptions,
     ): void {
       this.#emitter.add(type, listener, options);
     }
 
     removeEventListener(
       type: WebSocketEventType,
-      listener: WebSocketEventListener
+      listener: WebSocketEventListener,
     ): void {
       this.#emitter.remove(type, listener);
     }

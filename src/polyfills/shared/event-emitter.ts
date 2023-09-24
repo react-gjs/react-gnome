@@ -16,7 +16,7 @@ export class Event<D extends Record<string, any> = object> {
 export class EventEmitter<
   EventType extends string,
   Ev extends Event<any>,
-  Listener extends EventListener = EventListener<Ev>
+  Listener extends EventListener = EventListener<Ev>,
 > {
   private listeners: Map<EventType, Map<Function | object, Listener>> =
     new Map();
@@ -29,7 +29,7 @@ export class EventEmitter<
   add(
     event: EventType,
     listener: Listener,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Map());
@@ -49,7 +49,7 @@ export class EventEmitter<
         options.signal.addEventListener(
           "abort",
           () => this.remove(event, listener),
-          { once: true }
+          { once: true },
         );
       }
     }

@@ -37,8 +37,8 @@ class FormData {
     callbackfn: (
       value: FormDataEntryValueP,
       key: string,
-      parent: FormData
-    ) => void
+      parent: FormData,
+    ) => void,
   ): void {
     this._entries.forEach((value, key) => {
       value.forEach((value) => {
@@ -48,8 +48,7 @@ class FormData {
   }
 
   /**
-   * Returns an array of key, value pairs for every entry in the
-   * list.
+   * Returns an array of key, value pairs for every entry in the list.
    */
   entries(): IterableIterator<[string, FormDataEntryValueP]> {
     const entries = this._entries;
@@ -65,12 +64,16 @@ class FormData {
     return generator();
   }
 
-  /** Returns a list of keys in the list. */
+  /**
+   * Returns a list of keys in the list.
+   */
   keys(): IterableIterator<string> {
     return this._entries.keys();
   }
 
-  /** Returns a list of values in the list. */
+  /**
+   * Returns a list of values in the list.
+   */
   values(): IterableIterator<FormDataEntryValueP> {
     const entries = this._entries;
 

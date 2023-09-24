@@ -4,7 +4,7 @@ export class Command {
   constructor(
     private command: string,
     private args: string[],
-    private options: { cwd?: string }
+    private options: { cwd?: string },
   ) {}
 
   public async run(): Promise<string> {
@@ -31,9 +31,9 @@ export class Command {
           reject(
             new Error(
               `Command '${this.command} ${this.args.join(
-                " "
-              )}' failed with error code: ${code}.\n\n${stdout}\n\n${stderr}`
-            )
+                " ",
+              )}' failed with error code: ${code}.\n\n${stdout}\n\n${stderr}`,
+            ),
           );
         }
       });

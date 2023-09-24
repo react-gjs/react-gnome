@@ -1,31 +1,26 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 /**
- * Stolen from:
- * https://github.com/nodejs/node/blob/main/lib/querystring.js
+ * Stolen from: https://github.com/nodejs/node/blob/main/lib/querystring.js
  *
  * Copyright Joyent, Inc. and other Node contributors.
  *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the
- * Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 namespace QueryString_default {
@@ -56,7 +51,7 @@ namespace QueryString_default {
     hexTable[i] =
       "%" +
       StringPrototypeToUpperCase(
-        (i < 16 ? "0" : "") + NumberPrototypeToString(i, 16)
+        (i < 16 ? "0" : "") + NumberPrototypeToString(i, 16),
       );
 
   // prettier-ignore
@@ -82,7 +77,7 @@ namespace QueryString_default {
   function encodeStr(
     str: string,
     noEscapeTable: Int8Array,
-    hexTable: string[]
+    hexTable: string[],
   ): string {
     const len = str.length;
     if (len === 0) return "";
@@ -251,7 +246,7 @@ namespace QueryString_default {
   }
 
   function stringifyPrimitive(
-    v: string | number | bigint | boolean | symbol | undefined | null
+    v: string | number | bigint | boolean | symbol | undefined | null,
   ): string {
     if (typeof v === "string") return v;
     if (typeof v === "bigint") return "" + v;
@@ -261,7 +256,7 @@ namespace QueryString_default {
 
   function encodeStringified(
     v: string | number | bigint | boolean,
-    encode: (v: string) => string
+    encode: (v: string) => string,
   ): string {
     if (typeof v === "string") return v.length ? encode(v) : "";
     if (typeof v === "number" && NumberIsFinite(v)) {
@@ -276,7 +271,7 @@ namespace QueryString_default {
 
   function encodeStringifiedCustom(
     v: string | number | boolean | null,
-    encode: (v: string) => string
+    encode: (v: string) => string,
   ): string {
     return encode(stringifyPrimitive(v));
   }
@@ -292,7 +287,7 @@ namespace QueryString_default {
     >,
     sep: string,
     eq: string,
-    options: { encodeURIComponent?: (v: string) => string }
+    options: { encodeURIComponent?: (v: string) => string },
   ): string {
     sep = sep || "&";
     eq = eq || "=";
@@ -356,7 +351,7 @@ namespace QueryString_default {
     value: string,
     keyEncoded: boolean,
     valEncoded: boolean,
-    decode: (v: string) => string
+    decode: (v: string) => string,
   ) {
     if (key.length > 0 && keyEncoded) key = decodeStr(key, decode);
     if (value.length > 0 && valEncoded) value = decodeStr(value, decode);
@@ -374,7 +369,9 @@ namespace QueryString_default {
     }
   }
 
-  /** Parse a key/val string. */
+  /**
+   * Parse a key/val string.
+   */
   export function parse(
     qs: string,
     sep: string,
@@ -382,7 +379,7 @@ namespace QueryString_default {
     options: {
       maxKeys?: number;
       decodeURIComponent?(v: string): string;
-    }
+    },
   ): Record<string, string | string[]> {
     const obj = { __proto__: null } as any as Record<string, string | string[]>;
 
@@ -529,9 +526,9 @@ namespace QueryString_default {
   export const decode = parse;
 
   /**
-   * V8 does not optimize functions with try-catch blocks, so we
-   * isolate them here to minimize the damage (Note: no longer
-   * true as of V8 5.4 -- but still will not be inlined).
+   * V8 does not optimize functions with try-catch blocks, so we isolate them
+   * here to minimize the damage (Note: no longer true as of V8 5.4 -- but still
+   * will not be inlined).
    */
   function decodeStr(s: string, decoder: (v: string) => string): string {
     try {

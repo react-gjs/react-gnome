@@ -10,9 +10,9 @@ const file =
   GLib.get_current_dir() + "/__tests__/polyfills/fs/files/append-test";
 
 const mustCall = <
-  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void
+  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void,
 >(
-  run: (cb: F) => any
+  run: (cb: F) => any,
 ) => {
   return new Promise<FunctionMock<F>>((resolve, reject) => {
     const t = setTimeout(() => {
@@ -87,14 +87,14 @@ export default describe("fs.appendFile", () => {
       expect(() => fs.appendFile(file, s)).toThrowMatch(
         match.allOf(match.instanceOf(TypeError), {
           code: "ERR_INVALID_ARG_TYPE",
-        })
+        }),
       );
 
       // @ts-expect-error
       expect(() => fs.appendFile(file, s, {})).toThrowMatch(
         match.allOf(match.instanceOf(TypeError), {
           code: "ERR_INVALID_ARG_TYPE",
-        })
+        }),
       );
     });
   });

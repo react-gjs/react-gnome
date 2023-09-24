@@ -5,7 +5,7 @@ interface TrackedFunction<A extends any[], R> {
 }
 
 export const createFunction = <A extends any[], R>(
-  fn: (...args: A) => R
+  fn: (...args: A) => R,
 ): TrackedFunction<A, R> => {
   const calls: TrackedFunction<A, R>["calls"] = [];
 

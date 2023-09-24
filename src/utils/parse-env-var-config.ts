@@ -18,7 +18,7 @@ const isAllowed = (allowed: string[] | RegExp | undefined, key: string) => {
 
 const isDisallowed = (
   disallowed: string[] | RegExp | undefined,
-  key: string
+  key: string,
 ) => {
   if (disallowed === undefined) {
     return false;
@@ -109,7 +109,7 @@ export const parseEnvVarConfig = (program: Program) => {
   if (cwdFiles.includes(envFileName)) {
     const envFileData = fs.readFileSync(
       path.resolve(program.cwd, envFileName),
-      "utf-8"
+      "utf-8",
     );
 
     for (const envVarEntry of parseDotEnv(envFileData)) {

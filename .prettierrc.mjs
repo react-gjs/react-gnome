@@ -1,4 +1,6 @@
-/** @type {import("prettier").Options} */
+/**
+ * @type {import("prettier").Options}
+ */
 const config = {
   bracketSpacing: true,
   tabWidth: 2,

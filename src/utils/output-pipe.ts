@@ -17,7 +17,7 @@ export class OutputPipe {
 
   constructor(
     private source: NodeJS.ReadableStream,
-    private output: NodeJS.WritableStream
+    private output: NodeJS.WritableStream,
   ) {}
 
   private transform(chunk: string | Buffer): string | Buffer {
@@ -45,7 +45,7 @@ export class OutputPipe {
         }
       },
       this.output,
-      { signal: this.controller.signal }
+      { signal: this.controller.signal },
     ).catch((e) => {
       if (!isAbortError(e)) {
         console.error(e);

@@ -20,9 +20,9 @@ const readOnlyFile =
   GLib.get_current_dir() + "/__tests__/polyfills/fs/files/read-only-file";
 
 const mustCall = <
-  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void
+  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void,
 >(
-  run: (cb: F) => any
+  run: (cb: F) => any,
 ) => {
   return new Promise<FunctionMock<F>>((resolve, reject) => {
     const t = setTimeout(() => {
@@ -74,7 +74,7 @@ export default describe("fs.writeFile", () => {
 
     it("accepts buffer", async () => {
       const mock = await mustCall((cb) =>
-        fs.writeFile(file, Buffer.from(s), cb)
+        fs.writeFile(file, Buffer.from(s), cb),
       );
       expect(mock).toHaveBeenCalledWithLast(null);
 
@@ -85,19 +85,19 @@ export default describe("fs.writeFile", () => {
     it("throws when writing to a read-only file", async () => {
       const mock = await mustCall((cb) => fs.writeFile(readOnlyFile, s, cb));
       expect(mock).toHaveBeenCalledWithLast(
-        match.allOf(match.instanceOf(Error))
+        match.allOf(match.instanceOf(Error)),
       );
     });
 
     it("throws when callback is not provided", async () => {
       // @ts-expect-error
       expect(() => fs.writeFile(file, s)).toThrowMatch(
-        match.allOf(match.instanceOf(Error))
+        match.allOf(match.instanceOf(Error)),
       );
 
       // @ts-expect-error
       expect(() => fs.writeFile(file, s, {})).toThrowMatch(
-        match.allOf(match.instanceOf(Error))
+        match.allOf(match.instanceOf(Error)),
       );
     });
   });
@@ -119,7 +119,7 @@ export default describe("fs.writeFile", () => {
 
     it("throws when writing to a read-only file", async () => {
       expect(() => fs.writeFileSync(readOnlyFile, s)).toThrowMatch(
-        match.allOf(match.instanceOf(Error))
+        match.allOf(match.instanceOf(Error)),
       );
     });
   });
@@ -141,7 +141,7 @@ export default describe("fs.writeFile", () => {
 
     it("throws when writing to a read-only file", async () => {
       await expect(fs.writeFile(readOnlyFile, s)).toRejectMatch(
-        match.allOf(match.instanceOf(Error))
+        match.allOf(match.instanceOf(Error)),
       );
     });
   });

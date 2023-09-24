@@ -23,7 +23,7 @@ export const createNodePolyfillMap = (polyfills: Array<PolyfillMapDef>) => {
                 kind: args.kind,
                 pluginData: args.pluginData,
                 resolveDir: args.resolveDir,
-              }
+              },
             );
           });
         }

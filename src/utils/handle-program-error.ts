@@ -12,37 +12,31 @@ export const handleProgramError = (e: unknown) => {
   };
 
   if (isValidationError(e)) {
-    Stderr.print(
-      html`
-        <span color="lightRed">
-          Config file is invalid. Property
-          <pre color="lightYellow"> ${e.fieldPath} </pre>
-          is incorrect.
-        </span>
-      `
-    );
+    Stderr.print(html`
+      <span color="lightRed">
+        Config file is invalid. Property
+        <pre color="lightYellow"> ${e.fieldPath} </pre>
+        is incorrect.
+      </span>
+    `);
   } else if (isObject(e) && e instanceof Error) {
-    Stderr.print(
-      html`
-        <span>
-          <line> Build failed due to an error: </line>
-          <pad size="2">
-            <pre color="lightRed">${e.message}</pre>
-          </pad>
-          <br />
-          <pad size="2">
-            <pre color="lightYellow">${e.stack}</pre>
-          </pad>
-        </span>
-      `
-    );
+    Stderr.print(html`
+      <span>
+        <line> Build failed due to an error: </line>
+        <pad size="2">
+          <pre color="lightRed">${e.message}</pre>
+        </pad>
+        <br />
+        <pad size="2">
+          <pre color="lightYellow">${e.stack}</pre>
+        </pad>
+      </span>
+    `);
   } else {
     console.error(e);
-    Stderr.print(
-      html`
-        <span color="lightRed"> Build failed due to an unknown error. </span>
-      `
-    );
+    Stderr.print(html`
+      <span color="lightRed"> Build failed due to an unknown error. </span>
+    `);
   }
 
   process.exit(1);

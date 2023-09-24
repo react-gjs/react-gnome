@@ -128,7 +128,7 @@ namespace fspromises {
   }
 
   function _ensureWriteableData(
-    data: any
+    data: any,
   ): asserts data is Uint8Array | Buffer | string {
     if (typeof data === "string") {
       return;
@@ -139,7 +139,7 @@ namespace fspromises {
     }
 
     throw new ArgTypeError(
-      "Cannot write to the file. Written data must be a string, Buffer or Uint8Array."
+      "Cannot write to the file. Written data must be a string, Buffer or Uint8Array.",
     );
   }
 
@@ -161,7 +161,7 @@ namespace fspromises {
 
   function _resolveTo<T, R>(
     data: T | Promise<T>,
-    resolver: (data: T) => R
+    resolver: (data: T) => R,
   ): R | Promise<R> {
     if (data instanceof Promise) {
       return data.then(resolver);
@@ -176,7 +176,7 @@ namespace fspromises {
           throw new FsError(
             "Permission denied [read]",
             "EACCES",
-            path.toString()
+            path.toString(),
           );
         }
 
@@ -184,7 +184,7 @@ namespace fspromises {
           throw new FsError(
             "Permission denied [write]",
             "EACCES",
-            path.toString()
+            path.toString(),
           );
         }
 
@@ -192,7 +192,7 @@ namespace fspromises {
           throw new FsError(
             "Permission denied [execute]",
             "EACCES",
-            path.toString()
+            path.toString(),
           );
         }
       })
@@ -205,7 +205,7 @@ namespace fspromises {
           "No such file or directory.",
           "ENOENT",
           path.toString(),
-          err
+          err,
         );
       });
   };
@@ -248,7 +248,7 @@ namespace fspromises {
 
   export const readFile: typeof fspt.readFile = (
     path,
-    options
+    options,
   ): Promise<any> => {
     if (_isFileHandle(path)) {
       return path.readFile(options);
@@ -320,7 +320,7 @@ namespace fspromises {
 
     if (withFileTypes) {
       return Fs.listDir(path.toString()).then((files) =>
-        files.map(_fileInfoToDirent)
+        files.map(_fileInfoToDirent),
       );
     }
 
@@ -329,7 +329,7 @@ namespace fspromises {
 
   export const readlink: typeof fspt.readlink = (
     path,
-    options
+    options,
   ): Promise<any> => {
     return Fs.fileInfo(path.toString(), { followSymlinks: false }).then(
       (info) => {
@@ -337,7 +337,7 @@ namespace fspromises {
           throw new FsError(
             "File is not a symlink.",
             "EINVAL",
-            path.toString()
+            path.toString(),
           );
         }
 
@@ -349,19 +349,19 @@ namespace fspromises {
         }
 
         return info.symlinkTarget;
-      }
+      },
     );
   };
 
   export const stat: typeof fspt.stat = (path): Promise<any> => {
     return Fs.fileInfo(path.toString(), { followSymlinks: true }).then(
-      _fileInfoToStats
+      _fileInfoToStats,
     );
   };
 
   export const lstat: typeof fspt.lstat = (path): Promise<any> => {
     return Fs.fileInfo(path.toString(), { followSymlinks: false }).then(
-      _fileInfoToStats
+      _fileInfoToStats,
     );
   };
 
@@ -371,7 +371,7 @@ namespace fspromises {
 
   export const realpath: typeof fspt.realpath = (
     path,
-    options
+    options,
   ): Promise<any> => {
     return Fs.fileInfo(path.toString(), { followSymlinks: true }).then(
       (info) => {
@@ -383,7 +383,7 @@ namespace fspromises {
         }
 
         return info.filepath;
-      }
+      },
     );
   };
 
@@ -393,7 +393,7 @@ namespace fspromises {
   export const open: typeof fspt.open = async (
     path: PathLike,
     flags?: string | number,
-    mode?: Mode
+    mode?: Mode,
   ): Promise<any> => {
     const handle = new FileHandle(path.toString(), flags, mode);
     await handle._init();
@@ -419,7 +419,7 @@ namespace fspromises {
     constructor(
       private _filePath: string,
       flags: string | number = "r",
-      mode?: Mode
+      mode?: Mode,
     ) {
       this._parseFlags(flags);
       this._permissions = _modeNum(mode, 0o666);
@@ -669,7 +669,7 @@ namespace fspromises {
       options?: {
         encoding?: null | undefined;
         flag?: string | number | undefined;
-      } | null
+      } | null,
     ): Promise<Buffer>;
     readFile(
       options:
@@ -677,7 +677,7 @@ namespace fspromises {
             encoding: BufferEncoding;
             flag?: string | number | undefined;
           }
-        | BufferEncoding
+        | BufferEncoding,
     ): Promise<string>;
     async readFile(
       options?:
@@ -686,7 +686,7 @@ namespace fspromises {
             flag?: string | number | undefined;
           }
         | BufferEncoding
-        | null
+        | null,
     ): Promise<string | Buffer> {
       if (!this._canRead) {
         throw new Error("This file cannot be read.");
@@ -710,7 +710,7 @@ namespace fspromises {
       buffer: Buffer,
       offset?: number | null,
       length?: number | null,
-      position?: number | null
+      position?: number | null,
     ): Promise<FileReadResult<Buffer>>;
     read(options: FileReadOptions<Buffer>): Promise<FileReadResult<Buffer>>;
     async read(...args: any[]): Promise<FileReadResult<Buffer>> {
@@ -777,7 +777,7 @@ namespace fspromises {
       buffer: TBuffer,
       offset?: number | null,
       length?: number | null,
-      position?: number | null
+      position?: number | null,
     ): Promise<{
       bytesWritten: number;
       buffer: TBuffer;
@@ -785,7 +785,7 @@ namespace fspromises {
     write(
       data: string,
       position?: number | null,
-      encoding?: BufferEncoding | null
+      encoding?: BufferEncoding | null,
     ): Promise<{
       bytesWritten: number;
       buffer: string;
@@ -799,7 +799,7 @@ namespace fspromises {
         const [data, position, encoding] = args as [
           string,
           number?,
-          BufferEncoding?
+          BufferEncoding?,
         ];
 
         const encoded = Buffer.from(data, encoding).valueOf();

@@ -5,7 +5,10 @@ import { generateUniqueName } from "./generate-unique-name";
 class AppResource {
   private uid = generateUniqueName(8);
 
-  constructor(private origin: string, private appID: string) {}
+  constructor(
+    private origin: string,
+    private appID: string,
+  ) {}
 
   get name() {
     return this.uid + "-" + path.basename(this.origin);

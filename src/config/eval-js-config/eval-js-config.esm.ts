@@ -1,12 +1,12 @@
 import path from "path";
 
 export const evalJsConfigFile = async (
-  config: string
+  config: string,
 ): Promise<() => unknown> => {
   const ext = path.extname(config);
   if (ext === ".cjs" || ext === ".cts" || ext === ".ts") {
     throw new Error(
-      `Invalid config file type: '${ext}'. react-gnome is running in ESModule mode and can accept only configs in ESModule format. To use CommonJS, set the 'type' field in your package.json to 'commonjs'.`
+      `Invalid config file type: '${ext}'. react-gnome is running in ESModule mode and can accept only configs in ESModule format. To use CommonJS, set the 'type' field in your package.json to 'commonjs'.`,
     );
   }
 
@@ -17,6 +17,6 @@ export const evalJsConfigFile = async (
   }
 
   throw new Error(
-    `The default export of the config file must be a function, but it was a ${typeof defaultExport.default}`
+    `The default export of the config file must be a function, but it was a ${typeof defaultExport.default}`,
   );
 };

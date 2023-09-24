@@ -41,7 +41,7 @@ export class InitProgram {
         <span color="white">
           ./${path.relative(projectDir, entryFilePath)}
         </span>
-      </span>`
+      </span>`,
     );
     fs.writeFileSync(entryFilePath, entryFileContent);
 
@@ -51,7 +51,7 @@ export class InitProgram {
         <span color="white">
           ./${path.relative(projectDir, configFilePath)}
         </span>
-      </span>`
+      </span>`,
     );
     fs.writeFileSync(configFilePath, configFileContent);
 
@@ -60,7 +60,7 @@ export class InitProgram {
     Output.print(
       html`<span>
         Updating scripts in:<s /><span color="white">./package.json</span></span
-      >`
+      >`,
     );
     const packageJsonPath = path.resolve(projectDir, "package.json");
 

@@ -56,7 +56,7 @@ export abstract class Program {
 
   get appName() {
     return validateAppName(
-      this.config.applicationName.replace(/[^\w\d_-]/g, "")
+      this.config.applicationName.replace(/[^\w\d_-]/g, ""),
     );
   }
 
@@ -78,7 +78,7 @@ export abstract class Program {
 
     this.envs.define(
       "friendlyAppName",
-      this.config.friendlyName ?? this.config.applicationName
+      this.config.friendlyName ?? this.config.applicationName,
     );
     this.envs.define("appName", this.appName);
     this.envs.define("appVersion", this.config.applicationVersion);
@@ -86,10 +86,14 @@ export abstract class Program {
     this.envs.define("mode", this.isDev ? "development" : "production");
   }
 
-  /** @internal */
+  /**
+   * @internal
+   */
   abstract main<T extends this>(program: T): any;
 
-  /** @internal */
+  /**
+   * @internal
+   */
   async run() {
     try {
       this.config = await readConfig(this);
@@ -107,7 +111,7 @@ export abstract class Program {
   async runWith(
     args: MapArgRecord<this["args"]>,
     config: Config,
-    workingDir?: string
+    workingDir?: string,
   ) {
     try {
       if (workingDir) {

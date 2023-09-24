@@ -22,9 +22,9 @@ const nonExistentFile =
   GLib.get_current_dir() + "/__tests__/polyfills/fs/files/non-existent";
 
 const mustCall = <
-  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void
+  F extends (...args: any[]) => any = (err?: any, ...args: any[]) => void,
 >(
-  run: (cb: F) => any
+  run: (cb: F) => any,
 ) => {
   return new Promise<FunctionMock<F>>((resolve, reject) => {
     const t = setTimeout(() => {
@@ -101,7 +101,7 @@ export default describe("fs.readFile", () => {
     it("throws error when callback is not provided", async () => {
       // @ts-expect-error
       expect(() => fs.readFile(nonExistentFile)).toThrowMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
   });
@@ -127,13 +127,13 @@ export default describe("fs.readFile", () => {
 
     it("throws error when reading from a non-readable file", () => {
       expect(() => fs.readFileSync(nonReadableFile)).toThrowMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
 
     it("throws error when reading non-existent file", () => {
       expect(() => fs.readFileSync(nonExistentFile)).toThrowMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
   });
@@ -159,13 +159,13 @@ export default describe("fs.readFile", () => {
 
     it("throws error when reading from a non-readable file", async () => {
       await expect(fs.readFile(nonReadableFile)).toRejectMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
 
     it("throws error when reading non-existent file", async () => {
       await expect(fs.readFile(nonExistentFile)).toRejectMatch(
-        match.instanceOf(Error)
+        match.instanceOf(Error),
       );
     });
   });

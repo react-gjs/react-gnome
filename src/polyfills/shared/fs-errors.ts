@@ -3,7 +3,7 @@ export class FsError extends Error {
     message: string,
     public code: string,
     public path?: string,
-    cause?: any
+    cause?: any,
   ) {
     super(message, { cause });
     this.name = "FsError";

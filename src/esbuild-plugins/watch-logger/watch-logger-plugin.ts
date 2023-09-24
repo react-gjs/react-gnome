@@ -9,7 +9,7 @@ export const watchLoggerPlugin = () => {
       build.onStart(() => {
         if (!isFirstBuild) {
           Output.print(
-            html`<span color="yellow">Changes detected, rebuilding...</span>`
+            html`<span color="yellow">Changes detected, rebuilding...</span>`,
           );
         } else {
           isFirstBuild = false;
