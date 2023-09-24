@@ -41,12 +41,14 @@ export class StartProgram extends BuildProgram {
     }).run();
   }
 
-  /** @internal */
+  /**
+   * @internal
+   */
   async main() {
     if (this.watchMode) {
-      Output.print(
-        html` <span color="lightBlue"> Starting in watch mode... </span> `
-      );
+      Output.print(html`
+        <span color="lightBlue"> Starting in watch mode... </span>
+      `);
     } else {
       Output.print(html` <span color="lightBlue"> Starting. </span> `);
     }
@@ -57,17 +59,20 @@ export class StartProgram extends BuildProgram {
 
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
+    const polyfills = getGlobalPolyfills(this);
+
     await this.esbuildCtx.init(
       {
         ...defaultBuildOptions,
-        inject: getGlobalPolyfills(this),
+        inject: polyfills.inject,
+        banner: { js: polyfills.banner.join("\n\n") },
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(buildDirPath, "src", "main.js"),
         plugins: getPlugins(this),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
       },
-      this.watchMode
+      this.watchMode,
     );
 
     await this.esbuildCtx.start();

@@ -66,7 +66,7 @@ async function main() {
 
     await fs.writeFile(
       p("dist/config-schema.json"),
-      JSON.stringify(configJsonSchema, null, 2)
+      JSON.stringify(configJsonSchema, null, 2),
     );
 
     const configTsType = toTsType(ConfigSchema, {

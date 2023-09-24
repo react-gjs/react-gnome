@@ -1,8 +1,14 @@
+import fs from "fs";
 import path from "path";
 import { getDirPath } from "../get-dirpath/get-dirpath";
 import type { Program } from "../programs/base";
 
-export const getGlobalPolyfills = (program: Program): string[] => {
+export type Polyfills = {
+  inject: string[];
+  banner: string[];
+};
+
+export const getGlobalPolyfills = (program: Program): Polyfills => {
   const polyfills = { ...program.config.polyfills };
 
   if (polyfills?.XMLHttpRequest) {
@@ -13,48 +19,53 @@ export const getGlobalPolyfills = (program: Program): string[] => {
     polyfills.Buffer = true;
   }
 
-  const polyfillPaths: string[] = [];
+  const results: Polyfills = {
+    inject: [],
+    banner: [],
+  };
 
   const rootPath = getDirPath();
 
-  if (polyfills?.fetch) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/fetch.mjs"));
-  }
-
   if (polyfills?.Buffer) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/buffer.mjs"));
-  }
-
-  if (polyfills?.Blob) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/blob.mjs"));
+    results.inject.push(path.resolve(rootPath, "polyfills/esm/buffer.mjs"));
   }
 
   if (polyfills?.URL) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/url.mjs"));
+    results.banner.push(
+      fs.readFileSync(path.resolve(rootPath, "polyfills/esm/url.mjs"), "utf-8"),
+    );
+  }
+
+  if (polyfills?.fetch) {
+    results.inject.push(path.resolve(rootPath, "polyfills/esm/fetch.mjs"));
+  }
+
+  if (polyfills?.Blob) {
+    results.inject.push(path.resolve(rootPath, "polyfills/esm/blob.mjs"));
   }
 
   if (polyfills?.FormData) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/form-data.mjs"));
+    results.inject.push(path.resolve(rootPath, "polyfills/esm/form-data.mjs"));
   }
 
   if (polyfills?.XMLHttpRequest) {
-    polyfillPaths.push(
-      path.resolve(rootPath, "polyfills/esm/xml-http-request.mjs")
+    results.inject.push(
+      path.resolve(rootPath, "polyfills/esm/xml-http-request.mjs"),
     );
   }
 
   if (polyfills?.base64) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/base64.mjs"));
+    results.inject.push(path.resolve(rootPath, "polyfills/esm/base64.mjs"));
   }
 
   if (polyfills?.AbortController) {
-    polyfillPaths.push(
-      path.resolve(rootPath, "polyfills/esm/abort-controller.mjs")
+    results.inject.push(
+      path.resolve(rootPath, "polyfills/esm/abort-controller.mjs"),
     );
   }
 
   if (polyfills?.WebSocket) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/websocket.mjs"));
+    results.inject.push(path.resolve(rootPath, "polyfills/esm/websocket.mjs"));
   }
 
   if (program.config.customPolyfills) {
@@ -62,9 +73,9 @@ export const getGlobalPolyfills = (program: Program): string[] => {
       // polyfills with an import name are handled by the
       // `importPolyfillsPlugin`
       if (!customPoly.importName)
-        polyfillPaths.push(path.resolve(program.cwd, customPoly.filepath));
+        results.inject.push(path.resolve(program.cwd, customPoly.filepath));
     }
   }
 
-  return polyfillPaths;
+  return results;
 };

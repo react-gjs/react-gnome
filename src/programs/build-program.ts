@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import rimraf from "rimraf";
 import tar from "tar";
-import { html, Output } from "termx-markup";
+import { Output, html } from "termx-markup";
 import { getAppData } from "../packaging/templates/data/appdata";
 import { getDataBusname } from "../packaging/templates/data/busname";
 import { getDataDesktopEntry } from "../packaging/templates/data/desktop-entry";
@@ -78,7 +78,7 @@ export class BuildProgram extends Program {
 
   protected async preparePoDirFiles(
     poDirPath: string,
-    context: PackagingContext
+    context: PackagingContext,
   ) {
     const linguas = getLinguas();
     const poFiles = getPoFiles({
@@ -97,7 +97,7 @@ export class BuildProgram extends Program {
 
   protected async prepareMesonDirFiles(
     mesonDirPath: string,
-    context: PackagingContext
+    context: PackagingContext,
   ) {
     const postInstallScript = getPostInstallScript({
       packageName: context.packageName,
@@ -108,7 +108,7 @@ export class BuildProgram extends Program {
 
   protected async prepareDataDirFiles(
     dataDirPath: string,
-    context: PackagingContext
+    context: PackagingContext,
   ) {
     const appData = getAppData({
       appID: context.appID,
@@ -137,13 +137,13 @@ export class BuildProgram extends Program {
     await this.write(
       dataDesktopEntry,
       dataDirPath,
-      `${context.appID}.desktop.in`
+      `${context.appID}.desktop.in`,
     );
     await this.write(gschema, dataDirPath, `${context.appID}.gschema.xml`);
     await this.write(
       resources,
       dataDirPath,
-      `${context.appID}.data.gresource.xml`
+      `${context.appID}.data.gresource.xml`,
     );
     await this.write(dataService, dataDirPath, `${context.appID}.service.in`);
     await this.write(mesonBuild, dataDirPath, "meson.build");
@@ -151,14 +151,14 @@ export class BuildProgram extends Program {
     for (const resource of this.resources?.getAll() || []) {
       await fs.copyFile(
         resource.fullPath,
-        path.resolve(dataDirPath, resource.name)
+        path.resolve(dataDirPath, resource.name),
       );
     }
   }
 
   protected async prepareSrcDirFiles(
     srcDirPath: string,
-    context: PackagingContext
+    context: PackagingContext,
   ) {
     const inFile = getInFile({
       appID: context.appID,
@@ -176,7 +176,7 @@ export class BuildProgram extends Program {
     await this.write(
       gresource,
       srcDirPath,
-      `${context.appID}.src.gresource.xml.in`
+      `${context.appID}.src.gresource.xml.in`,
     );
     await this.write(srcMesonBuild, srcDirPath, "meson.build");
 
@@ -185,7 +185,7 @@ export class BuildProgram extends Program {
 
   protected async prepareMainBuildDirFiles(
     buildDirPath: string,
-    context: PackagingContext
+    context: PackagingContext,
   ) {
     const mainMesonBuild = getMainMesonBuild({
       appID: context.appID,
@@ -220,14 +220,16 @@ export class BuildProgram extends Program {
     await this.prepareDataDirFiles(path.resolve(buildDirPath, "data"), context);
     await this.prepareMesonDirFiles(
       path.resolve(buildDirPath, "meson"),
-      context
+      context,
     );
     await this.preparePoDirFiles(path.resolve(buildDirPath, "po"), context);
 
     return context;
   }
 
-  /** @internal */
+  /**
+   * @internal
+   */
   async main() {
     Output.print(html` <span color="lightBlue">Building package...</span> `);
 
@@ -238,9 +240,12 @@ export class BuildProgram extends Program {
 
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
+    const polyfills = getGlobalPolyfills(this);
+
     await this.esbuildCtx.init({
       ...defaultBuildOptions,
-      inject: getGlobalPolyfills(this),
+      inject: polyfills.inject,
+      banner: { js: polyfills.banner.join("\n\n") },
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(buildDirPath, "src", "main.js"),
       plugins: getPlugins(this),
@@ -252,7 +257,7 @@ export class BuildProgram extends Program {
 
     const { packageName, appVersion } = await this.prepareBuildFiles(
       appName,
-      buildDirPath
+      buildDirPath,
     );
 
     await new Command("meson", ["setup", "_build"], {
@@ -270,12 +275,12 @@ export class BuildProgram extends Program {
           file: path.resolve(
             this.cwd,
             this.config.outDir,
-            `${packageName}-${appVersion}.tar.gz`
+            `${packageName}-${appVersion}.tar.gz`,
           ),
           prefix: packageName,
         },
         readdirSync(buildDirPath),
-        (e) => (e ? reject(e) : resolve())
+        (e) => (e ? reject(e) : resolve()),
       );
     });
 

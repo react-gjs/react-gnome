@@ -73,7 +73,7 @@ const XMLHttpRequestPolyfill = (() => {
 
     constructor(
       public readonly type: string,
-      public readonly target: T | null
+      public readonly target: T | null,
     ) {}
   }
 
@@ -89,8 +89,9 @@ const XMLHttpRequestPolyfill = (() => {
       this.add(RequestEvents.PROGRESS, (e) => request.onprogress?.(e));
       this.add(RequestEvents.TIMEOUT, (e) => request.ontimeout?.(e));
 
-      this.add(RequestEvents.READY_STATE_CHANGE, (e) =>
-        request.onreadystatechange?.(e)
+      this.add(
+        RequestEvents.READY_STATE_CHANGE,
+        (e) => request.onreadystatechange?.(e),
       );
     }
 
@@ -211,6 +212,14 @@ const XMLHttpRequestPolyfill = (() => {
     }
   }
 
+  type RequestConfig = {
+    method: string;
+    url: string;
+    async: boolean;
+    username: string | null | undefined;
+    password: string | null | undefined;
+  };
+
   return class XMLHttpRequest {
     // #region enum
 
@@ -233,7 +242,7 @@ const XMLHttpRequestPolyfill = (() => {
 
     // #endregion
 
-    private _requestConfig = {
+    private _requestConfig: RequestConfig = {
       method: "GET",
       url: "",
       async: true,
@@ -370,7 +379,7 @@ const XMLHttpRequestPolyfill = (() => {
 
       this._eventController.emit(
         RequestEvents.READY_STATE_CHANGE,
-        new ProgressEvent(RequestEvents.READY_STATE_CHANGE, this)
+        new ProgressEvent(RequestEvents.READY_STATE_CHANGE, this),
       );
     }
 
@@ -381,6 +390,7 @@ const XMLHttpRequestPolyfill = (() => {
       if (username) {
         urlObj.username = username;
       }
+
       if (password) {
         urlObj.password = password;
       }
@@ -400,13 +410,13 @@ const XMLHttpRequestPolyfill = (() => {
     }
 
     private _getSoupMessage() {
-      const message = Soup.Message.new(
-        this._requestConfig.method,
-        this._getFullUrl()
-      );
+      const method = this._requestConfig.method;
+      const fullUrl = this._getFullUrl();
+
+      const message = Soup.Message.new(this._requestConfig.method, fullUrl);
 
       if (!message) {
-        throw new Error(`Invalid URL: ${this._requestConfig.url}`);
+        throw new Error(`Unable to create a message for ${method} ${fullUrl}`);
       }
 
       this._requestHeaders.forEach((value, key) => {
@@ -418,7 +428,7 @@ const XMLHttpRequestPolyfill = (() => {
         message.set_request(
           contentType ?? "application/json",
           Soup.MemoryUse.COPY,
-          this._body
+          this._body,
         );
       }
 
@@ -432,28 +442,28 @@ const XMLHttpRequestPolyfill = (() => {
 
       this._eventController.emit(
         RequestEvents.LOAD_END,
-        new ProgressEvent(RequestEvents.LOAD_END, this)
+        new ProgressEvent(RequestEvents.LOAD_END, this),
       );
 
       if (ok) {
         this._eventController.emit(
           RequestEvents.LOAD,
-          new ProgressEvent(RequestEvents.LOAD, this)
+          new ProgressEvent(RequestEvents.LOAD, this),
         );
       } else if (status_code === 7) {
         this._eventController.emit(
           RequestEvents.TIMEOUT,
-          new ProgressEvent(RequestEvents.TIMEOUT, this)
+          new ProgressEvent(RequestEvents.TIMEOUT, this),
         );
       } else if (status_code === 1) {
         this._eventController.emit(
           RequestEvents.ABORT,
-          new ProgressEvent(RequestEvents.ABORT, this)
+          new ProgressEvent(RequestEvents.ABORT, this),
         );
       } else {
         this._eventController.emit(
           RequestEvents.ERROR,
-          new ProgressEvent(RequestEvents.ERROR, this)
+          new ProgressEvent(RequestEvents.ERROR, this),
         );
       }
     }
@@ -492,12 +502,12 @@ const XMLHttpRequestPolyfill = (() => {
             this._setReadyState(ReadyState.LOADING);
             this._eventController.emit(
               RequestEvents.PROGRESS,
-              new ProgressEvent(RequestEvents.PROGRESS, this)
+              new ProgressEvent(RequestEvents.PROGRESS, this),
             );
             onReceived = () => {
               this._eventController.emit(
                 RequestEvents.PROGRESS,
-                new ProgressEvent(RequestEvents.PROGRESS, this)
+                new ProgressEvent(RequestEvents.PROGRESS, this),
               );
             };
           };
@@ -554,7 +564,7 @@ const XMLHttpRequestPolyfill = (() => {
         console.error(e);
         this._eventController.emit(
           RequestEvents.ERROR,
-          new ProgressEvent(RequestEvents.ERROR, this)
+          new ProgressEvent(RequestEvents.ERROR, this),
         );
       }
     }
@@ -569,7 +579,7 @@ const XMLHttpRequestPolyfill = (() => {
       this._setReadyState(ReadyState.LOADING);
       this._eventController.emit(
         RequestEvents.LOAD_START,
-        new ProgressEvent(RequestEvents.LOAD_START, this)
+        new ProgressEvent(RequestEvents.LOAD_START, this),
       );
 
       httpSession.send_message(message);
@@ -617,7 +627,7 @@ const XMLHttpRequestPolyfill = (() => {
       url: string | URL,
       async?: boolean,
       username?: string | null,
-      password?: string | null
+      password?: string | null,
     ) {
       this._requestConfig = {
         method,
