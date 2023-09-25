@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@reactgjs/gest";
-import { FormData } from "../../src/polyfills/form-data";
+import "../../src/polyfills/form-data";
 
 export default describe("FormData", () => {
   it("should be defined", () => {

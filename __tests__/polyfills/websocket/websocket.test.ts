@@ -6,7 +6,7 @@ import {
   it,
   match,
 } from "@reactgjs/gest";
-import { WebSocket } from "../../../src/polyfills/websocket";
+import "../../../src/polyfills/websocket";
 import { createFunction } from "../../utils/tracked-function";
 import { waitUntil } from "../../utils/wait-until";
 
@@ -54,9 +54,7 @@ export default describe("WebSocket", () => {
       const openHandler = createFunction(() => {});
       const messageHandler = createFunction(() => {});
 
-      // @ts-expect-error
       socket.addEventListener("open", openHandler);
-      // @ts-expect-error
       socket.addEventListener("message", messageHandler);
 
       await waitUntil(() => socket.readyState === socket.OPEN);

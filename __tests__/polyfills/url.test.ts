@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@reactgjs/gest";
 import "../../src/polyfills/url";
 
-export default describe("FormData", () => {
+export default describe("URL", () => {
   it("should have the URL defined in global scope", () => {
     expect(URL).toBeDefined();
     expect(new URL("http://google.com")).toBeDefined();

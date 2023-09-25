@@ -1,8 +1,5 @@
 import { describe, expect, it, match } from "@reactgjs/gest";
-import {
-  AbortController,
-  AbortSignal,
-} from "../../src/polyfills/abort-controller";
+import "../../src/polyfills/abort-controller";
 
 export default describe("AbortController", () => {
   it("should be defined", () => {
