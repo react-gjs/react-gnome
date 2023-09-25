@@ -5,6 +5,7 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -26,6 +27,10 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
 
 // src/programs/build-program.ts
 var build_program_exports = {};
@@ -61,7 +66,12 @@ var import_get_plugins = require("../utils/get-plugins.cjs");
 var import_get_polyfills = require("../utils/get-polyfills.cjs");
 var import_pascal_to_kebab = require("../utils/pascal-to-kebab.cjs");
 var import_base = require("./base.cjs");
+var import_default_build_options = require("./default-build-options.cjs");
 var BuildProgram = class extends import_base.Program {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "type", "build");
+  }
   additionalPlugins() {
     return {};
   }
@@ -203,7 +213,9 @@ var BuildProgram = class extends import_base.Program {
     await this.preparePoDirFiles(import_path.default.resolve(buildDirPath, "po"), context);
     return context;
   }
-  /** @internal */
+  /**
+   * @internal
+   */
   async main() {
     import_termx_markup.Output.print(import_termx_markup.html` <span color="lightBlue">Building package...</span> `);
     const appName = this.appName;
@@ -211,19 +223,17 @@ var BuildProgram = class extends import_base.Program {
     this.resources = new import_app_resources.AppResources(this.appID);
     if ((0, import_fs.existsSync)(buildDirPath))
       await (0, import_rimraf.default)(buildDirPath, {});
-    await this.esbuildCtx.init({
-      target: "es2020",
-      format: "esm",
-      inject: (0, import_get_polyfills.getPolyfills)(this),
-      entryPoints: [import_path.default.resolve(this.cwd, this.config.entrypoint)],
-      outfile: import_path.default.resolve(buildDirPath, "src", "main.js"),
-      plugins: (0, import_get_plugins.getPlugins)(this),
-      minify: this.config.minify ?? (this.isDev ? false : true),
-      treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      jsx: "transform",
-      keepNames: true,
-      bundle: true
-    });
+    const polyfills = await (0, import_get_polyfills.getGlobalPolyfills)(this);
+    await this.esbuildCtx.init(
+      (0, import_default_build_options.createBuildOptions)({
+        banner: { js: polyfills.bundle },
+        entryPoints: [import_path.default.resolve(this.cwd, this.config.entrypoint)],
+        outfile: import_path.default.resolve(buildDirPath, "src", "main.js"),
+        plugins: (0, import_get_plugins.getPlugins)(this, { giRequirements: polyfills.requirements }),
+        minify: this.config.minify ?? (this.isDev ? false : true),
+        treeShaking: this.config.treeShake ?? (this.isDev ? false : true)
+      })
+    );
     await this.esbuildCtx.start();
     const { packageName, appVersion } = await this.prepareBuildFiles(
       appName,

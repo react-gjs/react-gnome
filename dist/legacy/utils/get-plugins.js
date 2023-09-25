@@ -26,9 +26,12 @@ module.exports = __toCommonJS(get_plugins_exports);
 var import_import_polyfills = require("../esbuild-plugins/import-polyfills/import-polyfills.js");
 var import_react_gnome_plugin = require("../esbuild-plugins/react-gnome/react-gnome-plugin.js");
 var import_watch_logger_plugin = require("../esbuild-plugins/watch-logger/watch-logger-plugin.js");
-var getPlugins = (program) => {
+var getPlugins = (program, options) => {
   const additionalPlugins = program.additionalPlugins();
-  const plugins = [(0, import_import_polyfills.importPolyfillsPlugin)(program), (0, import_react_gnome_plugin.reactGnomePlugin)(program)];
+  const plugins = [
+    (0, import_import_polyfills.importPolyfillsPlugin)(program),
+    (0, import_react_gnome_plugin.reactGnomePlugin)(program, options)
+  ];
   if (additionalPlugins.before) {
     plugins.push(...additionalPlugins.before);
   }

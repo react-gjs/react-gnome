@@ -57,7 +57,7 @@ export declare function parseConfig(filePath: string, context: ConfigContext): P
     } | undefined;
     esbuildPlugins?: {
         name: string;
-        setup: import("dilswer/dist/types/data-types/type-utils").UnknownFunction;
+        setup: (build: import("esbuild").PluginBuild) => void | Promise<void>;
     }[] | undefined;
     externalPackages?: string[] | undefined;
     friendlyName?: string | undefined;
@@ -79,7 +79,7 @@ export declare function parseConfig(filePath: string, context: ConfigContext): P
         Graphene?: string | undefined;
         Gst?: string | undefined;
         HarfBuzz?: string | undefined;
-        Soup?: string | undefined;
+        Soup?: "2.4" | undefined;
         cairo?: string | undefined;
         xlib?: string | undefined;
     } | undefined;
@@ -94,6 +94,7 @@ export declare function parseConfig(filePath: string, context: ConfigContext): P
         URL?: boolean | undefined;
         XMLHttpRequest?: boolean | undefined;
         fetch?: boolean | undefined;
+        WebSocket?: boolean | undefined;
         node?: {
             path?: boolean | undefined;
             fs?: boolean | undefined;

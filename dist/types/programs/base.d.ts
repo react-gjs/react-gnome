@@ -4,13 +4,14 @@ import type { AppResources } from "../utils/app-resources";
 import { EnvVars } from "../utils/env-vars";
 import { ESBuild } from "../utils/esbuild";
 import type { AdditionalPlugins } from "../utils/get-plugins";
-type DeepReadonly<T> = {
+export type DeepReadonly<T> = {
     readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : Readonly<T[P]>;
 };
 type MapArgRecord<A extends Record<string, Argument<any, any>>> = {
     [K in keyof A]: A[K]["value"];
 };
 export declare abstract class Program {
+    type: "build" | "bundle" | "init" | "start";
     envs: EnvVars;
     config: DeepReadonly<Config>;
     cwd: string;

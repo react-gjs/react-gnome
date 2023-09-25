@@ -1,9 +1,13 @@
 // src/config/config-schema.ts
 import { DataType, OptionalField } from "dilswer";
-var EsbuildPluginDataType = DataType.RecordOf({
-  name: DataType.String,
-  setup: DataType.Function
-}).setTitle("EsbuildPlugin");
+var EsbuildPluginDataType = DataType.Custom(
+  (v) => typeof v === "object" && v !== null && "name" in v && "setup" in v
+).setTitle("EsbuildPlugin").setExtra({
+  extraType: "external-import",
+  path: "esbuild",
+  typeName: "EsbuildPlugin",
+  originalName: "Plugin"
+});
 var RegexDataType = DataType.InstanceOf(RegExp);
 RegexDataType.setDescription(
   "A Regular expression. Only supported in JavaScript config files."
@@ -50,7 +54,7 @@ var ConfigSchema = DataType.RecordOf({
       Graphene: OptionalField(DataType.String),
       Gst: OptionalField(DataType.String),
       HarfBuzz: OptionalField(DataType.String),
-      Soup: OptionalField(DataType.String),
+      Soup: OptionalField(DataType.Literal("2.4")),
       cairo: OptionalField(DataType.String),
       xlib: OptionalField(DataType.String)
     })
@@ -68,6 +72,7 @@ var ConfigSchema = DataType.RecordOf({
       XMLHttpRequest: OptionalField(DataType.Boolean),
       base64: OptionalField(DataType.Boolean),
       fetch: OptionalField(DataType.Boolean),
+      WebSocket: OptionalField(DataType.Boolean),
       node: OptionalField(
         DataType.RecordOf({
           path: OptionalField(DataType.Boolean),
@@ -178,6 +183,9 @@ polyfills.recordOf.base64.type.setDescription(
 );
 polyfills.recordOf.fetch.type.setDescription(
   "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope."
+);
+polyfills.recordOf.WebSocket.type.setDescription(
+  "Whether the polyfill for a `WebSocket` should be included in the generated bundle. When enabled the `WebSocket` class will become available in the global scope."
 );
 polyfills.recordOf.node.type.setDescription(
   "Polyfill options for some specific Node.js builtin packages."

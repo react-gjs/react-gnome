@@ -1,7 +1,5 @@
-export declare const EsbuildPluginDataType: import("dilswer").RecordOf<{
-    name: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
-    setup: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"function">;
-}>;
+import type { Plugin as EsbuildPlugin } from "esbuild";
+export declare const EsbuildPluginDataType: import("dilswer").Custom<(v: any) => v is EsbuildPlugin>;
 export declare const ConfigSchema: import("dilswer").RecordOf<{
     applicationName: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
     applicationVersion: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
@@ -36,10 +34,7 @@ export declare const ConfigSchema: import("dilswer").RecordOf<{
         readonly required: false;
     };
     esbuildPlugins: {
-        readonly type: import("dilswer").ArrayOf<[import("dilswer").RecordOf<{
-            name: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
-            setup: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"function">;
-        }>]>;
+        readonly type: import("dilswer").ArrayOf<[import("dilswer").Custom<(v: any) => v is EsbuildPlugin>]>;
         readonly required: false;
     };
     externalPackages: {
@@ -121,7 +116,7 @@ export declare const ConfigSchema: import("dilswer").RecordOf<{
                 readonly required: false;
             };
             Soup: {
-                readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"string">;
+                readonly type: import("dilswer").Literal<"2.4">;
                 readonly required: false;
             };
             cairo: {
@@ -175,6 +170,10 @@ export declare const ConfigSchema: import("dilswer").RecordOf<{
                 readonly required: false;
             };
             fetch: {
+                readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
+                readonly required: false;
+            };
+            WebSocket: {
                 readonly type: import("dilswer/dist/types/data-types/data-types").SimpleDataType<"boolean">;
                 readonly required: false;
             };

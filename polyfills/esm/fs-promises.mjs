@@ -1,136 +1,66 @@
-// gi://Gio
-var Gio_default = Gio;
-
-// gi://GLib
-var GLib_default = GLib;
-
 // src/polyfills/fs-promises.ts
+import Fs from "fs-gjs";
+import { ArgTypeError, FsError } from "./shared/fs-errors.mjs";
 var fspromises;
 ((fspromises2) => {
   fspromises2.constants = {
-    COPYFILE_EXCL: 1,
-    COPYFILE_FICLONE: 2,
-    COPYFILE_FICLONE_FORCE: 4,
+    UV_FS_SYMLINK_DIR: 1,
+    UV_FS_SYMLINK_JUNCTION: 2,
     O_RDONLY: 0,
     O_WRONLY: 1,
     O_RDWR: 2,
+    UV_DIRENT_UNKNOWN: 0,
+    UV_DIRENT_FILE: 1,
+    UV_DIRENT_DIR: 2,
+    UV_DIRENT_LINK: 3,
+    UV_DIRENT_FIFO: 4,
+    UV_DIRENT_SOCKET: 5,
+    UV_DIRENT_CHAR: 6,
+    UV_DIRENT_BLOCK: 7,
+    S_IFMT: 61440,
+    S_IFREG: 32768,
+    S_IFDIR: 16384,
+    S_IFCHR: 8192,
+    S_IFBLK: 24576,
+    S_IFIFO: 4096,
+    S_IFLNK: 40960,
+    S_IFSOCK: 49152,
     O_CREAT: 64,
     O_EXCL: 128,
+    UV_FS_O_FILEMAP: 0,
     O_NOCTTY: 256,
     O_TRUNC: 512,
     O_APPEND: 1024,
-    O_NONBLOCK: 2048,
-    O_DSYNC: 4096,
-    O_DIRECT: 16384,
+    O_DIRECTORY: 65536,
     O_NOATIME: 262144,
     O_NOFOLLOW: 131072,
     O_SYNC: 1052672,
-    O_DIRECTORY: 65536,
+    O_DSYNC: 4096,
+    O_DIRECT: 16384,
+    O_NONBLOCK: 2048,
+    S_IRWXU: 448,
+    S_IRUSR: 256,
+    S_IWUSR: 128,
+    S_IXUSR: 64,
+    S_IRWXG: 56,
+    S_IRGRP: 32,
+    S_IWGRP: 16,
+    S_IXGRP: 8,
+    S_IRWXO: 7,
+    S_IROTH: 4,
+    S_IWOTH: 2,
+    S_IXOTH: 1,
+    F_OK: 0,
+    R_OK: 4,
+    W_OK: 2,
+    X_OK: 1,
+    UV_FS_COPYFILE_EXCL: 1,
+    COPYFILE_EXCL: 1,
+    UV_FS_COPYFILE_FICLONE: 2,
+    COPYFILE_FICLONE: 2,
+    UV_FS_COPYFILE_FICLONE_FORCE: 4,
+    COPYFILE_FICLONE_FORCE: 4
   };
-  function _isIterable(obj) {
-    return obj != null && typeof obj[Symbol.iterator] === "function";
-  }
-  function _everyOfIterable(iterable, predicate) {
-    for (const value of iterable) {
-      if (!predicate(value)) {
-        return false;
-      }
-    }
-    return true;
-  }
-  function _normalizeStringPosix(path, allowAboveRoot) {
-    let res = "";
-    let lastSegmentLength = 0;
-    let lastSlash = -1;
-    let dots = 0;
-    let code;
-    for (let i = 0; i <= path.length; ++i) {
-      if (i < path.length) code = path.charCodeAt(i);
-      else if (code === 47) break;
-      else code = 47;
-      if (code === 47) {
-        if (lastSlash === i - 1 || dots === 1) {
-        } else if (lastSlash !== i - 1 && dots === 2) {
-          if (
-            res.length < 2 ||
-            lastSegmentLength !== 2 ||
-            res.charCodeAt(res.length - 1) !== 46 ||
-            res.charCodeAt(res.length - 2) !== 46
-          ) {
-            if (res.length > 2) {
-              const lastSlashIndex = res.lastIndexOf("/");
-              if (lastSlashIndex !== res.length - 1) {
-                if (lastSlashIndex === -1) {
-                  res = "";
-                  lastSegmentLength = 0;
-                } else {
-                  res = res.slice(0, lastSlashIndex);
-                  lastSegmentLength = res.length - 1 - res.lastIndexOf("/");
-                }
-                lastSlash = i;
-                dots = 0;
-                continue;
-              }
-            } else if (res.length === 2 || res.length === 1) {
-              res = "";
-              lastSegmentLength = 0;
-              lastSlash = i;
-              dots = 0;
-              continue;
-            }
-          }
-          if (allowAboveRoot) {
-            if (res.length > 0) res += "/..";
-            else res = "..";
-            lastSegmentLength = 2;
-          }
-        } else {
-          if (res.length > 0) res += "/" + path.slice(lastSlash + 1, i);
-          else res = path.slice(lastSlash + 1, i);
-          lastSegmentLength = i - lastSlash - 1;
-        }
-        lastSlash = i;
-        dots = 0;
-      } else if (code === 46 && dots !== -1) {
-        ++dots;
-      } else {
-        dots = -1;
-      }
-    }
-    return res;
-  }
-  function _normalize(path) {
-    if (path.length === 0) return ".";
-    const isAbsolute = path.charCodeAt(0) === 47;
-    const trailingSeparator = path.charCodeAt(path.length - 1) === 47;
-    path = _normalizeStringPosix(path, !isAbsolute);
-    if (path.length === 0 && !isAbsolute) path = ".";
-    if (path.length > 0 && trailingSeparator) path += "/";
-    if (isAbsolute) return "/" + path;
-    return path;
-  }
-  function _join(...args) {
-    if (args.length === 0) return ".";
-    let joined;
-    for (let i = 0; i < args.length; ++i) {
-      const arg = args[i];
-      if (arg.length > 0) {
-        if (joined === void 0) joined = arg;
-        else joined += "/" + arg;
-      }
-    }
-    if (joined === void 0) return ".";
-    return _normalize(joined);
-  }
-  function _async(callback) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await callback({ resolve, reject });
-      } catch (err) {
-        reject(err);
-      }
-    });
-  }
   function _modeNum(m, def) {
     switch (typeof m) {
       case "number":
@@ -146,56 +76,38 @@ var fspromises;
     }
   }
   function _fileInfoToStats(fileInfo) {
-    const noop = () => {
-      throw new Error("Method id not available.");
-    };
-    const beginningOfTime = new Date(0);
-    fileInfo.get_attribute_as_string;
-    const atime = fileInfo.get_attribute_uint64("time::access") * 1e3;
-    const mtime = fileInfo.get_attribute_uint64("time::modified") * 1e3;
-    const ctime = fileInfo.get_attribute_uint64("time::changed") * 1e3;
-    const creationtime = fileInfo.get_attribute_uint64("time::created") * 1e3;
     const stats = {
-      isFile: () => fileInfo.get_file_type() === Gio_default.FileType.REGULAR,
-      isDirectory: () =>
-        fileInfo.get_file_type() === Gio_default.FileType.DIRECTORY,
-      isSymbolicLink: () => fileInfo.get_is_symlink(),
-      isBlockDevice: noop,
-      isCharacterDevice: noop,
-      isFIFO: noop,
-      isSocket: noop,
-      dev: fileInfo.get_attribute_uint32("unix::device"),
-      ino: Number(fileInfo.get_attribute_as_string("unix::inode")),
-      rdev: fileInfo.get_attribute_uint32("unix::rdev"),
-      blksize: fileInfo.get_attribute_uint32("unix::block-size"),
-      blocks: Number(fileInfo.get_attribute_as_string("unix::blocks")),
-      mode: fileInfo.get_attribute_uint32("unix::mode"),
-      nlink: fileInfo.get_attribute_uint32("unix::nlink"),
-      uid: fileInfo.get_attribute_uint32("unix::uid"),
-      gid: fileInfo.get_attribute_uint32("unix::gid"),
-      size: fileInfo.get_size(),
-      atime: atime ? new Date(atime) : beginningOfTime,
-      mtime: mtime ? new Date(mtime) : beginningOfTime,
-      ctime: ctime ? new Date(ctime) : beginningOfTime,
-      birthtime: creationtime ? new Date(creationtime) : beginningOfTime,
+      isFile: () => fileInfo.isFile,
+      isDirectory: () => fileInfo.isDirectory,
+      isSymbolicLink: () => fileInfo.isSymlink,
+      dev: fileInfo._gioInfo.get_attribute_uint32("unix::device"),
+      ino: Number(fileInfo._gioInfo.get_attribute_as_string("unix::inode")),
+      rdev: fileInfo._gioInfo.get_attribute_uint32("unix::rdev"),
+      blksize: fileInfo.blockSize,
+      blocks: fileInfo.blocks,
+      mode: fileInfo._gioInfo.get_attribute_uint32("unix::mode"),
+      nlink: fileInfo._gioInfo.get_attribute_uint32("unix::nlink"),
+      uid: fileInfo.uid,
+      gid: fileInfo.gid,
+      size: fileInfo.size,
+      atimeMs: fileInfo.accessTime,
+      mtimeMs: fileInfo.modifiedTime,
+      ctimeMs: fileInfo.changedTime,
+      birthtimeMs: fileInfo.createdTime,
+      atime: new Date(fileInfo.accessTime),
+      mtime: new Date(fileInfo.modifiedTime),
+      ctime: new Date(fileInfo.changedTime),
+      birthtime: new Date(fileInfo.createdTime)
     };
-    return stats;
+    return Object.assign(new Stats2(), stats);
   }
   function _fileInfoToDirent(fileInfo) {
-    const noop = () => {
-      throw new Error("Method id not available.");
-    };
-    return {
-      isFile: () => fileInfo.get_file_type() === Gio_default.FileType.REGULAR,
-      isDirectory: () =>
-        fileInfo.get_file_type() === Gio_default.FileType.DIRECTORY,
-      isSymbolicLink: () => fileInfo.get_is_symlink(),
-      isBlockDevice: noop,
-      isCharacterDevice: noop,
-      isFIFO: noop,
-      isSocket: noop,
-      name: fileInfo.get_name(),
-    };
+    return Object.assign(new Dirent2(), {
+      name: fileInfo.filename,
+      isFile: () => fileInfo.isFile,
+      isDirectory: () => fileInfo.isDirectory,
+      isSymbolicLink: () => fileInfo.isSymlink
+    });
   }
   function _ensureWriteableData(data) {
     if (typeof data === "string") {
@@ -204,29 +116,199 @@ var fspromises;
       if (data instanceof Uint8Array || data instanceof Buffer) {
         return;
       }
-      if (_isIterable(data)) {
-        if (
-          _everyOfIterable(
-            data,
-            (v) =>
-              typeof v === "string" ||
-              v instanceof Uint8Array ||
-              v instanceof Buffer
-          )
-        ) {
-          return;
-        }
-      }
     }
-    throw new Error(
+    throw new ArgTypeError(
       "Cannot write to the file. Written data must be a string, Buffer or Uint8Array."
     );
   }
   function _checkFlag(flags, flag) {
     return (flags & flag) === flag;
   }
+  function _isFileHandle(obj) {
+    return obj instanceof FileHandle;
+  }
+  function _asUintArray(data) {
+    if (data instanceof Buffer) {
+      return data.valueOf();
+    } else {
+      return data;
+    }
+  }
+  function _resolveTo(data, resolver) {
+    if (data instanceof Promise) {
+      return data.then(resolver);
+    }
+    return resolver(data);
+  }
+  fspromises2.access = (path, mode = fspromises2.constants.F_OK) => {
+    return Fs.fileInfo(path.toString()).then((info) => {
+      if (_checkFlag(mode, fspromises2.constants.R_OK) && !info.canRead) {
+        throw new FsError(
+          "Permission denied [read]",
+          "EACCES",
+          path.toString()
+        );
+      }
+      if (_checkFlag(mode, fspromises2.constants.W_OK) && !info.canWrite) {
+        throw new FsError(
+          "Permission denied [write]",
+          "EACCES",
+          path.toString()
+        );
+      }
+      if (_checkFlag(mode, fspromises2.constants.X_OK) && !info.canExecute) {
+        throw new FsError(
+          "Permission denied [execute]",
+          "EACCES",
+          path.toString()
+        );
+      }
+    }).catch((err) => {
+      if (err instanceof FsError) {
+        throw err;
+      }
+      throw new FsError(
+        "No such file or directory.",
+        "ENOENT",
+        path.toString(),
+        err
+      );
+    });
+  };
+  fspromises2.writeFile = (path, data, options) => {
+    _ensureWriteableData(data);
+    if (_isFileHandle(path)) {
+      return path.writeFile(data, options);
+    }
+    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    if (typeof data === "string") {
+      const encoded = Buffer.from(data, encoding).valueOf();
+      return Fs.writeFile(path.toString(), encoded);
+    }
+    return Fs.writeFile(path.toString(), _asUintArray(data));
+  };
+  fspromises2.appendFile = (path, data, options) => {
+    _ensureWriteableData(data);
+    if (_isFileHandle(path)) {
+      return path.appendFile(data, options);
+    }
+    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    if (typeof data === "string") {
+      const encoded = Buffer.from(data, encoding).valueOf();
+      return Fs.appendFile(path.toString(), encoded);
+    }
+    return Fs.appendFile(path.toString(), _asUintArray(data));
+  };
+  fspromises2.readFile = (path, options) => {
+    if (_isFileHandle(path)) {
+      return path.readFile(options);
+    }
+    const encoding = typeof options === "string" ? options : options?.encoding;
+    return Fs.readFile(path.toString()).then((data) => {
+      if (encoding) {
+        return Buffer.from(data).toString(encoding);
+      }
+      return Buffer.from(data);
+    });
+  };
+  fspromises2.mkdir = (path) => {
+    return Fs.makeDir(path.toString()).then(() => void 0);
+  };
+  fspromises2.rename = (oldPath, newPath) => {
+    return Fs.moveFile(oldPath.toString(), newPath.toString());
+  };
+  fspromises2.copyFile = (src, dest) => {
+    return Fs.copyFile(src.toString(), dest.toString());
+  };
+  fspromises2.unlink = (path) => {
+    return Fs.deleteFile(path.toString(), { followSymlinks: false });
+  };
+  fspromises2.rmdir = (path, options) => {
+    return Fs.deleteFile(path.toString(), {
+      recursive: options?.recursive
+    });
+  };
+  fspromises2.rm = (path, options) => {
+    return Fs.deleteFile(path.toString(), {
+      recursive: options?.recursive
+    });
+  };
+  fspromises2.chmod = (path, mode) => {
+    return Fs.chmod(path.toString(), _modeNum(mode, 493), {
+      followSymlinks: true
+    });
+  };
+  fspromises2.chown = (path, uid, gid) => {
+    return Fs.chown(path.toString(), uid, gid, { followSymlinks: true });
+  };
+  fspromises2.lchmod = (path, mode) => {
+    return Fs.chmod(path.toString(), _modeNum(mode, 493), {
+      followSymlinks: false
+    });
+  };
+  fspromises2.lchown = (path, uid, gid) => {
+    return Fs.chown(path.toString(), uid, gid, { followSymlinks: false });
+  };
+  fspromises2.readdir = (path, options) => {
+    const withFileTypes = typeof options === "object" && options != null ? options.withFileTypes ?? false : false;
+    if (withFileTypes) {
+      return Fs.listDir(path.toString()).then(
+        (files) => files.map(_fileInfoToDirent)
+      );
+    }
+    return Fs.listFilenames(path.toString());
+  };
+  fspromises2.readlink = (path, options) => {
+    return Fs.fileInfo(path.toString(), { followSymlinks: false }).then(
+      (info) => {
+        if (!info.isSymlink || !info.symlinkTarget) {
+          throw new FsError(
+            "File is not a symlink.",
+            "EINVAL",
+            path.toString()
+          );
+        }
+        const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+        if (encoding === "buffer") {
+          return Buffer.from(info.symlinkTarget);
+        }
+        return info.symlinkTarget;
+      }
+    );
+  };
+  fspromises2.stat = (path) => {
+    return Fs.fileInfo(path.toString(), { followSymlinks: true }).then(
+      _fileInfoToStats
+    );
+  };
+  fspromises2.lstat = (path) => {
+    return Fs.fileInfo(path.toString(), { followSymlinks: false }).then(
+      _fileInfoToStats
+    );
+  };
+  fspromises2.symlink = (target, path) => {
+    return Fs.makeLink(path.toString(), target.toString());
+  };
+  fspromises2.realpath = (path, options) => {
+    return Fs.fileInfo(path.toString(), { followSymlinks: true }).then(
+      (info) => {
+        const encoding = typeof options === "string" ? options : options?.encoding;
+        if (encoding === "buffer") {
+          return Buffer.from(info.filepath);
+        }
+        return info.filepath;
+      }
+    );
+  };
+  fspromises2.cp = fspromises2.copyFile;
+  fspromises2.link = fspromises2.symlink;
+  fspromises2.open = async (path, flags, mode) => {
+    const handle = new FileHandle(path.toString(), flags, mode);
+    await handle._init();
+    return handle;
+  };
   class FileHandle {
-    constructor(_filePath, flags = "r", mode = 438) {
+    constructor(_filePath, flags = "r", mode) {
       this._filePath = _filePath;
       this._parseFlags(flags);
       this._permissions = _modeNum(mode, 438);
@@ -235,30 +317,42 @@ var fspromises;
     _canRead = false;
     _canWrite = false;
     _canAppend = false;
-    _mustExist = true;
+    _mustExist = false;
     _mustNotExist = false;
-    _canCreate = true;
     _truncateOnOpen = false;
     _onlyDirs = false;
     _failOnSymlink = false;
-    _fileStats;
+    _startFromEof = false;
+    _openInSyncMode = false;
+    _ioStream;
+    async _init() {
+      await this._openStream();
+    }
     _parseFlags(flags) {
       if (typeof flags === "number") {
         if (_checkFlag(flags, fspromises2.constants.O_RDONLY)) {
           this._canRead = true;
+          this._canWrite = false;
+          this._canAppend = false;
         } else if (_checkFlag(flags, fspromises2.constants.O_WRONLY)) {
+          this._canRead = false;
           this._canWrite = true;
+          this._canAppend = false;
         } else if (_checkFlag(flags, fspromises2.constants.O_RDWR)) {
+          this._canRead = true;
           this._canWrite = true;
           this._canAppend = true;
-        } else if (_checkFlag(flags, fspromises2.constants.O_APPEND)) {
-          this._canAppend = true;
         }
-        if (!_checkFlag(flags, fspromises2.constants.O_CREAT)) {
+        if (_checkFlag(flags, fspromises2.constants.O_APPEND)) {
+          this._startFromEof = true;
+        }
+        if (_checkFlag(flags, fspromises2.constants.O_CREAT)) {
+          this._mustExist = false;
+          if (_checkFlag(flags, fspromises2.constants.O_EXCL)) {
+            this._mustNotExist = false;
+          }
+        } else {
           this._mustExist = true;
-        }
-        if (_checkFlag(flags, fspromises2.constants.O_EXCL)) {
-          this._canCreate = false;
         }
         if (_checkFlag(flags, fspromises2.constants.O_TRUNC)) {
           this._truncateOnOpen = true;
@@ -269,488 +363,388 @@ var fspromises;
         if (_checkFlag(flags, fspromises2.constants.O_NOFOLLOW)) {
           this._failOnSymlink = true;
         }
+        if (_checkFlag(flags, fspromises2.constants.O_SYNC) || _checkFlag(flags, fspromises2.constants.O_DSYNC)) {
+          this._openInSyncMode = true;
+        }
       } else if (typeof flags === "string") {
         switch (flags) {
-          case "r":
-            this._canRead = true;
-            break;
-          case "r+":
-          case "rs+":
-            this._canRead = true;
-            this._canWrite = true;
-            break;
-          case "w":
-            this._canWrite = true;
-            this._mustExist = false;
-            break;
-          case "wx":
-            this._canWrite = true;
-            this._mustExist = false;
-            this._mustNotExist = true;
-            break;
-          case "w+":
-            this._canRead = true;
-            this._canWrite = true;
-            this._mustExist = false;
-            break;
-          case "wx+":
-            this._canRead = true;
-            this._canWrite = true;
-            this._mustExist = false;
-            this._mustNotExist = true;
-            break;
           case "a":
+            this._canRead = false;
+            this._canWrite = false;
             this._canAppend = true;
             this._mustExist = false;
+            this._mustNotExist = false;
             break;
           case "ax":
+            this._canRead = false;
+            this._canWrite = false;
             this._canAppend = true;
             this._mustExist = false;
             this._mustNotExist = true;
             break;
           case "a+":
             this._canRead = true;
+            this._canWrite = false;
             this._canAppend = true;
             this._mustExist = false;
+            this._mustNotExist = false;
             break;
           case "ax+":
             this._canRead = true;
+            this._canWrite = false;
             this._canAppend = true;
             this._mustExist = false;
             this._mustNotExist = true;
+            break;
+          case "as":
+            this._canRead = false;
+            this._canWrite = false;
+            this._canAppend = true;
+            this._mustExist = false;
+            this._mustNotExist = false;
+            this._openInSyncMode = true;
+            break;
+          case "as+":
+            this._canRead = true;
+            this._canWrite = false;
+            this._canAppend = true;
+            this._mustExist = false;
+            this._mustNotExist = false;
+            this._openInSyncMode = true;
+            break;
+          case "r":
+            this._canRead = true;
+            this._canWrite = false;
+            this._canAppend = false;
+            this._mustExist = true;
+            this._mustNotExist = false;
+            break;
+          case "r+":
+            this._canRead = true;
+            this._canWrite = true;
+            this._canAppend = false;
+            this._mustExist = true;
+            this._mustNotExist = false;
+            break;
+          case "rs+":
+            this._canRead = true;
+            this._canWrite = true;
+            this._canAppend = false;
+            this._mustExist = true;
+            this._mustNotExist = false;
+            this._openInSyncMode = true;
+            break;
+          case "w":
+            this._canRead = false;
+            this._canWrite = true;
+            this._canAppend = false;
+            this._mustExist = false;
+            this._mustNotExist = false;
+            this._truncateOnOpen = true;
+            break;
+          case "wx":
+            this._canRead = false;
+            this._canWrite = true;
+            this._canAppend = false;
+            this._mustExist = false;
+            this._mustNotExist = true;
+            this._truncateOnOpen = true;
+            break;
+          case "w+":
+            this._canRead = true;
+            this._canWrite = true;
+            this._canAppend = false;
+            this._mustExist = false;
+            this._mustNotExist = false;
+            this._truncateOnOpen = true;
+            break;
+          case "wx+":
+            this._canRead = true;
+            this._canWrite = true;
+            this._canAppend = false;
+            this._mustExist = false;
+            this._mustNotExist = true;
+            this._truncateOnOpen = true;
             break;
           default:
             throw new Error(`Invalid flags: ${flags}`);
         }
       }
     }
-    writeFile(...[data, options]) {}
-    write(...args) {}
-  }
-  fspromises2.open = async (path, flags, mode) => {
-    return _async(async (p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      const handle = new FileHandle(path.toString(), flags, mode);
-      handle._fileStats = await fspromises2.stat(path);
-    });
-  };
-  fspromises2.stat = async (path) => {
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      file.query_info_async(
-        "*",
-        Gio_default.FileQueryInfoFlags.NONE,
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        (_, result) => {
-          try {
-            const info = file.query_info_finish(result);
-            p.resolve(_fileInfoToStats(info));
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.readdir = async (path, options) => {
-    return _async(async (p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      const enumerator = await _async((p2) => {
-        file.enumerate_children_async(
-          "*",
-          Gio_default.FileQueryInfoFlags.NONE,
-          GLib_default.PRIORITY_DEFAULT,
-          null,
-          (_, result) => {
-            try {
-              const enumerator2 = file.enumerate_children_finish(result);
-              p2.resolve(enumerator2);
-            } catch (error) {
-              p2.reject(error);
-            }
-          }
-        );
-      });
-      const getNextBatch = () =>
-        _async((p3) => {
-          enumerator.next_files_async(
-            50,
-            GLib_default.PRIORITY_DEFAULT,
-            null,
-            (_, result) => {
-              try {
-                p3.resolve(enumerator.next_files_finish(result));
-              } catch (e) {
-                p3.reject(e);
-              }
-            }
-          );
-        });
-      const children = [];
-      let nextBatch = [];
-      while ((nextBatch = await getNextBatch()).length > 0) {
-        children.push(...nextBatch);
+    async _openStream() {
+      const fileExists = Fs.sync.fileExists(this._filePath);
+      if (this._mustExist && !fileExists) {
+        throw new Error(`File does not exist: ${this._filePath}`);
       }
-      const withFileTypes =
-        typeof options === "object" &&
-        options !== null &&
-        options.withFileTypes;
-      p.resolve(
-        withFileTypes
-          ? children.map(_fileInfoToDirent)
-          : children.map((f) => f.get_name())
-      );
-    });
-  };
-  fspromises2.lstat = async (path) => {
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      file.query_info_async(
-        "*",
-        Gio_default.FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        (_, result) => {
-          try {
-            const info = file.query_info_finish(result);
-            p.resolve(_fileInfoToStats(info));
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.chmod = async (path, mode) => {
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      const info = new Gio_default.FileInfo();
-      info.set_attribute_uint32("unix::mode", _modeNum(mode, 438));
-      file.set_attributes_async(
-        info,
-        Gio_default.FileQueryInfoFlags.NONE,
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        (_, result) => {
-          try {
-            file.set_attributes_finish(result);
-            p.resolve(void 0);
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.chown = async (path, uid, gid) => {
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      const info = new Gio_default.FileInfo();
-      info.set_attribute_uint32("unix::uid", uid);
-      info.set_attribute_uint32("unix::gid", gid);
-      file.set_attributes_async(
-        info,
-        Gio_default.FileQueryInfoFlags.NONE,
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        (_, result) => {
-          try {
-            file.set_attributes_finish(result);
-            p.resolve(void 0);
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.mkdir = async (path, options) => {
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      if (typeof options === "object" && options?.recursive) {
-        throw new Error(
-          "Recursive asynchronous directory creation is not currently supported."
-        );
+      if (this._mustNotExist && fileExists) {
+        throw new Error(`File already exists: ${this._filePath}`);
       }
-      file.make_directory_async(
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        async (_, result) => {
-          try {
-            if (!file.make_directory_finish(result)) {
-              throw new Error(`Failed to create directory: ${path}`);
-            }
-            const mode = typeof options === "object" ? options?.mode : options;
-            if (mode) {
-              await fspromises2.chmod(path, mode);
-            }
-            p.resolve(void 0);
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.rename = async (oldPath, newPath) => {
-    return _async((p) => {
-      const oldFile = Gio_default.File.new_for_path(oldPath.toString());
-      const newFile = Gio_default.File.new_for_path(newPath.toString());
-      oldFile.move_async(
-        newFile,
-        Gio_default.FileCopyFlags.NONE,
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        null,
-        (_, result) => {
-          try {
-            if (!oldFile.move_finish(result)) {
-              throw new Error(
-                `Failed to rename file: ${oldPath} -> ${newPath}`
-              );
-            }
-            p.resolve(void 0);
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.copyFile = async (src, dest, flags) => {
-    return _async((p) => {
-      const srcFile = Gio_default.File.new_for_path(src.toString());
-      const destFile = Gio_default.File.new_for_path(dest.toString());
-      const shouldOverwrite =
-        !flags || flags & fspromises2.constants.COPYFILE_EXCL;
-      srcFile.copy_async(
-        destFile,
-        shouldOverwrite
-          ? Gio_default.FileCopyFlags.OVERWRITE
-          : Gio_default.FileCopyFlags.NONE,
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        null,
-        null,
-        (_, result) => {
-          try {
-            if (!srcFile.copy_finish(result)) {
-              throw new Error(`Failed to copy file: ${src} -> ${dest}`);
-            }
-            p.resolve(void 0);
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.cp = fspromises2.copyFile;
-  fspromises2.unlink = async (path) => {
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      file.delete_async(GLib_default.PRIORITY_DEFAULT, null, (_, result) => {
-        try {
-          if (!file.delete_finish(result)) {
-            throw new Error(`Failed to delete file: ${path}`);
-          }
-          p.resolve(void 0);
-        } catch (error) {
-          p.reject(error);
-        }
-      });
-    });
-  };
-  fspromises2.rm = async (path, options) => {
-    return _async(async (p) => {
-      if (options?.recursive) {
-        if ((await fspromises2.stat(path)).isDirectory()) {
-          const children = await fspromises2.readdir(path);
-          for (const child of children) {
-            await fspromises2.rm(_join(path.toString(), child), options);
-          }
-        }
-      }
-      await fspromises2.unlink(path);
-      p.resolve(void 0);
-    });
-  };
-  fspromises2.writeFile = async (path, data, options) => {
-    _ensureWriteableData(data);
-    const encoding =
-      (typeof options === "object" ? options?.encoding : options) ?? "utf8";
-    if (typeof path === "object" && path instanceof FileHandle) {
-      if (
-        _isIterable(data) &&
-        !(data instanceof Buffer) &&
-        !(data instanceof Uint8Array)
-      ) {
-        for await (const chunk of data) {
-          if (typeof chunk === "string") {
-            await path.write(chunk, null, encoding);
-          } else {
-            await path.write(chunk);
-          }
-        }
-        return;
-      } else {
-        if (typeof data === "string") {
-          await path.write(data, null, encoding);
+      if (fileExists) {
+        if (this._openInSyncMode) {
+          this._ioStream = await Fs.sync.openIOStream(this._filePath, "OPEN");
         } else {
-          await path.write(data);
+          this._ioStream = await Fs.openIOStream(this._filePath, "OPEN");
         }
-        return;
+      } else {
+        if (this._openInSyncMode) {
+          this._ioStream = await Fs.sync.openIOStream(this._filePath, "CREATE");
+        } else {
+          this._ioStream = await Fs.openIOStream(this._filePath, "CREATE");
+        }
+      }
+      if (this._canWrite && this._truncateOnOpen) {
+        this._ioStream.truncate(0);
+      }
+      if (this._startFromEof) {
+        this._ioStream.seekFromEnd(0);
       }
     }
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      let bytes;
+    finishPending() {
+      if ("finishPending" in this._ioStream) {
+        return this._ioStream.finishPending();
+      }
+      return {
+        then(fn) {
+          fn();
+        }
+      };
+    }
+    async stat() {
+      return (0, fspromises2.stat)(this._filePath);
+    }
+    async chown(...[uid, gid]) {
+      return (0, fspromises2.chown)(this._filePath, uid, gid);
+    }
+    async chmod(...[mode]) {
+      return (0, fspromises2.chmod)(this._filePath, mode);
+    }
+    async appendFile(...[data, options]) {
+      if (!this._canAppend) {
+        throw new Error("This file cannot be appended to.");
+      }
+      let uarr;
       if (typeof data === "string") {
-        const buff = new Buffer(data, encoding);
-        bytes = new Uint8Array(buff);
+        const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+        const encoded = Buffer.from(data, encoding).valueOf();
+        uarr = encoded;
+      } else if (data instanceof Buffer) {
+        uarr = data.valueOf();
       } else {
-        const buff = data;
-        bytes = Array.isArray(buff)
-          ? buff.map((b) => new Uint8Array(b)).flat()
-          : new Uint8Array(buff);
+        uarr = data;
       }
-      file.replace_contents_async(
-        bytes,
-        bytes.byteLength,
-        null,
-        false,
-        Gio_default.FileCreateFlags.REPLACE_DESTINATION,
-        null,
-        (_, result) => {
-          try {
-            file.replace_contents_finish(result);
-            p.resolve(void 0);
-          } catch (error) {
-            p.reject(error);
-          }
-        }
-      );
-    });
-  };
-  fspromises2.appendFile = async (path, data, options) => {
-    _ensureWriteableData(data);
-    if (typeof path === "object" && path instanceof FileHandle) {
-      if (!path["_canAppend"]) {
-        throw new Error("FileHandle cannot be appended to.");
-      }
-      if (
-        _isIterable(data) &&
-        !(data instanceof Buffer) &&
-        !(data instanceof Uint8Array)
-      ) {
-        for await (const chunk of data) {
-          await path.writeFile(chunk, options);
-        }
-        return;
-      } else {
-        await path.writeFile(data, options);
-        return;
-      }
+      this._ioStream.seekFromEnd(0);
+      this._ioStream.write(uarr);
+      return this.finishPending().then(() => void 0);
     }
-    return _async((p) => {
-      const file = Gio_default.File.new_for_path(path.toString());
-      let bytes;
-      const encoding =
-        (typeof options === "string" ? options : options?.encoding) ?? "utf8";
-      if (typeof data === "string") {
-        const buff = new Buffer(data, encoding);
-        bytes = new Uint8Array(buff);
-      } else {
-        const buff = data;
-        bytes = Array.isArray(buff)
-          ? buff.map((b) => new Uint8Array(b)).flat()
-          : new Uint8Array(buff);
+    async readFile(options) {
+      if (!this._canRead) {
+        throw new Error("This file cannot be read.");
       }
-      file.append_to_async(
-        Gio_default.FileCreateFlags.NONE,
-        GLib_default.PRIORITY_DEFAULT,
-        null,
-        (_, result) => {
-          try {
-            const stream = file.append_to_finish(result);
-            stream.write_all_async(
-              bytes,
-              GLib_default.PRIORITY_DEFAULT,
-              null,
-              (_2, result2) => {
-                try {
-                  stream.write_bytes_finish(result2);
-                  stream.close_async(
-                    GLib_default.PRIORITY_DEFAULT,
-                    null,
-                    (_3, result3) => {
-                      try {
-                        stream.close_finish(result3);
-                        p.resolve(void 0);
-                      } catch (error) {
-                        p.reject(error);
-                      }
-                    }
-                  );
-                } catch (error) {
-                  p.reject(error);
-                }
-              }
-            );
-          } catch (error) {
-            p.reject(error);
-          }
+      const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+      this._ioStream.seekFromStart(0);
+      const br = this._ioStream.readAll();
+      return _resolveTo(br, (bytesRead) => {
+        if (encoding) {
+          return Buffer.from(bytesRead).toString(encoding);
         }
-      );
-    });
-  };
-  fspromises2.readFile = async (path, options) => {
-    if (typeof path === "object" && path instanceof FileHandle) {
-      return;
-    }
-    return _async((p) => {
-      const encoding =
-        typeof options === "string" ? options : options?.encoding;
-      const file = Gio_default.File.new_for_path(path.toString());
-      file.load_contents_async(null, (_, result) => {
-        try {
-          const [success, contents] = file.load_contents_finish(result);
-          if (success) {
-            if (encoding) {
-              const decoder = new TextDecoder(encoding);
-              p.resolve(decoder.decode(contents));
-            } else {
-              p.resolve(Buffer.from(contents));
-            }
-          } else {
-            p.reject(new Error("Could not read file."));
-          }
-        } catch (error) {
-          p.reject(error);
-        }
+        return Buffer.from(bytesRead);
       });
-    });
-  };
+    }
+    async read(...args) {
+      if (!this._canRead) {
+        throw new Error("This file cannot be read.");
+      }
+      let buffer;
+      let offset = 0;
+      let length;
+      let position;
+      if (args[0] instanceof Buffer) {
+        buffer = args[0];
+        offset = args[1] ?? 0;
+        length = args[2] ?? buffer.byteLength - offset;
+        position = args[3];
+      } else {
+        const [options] = args;
+        buffer = options.buffer ?? Buffer.alloc(0);
+        offset = options.offset ?? 0;
+        length = options.length ?? buffer.byteLength - offset;
+        position = options.position;
+      }
+      if (position != null) {
+        this._ioStream.seekFromStart(position);
+      }
+      const br = this._ioStream.read(length);
+      return _resolveTo(br, (bytesRead) => {
+        buffer.set(bytesRead, offset);
+        return {
+          bytesRead: bytesRead.length,
+          buffer
+        };
+      });
+    }
+    async writeFile(...[data, options]) {
+      if (!this._canWrite) {
+        throw new Error("This file cannot be written to.");
+      }
+      this._ioStream.truncate(0);
+      if (typeof data === "string") {
+        const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+        const encoded = Buffer.from(data, encoding).valueOf();
+        this._ioStream.write(encoded);
+      } else {
+        this._ioStream.write(data);
+      }
+      return this.finishPending().then(() => void 0);
+    }
+    async write(...args) {
+      if (!this._canWrite) {
+        throw new Error("This file cannot be written to.");
+      }
+      if (typeof args[0] === "string") {
+        const [data, position, encoding] = args;
+        const encoded = Buffer.from(data, encoding).valueOf();
+        if (position != null) {
+          this._ioStream.seekFromStart(position);
+        }
+        const bw = this._ioStream.write(encoded);
+        return _resolveTo(bw, (bytesWritten) => {
+          return {
+            bytesWritten,
+            buffer: data
+          };
+        });
+      } else {
+        const [
+          buffer,
+          offset = 0,
+          length = buffer.byteLength - offset,
+          position
+        ] = args;
+        const data = buffer.subarray(offset, offset + length);
+        if (position != null) {
+          this._ioStream.seekFromStart(position);
+        }
+        const bw = this._ioStream.write(data.valueOf());
+        return _resolveTo(bw, (bytesWritten) => {
+          return {
+            bytesWritten,
+            buffer: data
+          };
+        });
+      }
+    }
+    async close() {
+      return this._ioStream.close();
+    }
+    async truncate(len) {
+      return this._ioStream.truncate(Math.max(0, len ?? 0));
+    }
+    async sync() {
+      return this._ioStream.flush();
+    }
+    async datasync() {
+      return this._ioStream.flush();
+    }
+  }
+  class Stats2 {
+    dev;
+    ino;
+    mode;
+    nlink;
+    uid;
+    gid;
+    rdev;
+    size;
+    blksize;
+    blocks;
+    atimeMs;
+    mtimeMs;
+    ctimeMs;
+    birthtimeMs;
+    atime;
+    mtime;
+    ctime;
+    birthtime;
+    isFile() {
+      throw new Error("Method not implemented.");
+    }
+    isDirectory() {
+      throw new Error("Method not implemented.");
+    }
+    isBlockDevice() {
+      throw new Error("Method not implemented.");
+    }
+    isCharacterDevice() {
+      throw new Error("Method not implemented.");
+    }
+    isSymbolicLink() {
+      throw new Error("Method not implemented.");
+    }
+    isFIFO() {
+      throw new Error("Method not implemented.");
+    }
+    isSocket() {
+      throw new Error("Method not implemented.");
+    }
+  }
+  fspromises2.Stats = Stats2;
+  class Dirent2 {
+    name;
+    isFile() {
+      throw new Error("Method not implemented.");
+    }
+    isDirectory() {
+      throw new Error("Method not implemented.");
+    }
+    isBlockDevice() {
+      throw new Error("Method not implemented.");
+    }
+    isCharacterDevice() {
+      throw new Error("Method not implemented.");
+    }
+    isSymbolicLink() {
+      throw new Error("Method not implemented.");
+    }
+    isFIFO() {
+      throw new Error("Method not implemented.");
+    }
+    isSocket() {
+      throw new Error("Method not implemented.");
+    }
+  }
+  fspromises2.Dirent = Dirent2;
 })(fspromises || (fspromises = {}));
 var fs_promises_default = fspromises;
+var constants = fspromises.constants;
+var access = fspromises.access;
 var appendFile = fspromises.appendFile;
 var chmod = fspromises.chmod;
 var chown = fspromises.chown;
-var constants = fspromises.constants;
 var copyFile = fspromises.copyFile;
 var cp = fspromises.cp;
+var lchmod = fspromises.lchmod;
+var lchown = fspromises.lchown;
+var link = fspromises.link;
 var lstat = fspromises.lstat;
 var mkdir = fspromises.mkdir;
 var open = fspromises.open;
 var readdir = fspromises.readdir;
 var readFile = fspromises.readFile;
+var readlink = fspromises.readlink;
+var realpath = fspromises.realpath;
 var rename = fspromises.rename;
 var rm = fspromises.rm;
+var rmdir = fspromises.rmdir;
 var stat = fspromises.stat;
+var symlink = fspromises.symlink;
 var unlink = fspromises.unlink;
 var writeFile = fspromises.writeFile;
+var Dirent = fspromises.Dirent;
+var Stats = fspromises.Stats;
 export {
+  Dirent,
+  Stats,
+  access,
   appendFile,
   chmod,
   chown,
@@ -758,14 +752,21 @@ export {
   copyFile,
   cp,
   fs_promises_default as default,
+  lchmod,
+  lchown,
+  link,
   lstat,
   mkdir,
   open,
   readFile,
   readdir,
+  readlink,
+  realpath,
   rename,
   rm,
+  rmdir,
   stat,
+  symlink,
   unlink,
-  writeFile,
+  writeFile
 };

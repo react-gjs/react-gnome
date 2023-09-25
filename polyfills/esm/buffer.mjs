@@ -1,6 +1,8 @@
 // src/polyfills/buffer.ts
 import { Buffer as BufferPolyfill } from "buffer";
-var Buffer = BufferPolyfill;
-export {
-  Buffer
-};
+import { registerPolyfills } from "./shared/polyfill-global.mjs";
+registerPolyfills("Buffer")(() => {
+  return {
+    Buffer: BufferPolyfill
+  };
+});

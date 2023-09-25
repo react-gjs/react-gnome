@@ -55,7 +55,7 @@ export declare const readConfig: (program: Program) => Promise<{
     } | undefined;
     esbuildPlugins?: {
         name: string;
-        setup: import("dilswer/dist/types/data-types/type-utils").UnknownFunction;
+        setup: (build: import("esbuild").PluginBuild) => void | Promise<void>;
     }[] | undefined;
     externalPackages?: string[] | undefined;
     friendlyName?: string | undefined;
@@ -77,7 +77,7 @@ export declare const readConfig: (program: Program) => Promise<{
         Graphene?: string | undefined;
         Gst?: string | undefined;
         HarfBuzz?: string | undefined;
-        Soup?: string | undefined;
+        Soup?: "2.4" | undefined;
         cairo?: string | undefined;
         xlib?: string | undefined;
     } | undefined;
@@ -92,6 +92,7 @@ export declare const readConfig: (program: Program) => Promise<{
         URL?: boolean | undefined;
         XMLHttpRequest?: boolean | undefined;
         fetch?: boolean | undefined;
+        WebSocket?: boolean | undefined;
         node?: {
             path?: boolean | undefined;
             fs?: boolean | undefined;

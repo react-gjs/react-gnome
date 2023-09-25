@@ -1,5 +1,5 @@
 // src/polyfills/node-os.ts
-import GLib from "gi://GLib";
+import GLib from "gi://GLib?version=2.0";
 var os_default;
 ((os_default2) => {
   const __command = (program, ...args) => {

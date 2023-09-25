@@ -95,16 +95,8 @@
           "properties": {
             "name": {
               "type": "string"
-            },
-            "setup": {
-              "title": "EsBuild Plugin Setup Function"
             }
           },
-          "required": [
-            "name",
-            "setup"
-          ],
-          "title": "EsbuildPlugin",
           "additionalProperties": false
         }
       ],
@@ -183,7 +175,10 @@
           "type": "string"
         },
         "Soup": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "2.4"
+          ]
         },
         "cairo": {
           "type": "string"
@@ -242,6 +237,10 @@
         },
         "fetch": {
           "description": "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope.",
+          "type": "boolean"
+        },
+        "WebSocket": {
+          "description": "Whether the polyfill for a `WebSocket` should be included in the generated bundle. When enabled the `WebSocket` class will become available in the global scope.",
           "type": "boolean"
         },
         "node": {

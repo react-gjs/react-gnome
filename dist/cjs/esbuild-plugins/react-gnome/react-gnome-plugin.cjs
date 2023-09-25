@@ -39,42 +39,112 @@ __export(react_gnome_plugin_exports, {
 });
 module.exports = __toCommonJS(react_gnome_plugin_exports);
 var import_promises = __toESM(require("fs/promises"));
+var import_path = __toESM(require("path"));
 var import_generate_unique_name = require("../../utils/generate-unique-name.cjs");
 var import_default_gi_imports = require("./default-gi-imports.cjs");
 var ExternalImport = class {
-  constructor(path) {
-    this.path = path;
+  constructor(path2) {
+    this.path = path2;
     __publicField(this, "importName");
-    this.importName = "_" + path.replace(/[^a-zA-Z]/g, "") + "_" + (0, import_generate_unique_name.generateUniqueName)(8);
+    this.importName = "_" + path2.replace(/[^a-zA-Z]/g, "") + "_" + (0, import_generate_unique_name.generateUniqueName)(8);
   }
   toImportStatement() {
-    return `import * as ${this.importName} from "${this.path}";`;
+    return `import ${this.importName} from "${this.path}";`;
   }
   toExportStatement() {
     return `module.exports = ${this.importName};`;
   }
 };
-var reactGnomePlugin = (program) => {
+var reactGnomePlugin = (program, options) => {
   const externalPackages = new Set(program.config.externalPackages ?? []);
   externalPackages.add("system");
   externalPackages.add("gettext");
   return {
     name: "react-gnome-esbuild-plugin",
     setup(build) {
+      const gi = new import_default_gi_imports.GiImports(program.config.giVersions);
       const externalImports = [];
-      if (program.resources)
+      for (const [name, version] of options.giRequirements ?? []) {
+        gi.add(name, version);
+      }
+      if (program.resources) {
         build.onLoad(
           {
-            filter: /(.*\.(jpg|jpeg|png|webp|webm|svg|mpeg|mp4|css|ui))|(.*\.resource\.[\w\d]*)/i
+            filter: /(.*\.(jpg|jpeg|png|webp|webm|svg|mpeg|mp4|ui))|(.*\.resource\.[\w\d]*)/i
           },
           (args) => {
             const resource = program.resources.registerResource(args.path);
             return {
-              contents: `const resource = "${resource.resourceString}";
-export default resource;`
+              contents: (
+                /* js */
+                `
+                const resource = ${JSON.stringify(resource.resourceString)};
+                export default resource;
+              `
+              )
             };
           }
         );
+        if (program.type === "start") {
+          build.onLoad(
+            {
+              filter: /.*\.css$/i
+            },
+            async (args) => {
+              const resource = program.resources.registerResource(args.path);
+              const content = await import_promises.default.readFile(
+                import_path.default.resolve(args.path),
+                "utf-8"
+              );
+              return {
+                contents: (
+                  /* js */
+                  `
+                import "react-gjs-renderer"; // renderer mus be imported before styles are added
+
+                const resource = ${JSON.stringify(resource.resourceString)};
+
+                if(applicationCss) {
+                  const css = ${JSON.stringify(content)};
+
+                  applicationCss.addStyles(css);
+                }
+
+                export default resource;
+              `
+                )
+              };
+            }
+          );
+        } else {
+          build.onLoad(
+            {
+              filter: /.*\.css$/i
+            },
+            (args) => {
+              const resource = program.resources.registerResource(args.path);
+              return {
+                contents: (
+                  /* js */
+                  `
+                import "react-gjs-renderer"; // renderer mus be imported before styles are added
+
+                const resource = ${JSON.stringify(resource.resourceString)};
+
+                if(applicationCss) {
+                  applicationCss.addStyles({ 
+                    resource: resource.substring("resource://".length),
+                  });
+                }
+
+                export default resource;
+              `
+                )
+              };
+            }
+          );
+        }
+      }
       build.onResolve(
         {
           filter: /^gapp:(env)$/
@@ -82,7 +152,7 @@ export default resource;`
         (args) => {
           return {
             namespace: "gapp",
-            path: args.path.replace(/^gapp:/, "")
+            path: "env"
           };
         }
       );
@@ -105,6 +175,18 @@ export default resource;`
         path: args.path.replace(/^gi?:/, ""),
         namespace: "gi"
       }));
+      build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
+        const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
+        const vmatch = args.path.match(/^\/\/.+?\?version=(.+?)$/);
+        const version = vmatch ? vmatch[1] : void 0;
+        if (!name) {
+          throw new Error(`Invalid gi import: ${args.path}`);
+        }
+        gi.add(name, version);
+        return {
+          contents: `export default ${name};`
+        };
+      });
       build.onResolve({ filter: /.*/ }, (args) => {
         if (externalPackages.has(args.path)) {
           return {
@@ -114,30 +196,42 @@ export default resource;`
         }
       });
       build.onLoad({ filter: /.*/, namespace: "external-import" }, (args) => {
-        const externalImport = new ExternalImport(args.path);
-        externalImports.push(externalImport);
+        let externalImport = externalImports.find((e) => e.path === args.path);
+        if (!externalImport) {
+          externalImport = new ExternalImport(args.path);
+          externalImports.push(externalImport);
+        }
         return {
           contents: externalImport.toExportStatement()
         };
       });
-      build.onLoad({ filter: /.*/, namespace: "gi" }, async (args) => {
-        const name = args.path.replace(/(^gi:\/\/)|(^gi:)|(^\/\/)|(\?.+)/g, "");
-        return {
-          contents: `export default ${name};`
-        };
-      });
       build.onEnd(async () => {
-        const outputFile = await import_promises.default.readFile(
-          build.initialOptions.outfile,
-          "utf8"
+        const bundle = await import_promises.default.readFile(build.initialOptions.outfile, "utf8");
+        const imports = [
+          gi.toJavaScript(),
+          ...externalImports.map((e) => e.toImportStatement())
+        ];
+        const gtkInit = program.config.giVersions?.Gtk === "4.0" ? (
+          // eslint-disable-next-line quotes
+          /* js */
+          `Gtk.init();`
+        ) : (
+          // eslint-disable-next-line quotes
+          /* js */
+          `Gtk.init(null);`
         );
-        const imports = [(0, import_default_gi_imports.getDefaultGiImports)(program.config.giVersions)];
-        imports.push(...externalImports.map((e) => e.toImportStatement()));
         await import_promises.default.writeFile(
           build.initialOptions.outfile,
-          [...imports, `export function main() {
-${outputFile}
-}`].join("\n")
+          [
+            ...imports,
+            /* js */
+            `
+export function main() {
+${gtkInit}
+${bundle}
+};
+`
+          ].join("\n")
         );
       });
     }

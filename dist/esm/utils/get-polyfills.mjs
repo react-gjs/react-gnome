@@ -1,7 +1,8 @@
 // src/utils/get-polyfills.ts
+import esbuild from "esbuild";
 import path from "path";
 import { getDirPath } from "../get-dirpath/get-dirpath.mjs";
-var getPolyfills = (program) => {
+var getGlobalPolyfills = (program) => {
   const polyfills = { ...program.config.polyfills };
   if (polyfills?.XMLHttpRequest) {
     polyfills.URL = true;
@@ -9,44 +10,121 @@ var getPolyfills = (program) => {
   if (polyfills?.URL || polyfills.node?.querystring) {
     polyfills.Buffer = true;
   }
-  const polyfillPaths = [];
-  const rootPath = getDirPath();
-  if (polyfills?.fetch) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/fetch.mjs"));
-  }
+  const polyFilepaths = [];
   if (polyfills?.Buffer) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/buffer.mjs"));
-  }
-  if (polyfills?.Blob) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/blob.mjs"));
+    polyFilepaths.push("./polyfills/esm/buffer.mjs");
   }
   if (polyfills?.URL) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/url.mjs"));
+    polyFilepaths.push("./polyfills/esm/url.mjs");
+  }
+  if (polyfills?.fetch) {
+    polyFilepaths.push("./polyfills/esm/fetch.mjs");
+  }
+  if (polyfills?.Blob) {
+    polyFilepaths.push("./polyfills/esm/blob.mjs");
   }
   if (polyfills?.FormData) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/form-data.mjs"));
+    polyFilepaths.push("./polyfills/esm/form-data.mjs");
   }
   if (polyfills?.XMLHttpRequest) {
-    polyfillPaths.push(
-      path.resolve(rootPath, "polyfills/esm/xml-http-request.mjs")
-    );
+    polyFilepaths.push("./polyfills/esm/xml-http-request.mjs");
   }
   if (polyfills?.base64) {
-    polyfillPaths.push(path.resolve(rootPath, "polyfills/esm/base64.mjs"));
+    polyFilepaths.push("./polyfills/esm/base64.mjs");
   }
   if (polyfills?.AbortController) {
-    polyfillPaths.push(
-      path.resolve(rootPath, "polyfills/esm/abort-controller.mjs")
-    );
+    polyFilepaths.push("./polyfills/esm/abort-controller.mjs");
   }
+  if (polyfills?.WebSocket) {
+    polyFilepaths.push("./polyfills/esm/websocket.mjs");
+  }
+  const customPolyfills = [];
   if (program.config.customPolyfills) {
+    const rootPath = getDirPath();
     for (const customPoly of program.config.customPolyfills) {
-      if (!customPoly.importName)
-        polyfillPaths.push(path.resolve(program.cwd, customPoly.filepath));
+      if (!customPoly.importName) {
+        const base = path.relative(rootPath, program.cwd);
+        customPolyfills.push(path.join(base, customPoly.filepath));
+      }
     }
   }
-  return polyfillPaths;
+  return buildPolyfillsBundle(polyFilepaths, customPolyfills);
 };
+async function buildPolyfillsBundle(polyfillsPaths, customPolyfills) {
+  const rootPath = getDirPath();
+  const index = (
+    /* js */
+    `
+import { registerPolyfills } from "./polyfills/esm/shared/polyfill-global.mjs";
+${polyfillsPaths.map((p) => (
+      /* js */
+      `import "${p}";`
+    )).join("\n")}
+${customPolyfills.map((p, i) => (
+      /* js */
+      `import p${i} from "${p}";`
+    )).join("\n")}
+${customPolyfills.map(
+      (_, i) => (
+        /* js */
+        `
+const p${i}keys = Object.keys(p${i});
+registerPolyfills(...p${i}keys)(() => {
+  return p${i};
+})
+`
+      )
+    ).join("\n")}
+`.trim()
+  );
+  const requirements = [];
+  const result = await esbuild.build({
+    stdin: {
+      contents: index,
+      loader: "ts",
+      resolveDir: rootPath,
+      sourcefile: "polyfills.ts"
+    },
+    bundle: true,
+    write: false,
+    format: "iife",
+    target: "esnext",
+    plugins: [
+      {
+        name: "replace-gi-imports",
+        setup(build) {
+          build.onResolve({ filter: /^gi:\/\/.+/ }, (args) => {
+            return {
+              namespace: "gi",
+              path: args.path.replace(/^gi:/, "")
+            };
+          });
+          build.onLoad({ namespace: "gi", filter: /.*/ }, (args) => {
+            const name = args.path.replace(/^\/\//, "").replace(/\?.+/, "");
+            const version = args.path.indexOf("?") !== -1 ? args.path.slice(
+              args.path.indexOf("?") + "version=".length + 1
+            ) : void 0;
+            requirements.push([name, version]);
+            return {
+              contents: (
+                /* js */
+                `export default ${name};`
+              )
+            };
+          });
+        }
+      }
+    ]
+  });
+  if (result.errors.length > 0) {
+    throw new Error(result.errors[0].text);
+  }
+  const [out] = result.outputFiles;
+  return {
+    bundle: out.text,
+    requirements
+  };
+}
 export {
-  getPolyfills
+  getGlobalPolyfills
 };

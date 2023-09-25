@@ -25,10 +25,14 @@ __export(config_schema_exports, {
 });
 module.exports = __toCommonJS(config_schema_exports);
 var import_dilswer = require("dilswer");
-var EsbuildPluginDataType = import_dilswer.DataType.RecordOf({
-  name: import_dilswer.DataType.String,
-  setup: import_dilswer.DataType.Function
-}).setTitle("EsbuildPlugin");
+var EsbuildPluginDataType = import_dilswer.DataType.Custom(
+  (v) => typeof v === "object" && v !== null && "name" in v && "setup" in v
+).setTitle("EsbuildPlugin").setExtra({
+  extraType: "external-import",
+  path: "esbuild",
+  typeName: "EsbuildPlugin",
+  originalName: "Plugin"
+});
 var RegexDataType = import_dilswer.DataType.InstanceOf(RegExp);
 RegexDataType.setDescription(
   "A Regular expression. Only supported in JavaScript config files."
@@ -75,7 +79,7 @@ var ConfigSchema = import_dilswer.DataType.RecordOf({
       Graphene: (0, import_dilswer.OptionalField)(import_dilswer.DataType.String),
       Gst: (0, import_dilswer.OptionalField)(import_dilswer.DataType.String),
       HarfBuzz: (0, import_dilswer.OptionalField)(import_dilswer.DataType.String),
-      Soup: (0, import_dilswer.OptionalField)(import_dilswer.DataType.String),
+      Soup: (0, import_dilswer.OptionalField)(import_dilswer.DataType.Literal("2.4")),
       cairo: (0, import_dilswer.OptionalField)(import_dilswer.DataType.String),
       xlib: (0, import_dilswer.OptionalField)(import_dilswer.DataType.String)
     })
@@ -93,6 +97,7 @@ var ConfigSchema = import_dilswer.DataType.RecordOf({
       XMLHttpRequest: (0, import_dilswer.OptionalField)(import_dilswer.DataType.Boolean),
       base64: (0, import_dilswer.OptionalField)(import_dilswer.DataType.Boolean),
       fetch: (0, import_dilswer.OptionalField)(import_dilswer.DataType.Boolean),
+      WebSocket: (0, import_dilswer.OptionalField)(import_dilswer.DataType.Boolean),
       node: (0, import_dilswer.OptionalField)(
         import_dilswer.DataType.RecordOf({
           path: (0, import_dilswer.OptionalField)(import_dilswer.DataType.Boolean),
@@ -203,6 +208,9 @@ polyfills.recordOf.base64.type.setDescription(
 );
 polyfills.recordOf.fetch.type.setDescription(
   "Whether the polyfill for a `fetch()` function should be included in the generated bundle. When enabled the `fetch()` function will become available in the global scope."
+);
+polyfills.recordOf.WebSocket.type.setDescription(
+  "Whether the polyfill for a `WebSocket` should be included in the generated bundle. When enabled the `WebSocket` class will become available in the global scope."
 );
 polyfills.recordOf.node.type.setDescription(
   "Polyfill options for some specific Node.js builtin packages."

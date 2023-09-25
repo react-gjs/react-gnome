@@ -20,6 +20,7 @@ var PackageManagerArg = Argument.define({
 });
 var InitProgram = class {
   constructor() {
+    __publicField(this, "type", "init");
     __publicField(this, "packageManager", new PackageManagerArg());
   }
   run() {
@@ -34,8 +35,8 @@ var InitProgram = class {
       fs.mkdirSync(srcDir);
     }
     Output.print(
-      html`<span
-        >Creating entrypoint file:<s />
+      html`<span>
+        Creating entrypoint file:
         <span color="white">
           ./${path.relative(projectDir, entryFilePath)}
         </span>
@@ -44,7 +45,7 @@ var InitProgram = class {
     fs.writeFileSync(entryFilePath, entryFileContent);
     Output.print(
       html`<span>
-        Creating config file:<s />
+        Creating config file:
         <span color="white">
           ./${path.relative(projectDir, configFilePath)}
         </span>
@@ -53,8 +54,9 @@ var InitProgram = class {
     fs.writeFileSync(configFilePath, configFileContent);
     Output.print(
       html`<span>
-        Updating scripts in:<s /><span color="white">./package.json</span></span
-      >`
+        Updating scripts in:
+        <span color="white">./package.json</span>
+      </span>`
     );
     const packageJsonPath = path.resolve(projectDir, "package.json");
     let packageJson = {};

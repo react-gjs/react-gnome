@@ -1,3 +1,10 @@
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+
 // src/programs/build-program.ts
 import { existsSync, readdirSync } from "fs";
 import fs from "fs/promises";
@@ -24,10 +31,15 @@ import { getPostInstallScript } from "../packaging/templates/post-install-script
 import { AppResources } from "../utils/app-resources.mjs";
 import { Command } from "../utils/command.mjs";
 import { getPlugins } from "../utils/get-plugins.mjs";
-import { getPolyfills } from "../utils/get-polyfills.mjs";
+import { getGlobalPolyfills } from "../utils/get-polyfills.mjs";
 import { pascalToKebab } from "../utils/pascal-to-kebab.mjs";
 import { Program } from "./base.mjs";
+import { createBuildOptions } from "./default-build-options.mjs";
 var BuildProgram = class extends Program {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "type", "build");
+  }
   additionalPlugins() {
     return {};
   }
@@ -169,7 +181,9 @@ var BuildProgram = class extends Program {
     await this.preparePoDirFiles(path.resolve(buildDirPath, "po"), context);
     return context;
   }
-  /** @internal */
+  /**
+   * @internal
+   */
   async main() {
     Output.print(html` <span color="lightBlue">Building package...</span> `);
     const appName = this.appName;
@@ -177,19 +191,17 @@ var BuildProgram = class extends Program {
     this.resources = new AppResources(this.appID);
     if (existsSync(buildDirPath))
       await rimraf(buildDirPath, {});
-    await this.esbuildCtx.init({
-      target: "es2020",
-      format: "esm",
-      inject: getPolyfills(this),
-      entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
-      outfile: path.resolve(buildDirPath, "src", "main.js"),
-      plugins: getPlugins(this),
-      minify: this.config.minify ?? (this.isDev ? false : true),
-      treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
-      jsx: "transform",
-      keepNames: true,
-      bundle: true
-    });
+    const polyfills = await getGlobalPolyfills(this);
+    await this.esbuildCtx.init(
+      createBuildOptions({
+        banner: { js: polyfills.bundle },
+        entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
+        outfile: path.resolve(buildDirPath, "src", "main.js"),
+        plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
+        minify: this.config.minify ?? (this.isDev ? false : true),
+        treeShaking: this.config.treeShake ?? (this.isDev ? false : true)
+      })
+    );
     await this.esbuildCtx.start();
     const { packageName, appVersion } = await this.prepareBuildFiles(
       appName,

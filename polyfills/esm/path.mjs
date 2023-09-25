@@ -1,4 +1,5 @@
 // src/polyfills/path.ts
+import GLib from "gi://GLib?version=2.0";
 var posix_default;
 ((posix_default2) => {
   const SEPARATOR_CHAR = "/";
@@ -93,7 +94,7 @@ var posix_default;
         path = args[i];
       else {
         if (cwd === void 0)
-          cwd = process.cwd();
+          cwd = GLib.get_current_dir();
         path = cwd;
       }
       __assertPath(path);

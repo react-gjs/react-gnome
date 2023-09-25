@@ -1,6 +1,7 @@
 // src/polyfills/xml-http-request.ts
-import Soup from "gi://Soup";
-var XMLHttpRequestPolyfill = (() => {
+import Soup from "gi://Soup?version=2.4";
+import { registerPolyfills } from "./shared/polyfill-global.mjs";
+registerPolyfills("XMLHttpRequest")(() => {
   let RequestEvents;
   ((RequestEvents2) => {
     RequestEvents2["READY_STATE_CHANGE"] = "readystatechange";
@@ -23,10 +24,6 @@ var XMLHttpRequestPolyfill = (() => {
   function typedArrayToString(array) {
     const decoder = new TextDecoder();
     return decoder.decode(array);
-  }
-  function stringToTypedArray(str) {
-    const encoder = new TextEncoder();
-    return encoder.encode(str);
   }
   class ProgressEvent {
     constructor(type, target) {
@@ -74,7 +71,10 @@ var XMLHttpRequestPolyfill = (() => {
       }
       this.listeners.get(event).forEach(async (listener) => {
         try {
-          await listener(ev);
+          if (typeof listener === "function")
+            await listener(ev);
+          else
+            await listener.handleEvent(ev);
         } catch (e) {
           console.error(e);
         }
@@ -129,7 +129,7 @@ var XMLHttpRequestPolyfill = (() => {
       return this.content[0] === type;
     }
     isOfType(type) {
-      const [mainType, subType] = this.content[0].split("/");
+      const [mainType] = this.content[0].split("/");
       return mainType === type;
     }
     toString() {
@@ -148,7 +148,7 @@ var XMLHttpRequestPolyfill = (() => {
       return "";
     }
   }
-  return class XMLHttpRequest {
+  class XMLHttpRequest {
     // #region enum
     DONE = 4 /* DONE */;
     HEADERS_RECEIVED = 2 /* HEADERS_RECEIVED */;
@@ -172,8 +172,7 @@ var XMLHttpRequestPolyfill = (() => {
       password: null
     };
     _currentReadyState = 0 /* UNSENT */;
-    _responseBlob = null;
-    _responseText = null;
+    _responseBuffer = null;
     _responseType = null;
     _responseURL = null;
     _contentType = null;
@@ -195,7 +194,11 @@ var XMLHttpRequestPolyfill = (() => {
       return null;
     }
     get responseText() {
-      return this._responseText;
+      const decoder = new TextDecoder();
+      if (this._responseBuffer) {
+        return decoder.decode(this._responseBuffer);
+      }
+      return null;
     }
     get responseXML() {
       return null;
@@ -238,14 +241,14 @@ var XMLHttpRequestPolyfill = (() => {
     _parseResponseData() {
       switch (this.responseType) {
         case "json":
-          return JSON.parse(this._responseText);
+          return JSON.parse(this.responseText);
         case "arraybuffer":
-          return stringToTypedArray(this._responseText);
+          return this._responseBuffer.slice();
         case "blob":
-          return this._responseBlob;
+          return new Blob([this._responseBuffer]);
         case "text":
         case "":
-          return this._responseText;
+          return this.responseText;
       }
     }
     _loadRequestBody(body) {
@@ -304,12 +307,11 @@ var XMLHttpRequestPolyfill = (() => {
       return Math.max(1, Math.floor(this.timeout / 1e3));
     }
     _getSoupMessage() {
-      const message = Soup.Message.new(
-        this._requestConfig.method,
-        this._getFullUrl()
-      );
+      const method = this._requestConfig.method;
+      const fullUrl = this._getFullUrl();
+      const message = Soup.Message.new(this._requestConfig.method, fullUrl);
       if (!message) {
-        throw new Error(`Invalid URL: ${this._requestConfig.url}`);
+        throw new Error(`Unable to create a message for ${method} ${fullUrl}`);
       }
       this._requestHeaders.forEach((value, key) => {
         message.request_headers.append(key, value);
@@ -403,7 +405,6 @@ var XMLHttpRequestPolyfill = (() => {
               const contentType = msg.response_headers.get_one("Content-Type") ?? null;
               resolve({
                 rawResponseData: msg.response_body_data,
-                responseData: msg.response_body.data,
                 responseType: contentType,
                 responseUrl: msg.uri.to_string(true),
                 statusCode: msg.status_code,
@@ -421,8 +422,7 @@ var XMLHttpRequestPolyfill = (() => {
         this._contentType = response.responseType ? new ContentType(response.responseType) : null;
         this._status = response.statusCode;
         this._statusText = response.statusText;
-        this._responseText = response.responseData;
-        this._responseBlob = response.rawResponseData;
+        this._responseBuffer = response.rawResponseData.toArray();
         this._finishRequest(response.statusCode);
       } catch (e) {
         console.error(e);
@@ -452,8 +452,7 @@ var XMLHttpRequestPolyfill = (() => {
       this._contentType = contentType ? new ContentType(contentType) : null;
       this._status = status_code;
       this._statusText = reason_phrase;
-      this._responseText = message.response_body.data;
-      this._responseBlob = message.response_body_data;
+      this._responseBuffer = message.response_body_data.toArray();
       this._responseURL = message.uri.to_string(true);
       this._finishRequest(status_code);
     }
@@ -497,8 +496,8 @@ var XMLHttpRequestPolyfill = (() => {
     removeEventListener(type, listener) {
       this._eventController.remove(type, listener);
     }
+  }
+  return {
+    XMLHttpRequest
   };
-})();
-export {
-  XMLHttpRequestPolyfill as XMLHttpRequest
-};
+});

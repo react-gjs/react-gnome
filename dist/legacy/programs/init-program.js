@@ -52,6 +52,7 @@ var PackageManagerArg = import_clify.Argument.define({
 });
 var InitProgram = class {
   constructor() {
+    __publicField(this, "type", "init");
     __publicField(this, "packageManager", new PackageManagerArg());
   }
   run() {
@@ -66,8 +67,8 @@ var InitProgram = class {
       import_fs.default.mkdirSync(srcDir);
     }
     import_termx_markup.Output.print(
-      import_termx_markup.html`<span
-        >Creating entrypoint file:<s />
+      import_termx_markup.html`<span>
+        Creating entrypoint file:
         <span color="white">
           ./${import_path.default.relative(projectDir, entryFilePath)}
         </span>
@@ -76,7 +77,7 @@ var InitProgram = class {
     import_fs.default.writeFileSync(entryFilePath, entryFileContent);
     import_termx_markup.Output.print(
       import_termx_markup.html`<span>
-        Creating config file:<s />
+        Creating config file:
         <span color="white">
           ./${import_path.default.relative(projectDir, configFilePath)}
         </span>
@@ -85,8 +86,9 @@ var InitProgram = class {
     import_fs.default.writeFileSync(configFilePath, configFileContent);
     import_termx_markup.Output.print(
       import_termx_markup.html`<span>
-        Updating scripts in:<s /><span color="white">./package.json</span></span
-      >`
+        Updating scripts in:
+        <span color="white">./package.json</span>
+      </span>`
     );
     const packageJsonPath = import_path.default.resolve(projectDir, "package.json");
     let packageJson = {};

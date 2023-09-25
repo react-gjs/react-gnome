@@ -27,6 +27,7 @@ var BuildModeArgument = Argument.define({
 });
 var Program = class {
   constructor() {
+    __publicField(this, "type", "build");
     __publicField(this, "envs", new EnvVars());
     __publicField(this, "config");
     __publicField(this, "cwd", process.cwd());
@@ -67,7 +68,9 @@ var Program = class {
     this.envs.define("appId", this.appID);
     this.envs.define("mode", this.isDev ? "development" : "production");
   }
-  /** @internal */
+  /**
+   * @internal
+   */
   async run() {
     try {
       this.config = await readConfig(this);

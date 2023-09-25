@@ -32,7 +32,7 @@ declare namespace os_default {
     const devNull: () => string;
     function freemem(): number;
     function homedir(): string;
-    function hostname(): string;
+    function hostname(): string | null;
     const machine: () => string;
     const platform: () => string;
     const release: () => string;
@@ -45,7 +45,7 @@ declare namespace os_default {
         gid: number;
         username: string;
         homedir: string;
-        shell: string;
+        shell: string | null;
     };
     function version(): string;
 }

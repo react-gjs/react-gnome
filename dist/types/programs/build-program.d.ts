@@ -6,6 +6,7 @@ type PackagingContext = {
     packageName: string;
 };
 export declare class BuildProgram extends Program {
+    readonly type: "build" | "bundle" | "init" | "start";
     additionalPlugins(): {};
     protected write(data: string, ...pathParts: string[]): Promise<void>;
     protected createDataDir(buildDirPath: string): Promise<void>;

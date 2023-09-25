@@ -2,9 +2,12 @@
 import { importPolyfillsPlugin } from "../esbuild-plugins/import-polyfills/import-polyfills.mjs";
 import { reactGnomePlugin } from "../esbuild-plugins/react-gnome/react-gnome-plugin.mjs";
 import { watchLoggerPlugin } from "../esbuild-plugins/watch-logger/watch-logger-plugin.mjs";
-var getPlugins = (program) => {
+var getPlugins = (program, options) => {
   const additionalPlugins = program.additionalPlugins();
-  const plugins = [importPolyfillsPlugin(program), reactGnomePlugin(program)];
+  const plugins = [
+    importPolyfillsPlugin(program),
+    reactGnomePlugin(program, options)
+  ];
   if (additionalPlugins.before) {
     plugins.push(...additionalPlugins.before);
   }

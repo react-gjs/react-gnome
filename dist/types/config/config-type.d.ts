@@ -1,7 +1,8 @@
+import type { Plugin as EsbuildPlugin } from "esbuild";
 /**
  * Settings for environment variables injected into the generated bundle.
  */
-export declare type EnvVars = {
+type EnvVars = {
   /**
    * If system vars are enabled, an array of strings or a Regex of environment variables that can be included in the generated bundle.
    * 
@@ -32,28 +33,22 @@ export declare type EnvVars = {
   systemVars?: boolean;
 };
 
-
-export declare type EsbuildPlugin = {
-  name: string;
-  setup: (...args: any[]) => unknown;
-};
-
 /**
  * Esbuild plugins.
  * Plugins can only be added via a JavaScript config file. If you are using a JSON config file and want to add a plugin, you will need to create a `react-gnome.config.js` file and use that instead.
  */
-export declare type EsbuildPlugins = Array<EsbuildPlugin>;
+type EsbuildPlugins = Array<EsbuildPlugin>;
 
 /**
  * An array of packages that should be excluded from the bundle.
  * This is useful for packages that are already installed on the system and should not be bundled.
  */
-export declare type ExternalPackages = Array<string>;
+type ExternalPackages = Array<string>;
 
 /**
  * The versions of the builtin libraries from the `gi://` namespace, that should be used in the generated bundle.
  */
-export declare type GiVersions = {
+type GiVersions = {
   Gtk?: "3.0";
   Gdk?: string;
   Gio?: string;
@@ -71,7 +66,7 @@ export declare type GiVersions = {
   Graphene?: string;
   Gst?: string;
   HarfBuzz?: string;
-  Soup?: string;
+  Soup?: "2.4";
   cairo?: string;
   xlib?: string;
 };
@@ -79,7 +74,7 @@ export declare type GiVersions = {
 /**
  * Polyfill options for some specific Node.js builtin packages.
  */
-export declare type NodePolyfills = {
+type NodePolyfills = {
   /**
    * Whether the polyfill for the `path` and/or `node:path` package should be included in the generated bundle. When enabled imports of `path` and `node:path` will be replaced with the polyfill.
    */
@@ -101,7 +96,7 @@ export declare type NodePolyfills = {
 /**
  * Polyfills that should be included in the generated bundle.
  */
-export declare type Polyfills = {
+type Polyfills = {
   /**
    * Whether the polyfill for an `AbortController` should be included in the generated bundle. When enabled the `AbortController`, `AbortSignal` and `AbortError` classes will become available in the global scope.
    */
@@ -135,13 +130,17 @@ export declare type Polyfills = {
    */
   fetch?: boolean;
   /**
+   * Whether the polyfill for a `WebSocket` should be included in the generated bundle. When enabled the `WebSocket` class will become available in the global scope.
+   */
+  WebSocket?: boolean;
+  /**
    * Polyfill options for some specific Node.js builtin packages.
    */
   node?: NodePolyfills;
 };
 
 
-export declare type Config = {
+type Config = {
   /**
    * The name of the application. It is recommended for this name to only include letters, numbers, dashes and floors. Additional it is invalid to have the first or last letter of the name to be anything else than a letter or a number.
    */
@@ -229,3 +228,5 @@ export declare type Config = {
    */
   treeShake?: boolean;
 };
+
+export type { Config };
