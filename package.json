@@ -64,7 +64,7 @@
     "prettier": "^3.0.3",
     "prettier-plugin-jsdoc": "^1.0.2",
     "typescript": "latest",
-    "ws": "^8.14.1"
+    "ws": "^8.14.2"
   },
   "peerDependencies": {
     "ts-node": "^10.9.1"
