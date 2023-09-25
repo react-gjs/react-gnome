@@ -21,70 +21,101 @@
  */
 
 import Soup from "gi://Soup?version=2.4";
+import { registerPolyfills } from "./shared/polyfill-global";
 
-async function fetch(url: RequestInfo, options: Partial<Request> = {} as any) {
-  if (url == null) {
-    throw new Error("URL must be specified.");
-  }
-
-  if (typeof url === "object") {
-    options = url;
-    if (!options.url) {
+registerPolyfills("fetch")(() => {
+  async function fetch(
+    url: RequestInfo,
+    options: Partial<Request> = {} as any,
+  ) {
+    if (url == null) {
       throw new Error("URL must be specified.");
     }
-    url = options.url;
-  }
 
-  const method = options.method || "GET";
+    if (typeof url === "object") {
+      options = url;
+      if (!options.url) {
+        throw new Error("URL must be specified.");
+      }
+      url = options.url;
+    }
 
-  const message = Soup.Message.new(method, url);
+    const method = options.method || "GET";
 
-  if (!message) {
-    throw new Error(`Invalid URL: ${url}`);
-  }
+    const message = Soup.Message.new(method, url);
 
-  const httpSession = new Soup.SessionAsync();
+    if (!message) {
+      throw new Error(`Invalid URL: ${url}`);
+    }
 
-  if (options.redirect === "error") {
-    message.set_flags(Soup.MessageFlags.NO_REDIRECT);
-  }
+    const httpSession = new Soup.SessionAsync();
 
-  let wasAborted = false;
-  if (options.signal) {
-    options.signal.addEventListener("abort", () => {
-      httpSession.abort();
-      wasAborted = true;
+    if (options.redirect === "error") {
+      message.set_flags(Soup.MessageFlags.NO_REDIRECT);
+    }
+
+    let wasAborted = false;
+    if (options.signal) {
+      options.signal.addEventListener("abort", () => {
+        httpSession.abort();
+        wasAborted = true;
+      });
+    }
+
+    const headers = options.headers || {};
+
+    for (const header in headers) {
+      // @ts-expect-error
+      message.request_headers.append(header, headers[header]);
+    }
+
+    if (typeof options.body === "string") {
+      message.set_request(
+        "application/json",
+        Soup.MemoryUse.COPY,
+        options.body,
+      );
+    }
+
+    const responseBuffer = await new Promise<Uint8Array>((resolve) => {
+      httpSession.queue_message(message, (_, msg) => {
+        resolve(msg!.response_body_data.toArray() as any);
+      });
     });
-  }
 
-  const headers = options.headers || {};
+    const { status_code, reason_phrase } = message;
+    const ok = status_code >= 200 && status_code < 300;
 
-  for (const header in headers) {
-    // @ts-expect-error
-    message.request_headers.append(header, headers[header]);
-  }
+    if (!ok) {
+      const abortReason = options.signal?.reason;
+      const error = wasAborted
+        ? () =>
+            abortReason ??
+            new Error("Request was aborted. Cannot read the response body.")
+        : () =>
+            new Error(
+              "HTTP Request has failed, cannot read the response body.",
+            );
 
-  if (typeof options.body === "string") {
-    message.set_request("application/json", Soup.MemoryUse.COPY, options.body);
-  }
-
-  const responseBuffer = await new Promise<Uint8Array>((resolve) => {
-    httpSession.queue_message(message, (_, msg) => {
-      resolve(msg!.response_body_data.toArray() as any);
-    });
-  });
-
-  const { status_code, reason_phrase } = message;
-  const ok = status_code >= 200 && status_code < 300;
-
-  if (!ok) {
-    const abortReason = options.signal?.reason;
-    const error = wasAborted
-      ? () =>
-          abortReason ??
-          new Error("Request was aborted. Cannot read the response body.")
-      : () =>
-          new Error("HTTP Request has failed, cannot read the response body.");
+      return {
+        status: status_code,
+        statusText: reason_phrase,
+        ok,
+        type: "basic",
+        async json() {
+          throw error();
+        },
+        async text() {
+          throw error();
+        },
+        async arrayBuffer() {
+          throw error();
+        },
+        async gBytes() {
+          throw error();
+        },
+      };
+    }
 
     return {
       status: status_code,
@@ -92,39 +123,22 @@ async function fetch(url: RequestInfo, options: Partial<Request> = {} as any) {
       ok,
       type: "basic",
       async json() {
-        throw error();
+        const decoder = new TextDecoder();
+        const responseBody = decoder.decode(responseBuffer);
+        return JSON.parse(responseBody);
       },
       async text() {
-        throw error();
+        const decoder = new TextDecoder();
+        const responseBody = decoder.decode(responseBuffer);
+        return responseBody;
       },
       async arrayBuffer() {
-        throw error();
-      },
-      async gBytes() {
-        throw error();
+        return responseBuffer.buffer;
       },
     };
   }
 
   return {
-    status: status_code,
-    statusText: reason_phrase,
-    ok,
-    type: "basic",
-    async json() {
-      const decoder = new TextDecoder();
-      const responseBody = decoder.decode(responseBuffer);
-      return JSON.parse(responseBody);
-    },
-    async text() {
-      const decoder = new TextDecoder();
-      const responseBody = decoder.decode(responseBuffer);
-      return responseBody;
-    },
-    async arrayBuffer() {
-      return responseBuffer.buffer;
-    },
+    fetch,
   };
-}
-
-export { fetch as fetch };
+});

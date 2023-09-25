@@ -1,7 +1,8 @@
 import type GLib from "gi://GLib?version=2.0";
 import Soup from "gi://Soup?version=2.4";
+import { registerPolyfills } from "./shared/polyfill-global";
 
-const XMLHttpRequestPolyfill = (() => {
+registerPolyfills("XMLHttpRequest")(() => {
   type RequestWithEventHandlers = {
     onabort?: (ev: ProgressEvent) => void;
     onerror?: (ev: ProgressEvent) => void;
@@ -220,7 +221,7 @@ const XMLHttpRequestPolyfill = (() => {
     password: string | null | undefined;
   };
 
-  return class XMLHttpRequest {
+  class XMLHttpRequest {
     // #region enum
 
     readonly DONE = ReadyState.DONE;
@@ -662,7 +663,9 @@ const XMLHttpRequestPolyfill = (() => {
     removeEventListener(type: RequestEvents, listener: EventListener) {
       this._eventController.remove(type, listener);
     }
-  };
-})();
+  }
 
-export { XMLHttpRequestPolyfill as XMLHttpRequest };
+  return {
+    XMLHttpRequest,
+  };
+});

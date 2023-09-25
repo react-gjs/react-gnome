@@ -2,9 +2,10 @@ import GLib from "gi://GLib?version=2.0";
 import Soup from "gi://Soup?version=2.4";
 import type { EventListener } from "./shared/event-emitter";
 import { Event, EventEmitter } from "./shared/event-emitter";
+import { registerPolyfills } from "./shared/polyfill-global";
 import { _async } from "./shared/utils";
 
-namespace WsPolyfill {
+registerPolyfills("WebSocket")(() => {
   type WebSocketEvent = any;
 
   type WebSocketEventListener = EventListener<WebSocketEvent>;
@@ -28,7 +29,7 @@ namespace WsPolyfill {
     }
   }
 
-  export class WebSocket {
+  class WebSocket {
     static readonly CONNECTING = 0;
     static readonly OPEN = 1;
     static readonly CLOSING = 2;
@@ -211,6 +212,8 @@ namespace WsPolyfill {
       this.#emitter.remove(type, listener);
     }
   }
-}
 
-export const WebSocket = WsPolyfill.WebSocket;
+  return {
+    WebSocket,
+  };
+});

@@ -1,14 +1,14 @@
-import fs from "fs";
+import esbuild from "esbuild";
 import path from "path";
 import { getDirPath } from "../get-dirpath/get-dirpath";
 import type { Program } from "../programs/base";
 
 export type Polyfills = {
-  inject: string[];
-  banner: string[];
+  bundle: string;
+  requirements: [string, string | undefined][];
 };
 
-export const getGlobalPolyfills = (program: Program): Polyfills => {
+export const getGlobalPolyfills = (program: Program): Promise<Polyfills> => {
   const polyfills = { ...program.config.polyfills };
 
   if (polyfills?.XMLHttpRequest) {
@@ -19,63 +19,134 @@ export const getGlobalPolyfills = (program: Program): Polyfills => {
     polyfills.Buffer = true;
   }
 
-  const results: Polyfills = {
-    inject: [],
-    banner: [],
-  };
-
-  const rootPath = getDirPath();
+  const polyFilepaths: string[] = [];
 
   if (polyfills?.Buffer) {
-    results.inject.push(path.resolve(rootPath, "polyfills/esm/buffer.mjs"));
+    polyFilepaths.push("./polyfills/esm/buffer.mjs");
   }
 
   if (polyfills?.URL) {
-    results.banner.push(
-      fs.readFileSync(path.resolve(rootPath, "polyfills/esm/url.mjs"), "utf-8"),
-    );
+    polyFilepaths.push("./polyfills/esm/url.mjs");
   }
 
   if (polyfills?.fetch) {
-    results.inject.push(path.resolve(rootPath, "polyfills/esm/fetch.mjs"));
+    polyFilepaths.push("./polyfills/esm/fetch.mjs");
   }
 
   if (polyfills?.Blob) {
-    results.inject.push(path.resolve(rootPath, "polyfills/esm/blob.mjs"));
+    polyFilepaths.push("./polyfills/esm/blob.mjs");
   }
 
   if (polyfills?.FormData) {
-    results.inject.push(path.resolve(rootPath, "polyfills/esm/form-data.mjs"));
+    polyFilepaths.push("./polyfills/esm/form-data.mjs");
   }
 
   if (polyfills?.XMLHttpRequest) {
-    results.inject.push(
-      path.resolve(rootPath, "polyfills/esm/xml-http-request.mjs"),
-    );
+    polyFilepaths.push("./polyfills/esm/xml-http-request.mjs");
   }
 
   if (polyfills?.base64) {
-    results.inject.push(path.resolve(rootPath, "polyfills/esm/base64.mjs"));
+    polyFilepaths.push("./polyfills/esm/base64.mjs");
   }
 
   if (polyfills?.AbortController) {
-    results.inject.push(
-      path.resolve(rootPath, "polyfills/esm/abort-controller.mjs"),
-    );
+    polyFilepaths.push("./polyfills/esm/abort-controller.mjs");
   }
 
   if (polyfills?.WebSocket) {
-    results.inject.push(path.resolve(rootPath, "polyfills/esm/websocket.mjs"));
+    polyFilepaths.push("./polyfills/esm/websocket.mjs");
   }
 
+  const customPolyfills: string[] = [];
+
   if (program.config.customPolyfills) {
+    const rootPath = getDirPath();
     for (const customPoly of program.config.customPolyfills) {
       // polyfills with an import name are handled by the
       // `importPolyfillsPlugin`
-      if (!customPoly.importName)
-        results.inject.push(path.resolve(program.cwd, customPoly.filepath));
+      if (!customPoly.importName) {
+        const base = path.relative(rootPath, program.cwd);
+        customPolyfills.push(path.join(base, customPoly.filepath));
+      }
     }
   }
 
-  return results;
+  return buildPolyfillsBundle(polyFilepaths, customPolyfills);
 };
+
+async function buildPolyfillsBundle(
+  polyfillsPaths: string[],
+  customPolyfills: string[],
+): Promise<Polyfills> {
+  const rootPath = getDirPath();
+  const index = /* js */ `
+import { registerPolyfills } from "./polyfills/esm/shared/polyfill-global.mjs";
+${polyfillsPaths.map((p) => /* js */ `import "${p}";`).join("\n")}
+${customPolyfills
+  .map((p, i) => /* js */ `import p${i} from "${p}";`)
+  .join("\n")}
+${customPolyfills
+  .map(
+    (_, i) => /* js */ `
+const p${i}keys = Object.keys(p${i});
+registerPolyfills(...p${i}keys)(() => {
+  return p${i};
+})
+`,
+  )
+  .join("\n")}
+`.trim();
+
+  const requirements: [string, string | undefined][] = [];
+
+  const result = await esbuild.build({
+    stdin: {
+      contents: index,
+      loader: "ts",
+      resolveDir: rootPath,
+      sourcefile: "polyfills.ts",
+    },
+    bundle: true,
+    write: false,
+    format: "iife",
+    target: "esnext",
+    plugins: [
+      {
+        name: "replace-gi-imports",
+        setup(build) {
+          build.onResolve({ filter: /^gi:\/\/.+/ }, (args) => {
+            return {
+              namespace: "gi",
+              path: args.path.replace(/^gi:/, ""),
+            };
+          });
+
+          build.onLoad({ namespace: "gi", filter: /.*/ }, (args) => {
+            const name = args.path.replace(/^\/\//, "").replace(/\?.+/, "");
+            const version =
+              args.path.indexOf("?") !== -1
+                ? args.path.slice(
+                    args.path.indexOf("?") + "version=".length + 1,
+                  )
+                : undefined;
+            requirements.push([name, version]);
+            return {
+              contents: /* js */ `export default ${name};`,
+            };
+          });
+        },
+      },
+    ],
+  });
+
+  if (result.errors.length > 0) {
+    throw new Error(result.errors[0]!.text);
+  }
+
+  const [out] = result.outputFiles;
+
+  return {
+    bundle: out!.text,
+    requirements,
+  };
+}

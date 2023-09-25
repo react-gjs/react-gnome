@@ -36,8 +36,8 @@ export class InitProgram {
     }
 
     Output.print(
-      html`<span
-        >Creating entrypoint file:<s />
+      html`<span>
+        Creating entrypoint file:
         <span color="white">
           ./${path.relative(projectDir, entryFilePath)}
         </span>
@@ -47,7 +47,7 @@ export class InitProgram {
 
     Output.print(
       html`<span>
-        Creating config file:<s />
+        Creating config file:
         <span color="white">
           ./${path.relative(projectDir, configFilePath)}
         </span>
@@ -59,8 +59,9 @@ export class InitProgram {
 
     Output.print(
       html`<span>
-        Updating scripts in:<s /><span color="white">./package.json</span></span
-      >`,
+        Updating scripts in:
+        <span color="white">./package.json</span>
+      </span>`,
     );
     const packageJsonPath = path.resolve(projectDir, "package.json");
 

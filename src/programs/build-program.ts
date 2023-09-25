@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import rimraf from "rimraf";
 import tar from "tar";
-import { Output, html } from "termx-markup";
+import { html, Output } from "termx-markup";
 import { getAppData } from "../packaging/templates/data/appdata";
 import { getDataBusname } from "../packaging/templates/data/busname";
 import { getDataDesktopEntry } from "../packaging/templates/data/desktop-entry";
@@ -240,15 +240,14 @@ export class BuildProgram extends Program {
 
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
-    const polyfills = getGlobalPolyfills(this);
+    const polyfills = await getGlobalPolyfills(this);
 
     await this.esbuildCtx.init({
       ...defaultBuildOptions,
-      inject: polyfills.inject,
-      banner: { js: polyfills.banner.join("\n\n") },
+      banner: { js: polyfills.bundle },
       entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
       outfile: path.resolve(buildDirPath, "src", "main.js"),
-      plugins: getPlugins(this),
+      plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
       minify: this.config.minify ?? (this.isDev ? false : true),
       treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
     });

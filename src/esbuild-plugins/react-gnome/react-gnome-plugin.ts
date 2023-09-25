@@ -22,7 +22,14 @@ class ExternalImport {
   }
 }
 
-export const reactGnomePlugin = (program: Program) => {
+export type GnomePluginOptions = {
+  giRequirements?: [string, string | undefined][];
+};
+
+export const reactGnomePlugin = (
+  program: Program,
+  options: GnomePluginOptions,
+) => {
   const externalPackages = new Set(program.config.externalPackages ?? []);
   externalPackages.add("system");
   externalPackages.add("gettext");
@@ -32,6 +39,10 @@ export const reactGnomePlugin = (program: Program) => {
     setup(build: esbuild.PluginBuild) {
       const gi = new GiImports(program.config.giVersions);
       const externalImports: ExternalImport[] = [];
+
+      for (const [name, version] of options.giRequirements ?? []) {
+        gi.add(name, version);
+      }
 
       if (program.resources) {
         build.onLoad(

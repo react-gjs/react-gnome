@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-confusing-non-null-assertion */
+
+import { registerPolyfills } from "./shared/polyfill-global";
+
 /**
  * Stolen from:
  * https://github.com/charpeni/whatwg-url/blob/whatwg-url-without-unicode
@@ -27,7 +30,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-namespace __UrlPolyfillImplementation {
+registerPolyfills(
+  "URL",
+  "URLSearchParams",
+)(() => {
   // #region encoding
 
   const utf8Encoder = new TextEncoder();
@@ -1768,7 +1774,7 @@ namespace __UrlPolyfillImplementation {
 
   // #region URLSearchParams
 
-  export class URLSearchParams {
+  class URLSearchParams {
     static createInstanceNoStrip(
       init?:
         | URLSearchParams
@@ -1939,7 +1945,7 @@ namespace __UrlPolyfillImplementation {
 
   // #region URL
 
-  export class URL {
+  class URL {
     _url: UrlObject;
     _query: URLSearchParams;
 
@@ -2165,16 +2171,9 @@ namespace __UrlPolyfillImplementation {
   });
 
   // #endregion
-}
 
-Object.defineProperty(globalThis, "URL", {
-  enumerable: false,
-  writable: false,
-  value: __UrlPolyfillImplementation.URL,
-});
-
-Object.defineProperty(globalThis, "URLSearchParams", {
-  enumerable: false,
-  writable: false,
-  value: __UrlPolyfillImplementation.URLSearchParams,
+  return {
+    URL,
+    URLSearchParams,
+  };
 });

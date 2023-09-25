@@ -1,3 +1,4 @@
+import { html, Output } from "termx-markup";
 import type { Config } from "../../config/config-type";
 
 class GiImport {
@@ -26,12 +27,38 @@ export class GiImports {
     versions.Soup ??= "2.4";
   }
 
+  private printVersionConflict(name: string, v1: string, v2: string) {
+    Output.print(html`
+      <span>
+        <span color="yellow">WARN:</span>
+        <span>
+          GI dependency (${name}) version conflict. ${v1} and ${v2} are both
+          required at the same time.
+        </span>
+      </span>
+    `);
+  }
+
   add(name: string, version?: string) {
-    if (this.imports.has(name)) return;
+    if (this.imports.has(name)) {
+      const im = this.imports.get(name)!;
+      if (version != null) {
+        if (im.version == null) {
+          im.setVersion(version);
+        } else if (version !== im.version) {
+          this.printVersionConflict(name, im.version, version!);
+        }
+      }
+      return;
+    }
 
     if (name in this.versions) {
       // @ts-expect-error
-      version = this.versions[name];
+      const versionOverride = this.versions[name];
+      if (version != null && version !== versionOverride) {
+        this.printVersionConflict(name, versionOverride, version!);
+      }
+      version = versionOverride;
     }
 
     const giImport = new GiImport(name);

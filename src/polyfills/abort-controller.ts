@@ -1,4 +1,10 @@
-namespace AbortControllerPolyfill {
+import { registerPolyfills } from "./shared/polyfill-global";
+
+registerPolyfills(
+  "AbortController",
+  "AbortSignal",
+  "AbortError",
+)(() => {
   enum Events {
     Abort = "abort",
   }
@@ -48,14 +54,14 @@ namespace AbortControllerPolyfill {
     }
   }
 
-  export class AbortError extends Error {
+  class AbortError extends Error {
     constructor(message: string) {
       super(message);
       this.name = "AbortError";
     }
   }
 
-  export class AbortSignal {
+  class AbortSignal {
     static abort(reason?: any) {
       const signal = new AbortSignal();
       signal._abort(reason ?? new AbortError("Signal was aborted."));
@@ -118,7 +124,7 @@ namespace AbortControllerPolyfill {
     }
   }
 
-  export class AbortController {
+  class AbortController {
     private readonly _signal = new AbortSignal();
 
     get signal(): AbortSignal {
@@ -129,8 +135,10 @@ namespace AbortControllerPolyfill {
       this._signal["_abort"]();
     }
   }
-}
 
-export const AbortController = AbortControllerPolyfill.AbortController;
-export const AbortSignal = AbortControllerPolyfill.AbortSignal;
-export const AbortError = AbortControllerPolyfill.AbortError;
+  return {
+    AbortController,
+    AbortSignal,
+    AbortError,
+  };
+});

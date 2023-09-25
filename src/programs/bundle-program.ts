@@ -24,16 +24,15 @@ export class BundleProgram extends Program {
       Output.print(html` <span color="lightBlue"> Building... </span> `);
     }
 
-    const polyfills = getGlobalPolyfills(this);
+    const polyfills = await getGlobalPolyfills(this);
 
     await this.esbuildCtx.init(
       {
         ...defaultBuildOptions,
-        inject: polyfills.inject,
-        banner: { js: polyfills.banner.join("\n\n") },
+        banner: { js: polyfills.bundle },
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
-        plugins: getPlugins(this),
+        plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
       },

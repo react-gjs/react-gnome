@@ -1,3 +1,8 @@
 import { Blob as BlobPolyfill } from "buffer";
+import { registerPolyfills } from "./shared/polyfill-global";
 
-export const Blob = BlobPolyfill;
+registerPolyfills("Blob")(() => {
+  return {
+    Blob: BlobPolyfill,
+  };
+});
