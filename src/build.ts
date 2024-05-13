@@ -8,26 +8,51 @@ import { StartProgram } from "./programs/start-program";
  * Invokes the CLI program that builds the app.
  */
 export async function build() {
-  configure((main) => {
-    main.setDisplayName("react-gnome");
+  const program = configure((main) => {
+    main.setName("react-gnome");
     main.setDescription("Build GTK apps with React.");
 
-    const bundleCmd = main.addSubCommand("bundle", () => new BundleProgram());
-    const buildCmd = main.addSubCommand("build", () => new BuildProgram());
-    const startCmd = main.addSubCommand("start", () => new StartProgram());
-    const initCmd = main.addSubCommand("init", () => new InitProgram());
+    main.command("bundle", (cmd) => {
+      cmd.setDescription(
+        "Create a bundled js file, without the tarball or meson configuration. This is useful if you want to manage the build process yourself.",
+      );
 
-    bundleCmd.setDescription(
-      "Create a bundled js file, without the tarball or meson configuration. This is useful if you want to manage the build process yourself.",
-    );
-    buildCmd.setDescription(
-      "Create a tarball and meson configuration thats ready to be installed.",
-    );
-    startCmd.setDescription("Build and run the app immediately after.");
-    initCmd.setDescription(
-      "Initialize a new project with the necessary files and scripts.",
-    );
+      const program = new BundleProgram(cmd);
+
+      return () => program.run();
+    });
+
+    main.command("build", (cmd) => {
+      cmd.setDescription(
+        "Create a tarball and meson configuration that's ready to be installed.",
+      );
+
+      const program = new BuildProgram(cmd);
+
+      return () => program.run();
+    });
+
+    main.command("start", (cmd) => {
+      cmd.setDescription("Build and run the app immediately.");
+
+      const program = new StartProgram(cmd);
+
+      return () => program.run();
+    });
+
+    main.command("init", (cmd) => {
+      cmd.setDescription(
+        "Initialize a new project with the necessary files and scripts.",
+      );
+
+      const program = new InitProgram(cmd);
+
+      return () => program.run();
+    });
   });
+
+  program.run();
 }
 
-export { BundleProgram, BuildProgram, StartProgram };
+export { BuildProgram, BundleProgram, StartProgram };
+

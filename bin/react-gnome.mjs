@@ -1,3 +1,3 @@
-import { build } from "react-gnome/build";
+import { build } from "@reactgjs/react-gnome/build";
 
 build();

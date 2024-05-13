@@ -1,4 +1,4 @@
-import { Argument } from "clify.js";
+import { CommandInitPhase, Option, defineOption } from "clify.js";
 import type { Config } from "../config/config-type";
 import type { AppResources } from "../utils/app-resources";
 import { EnvVars } from "../utils/env-vars";
@@ -16,21 +16,29 @@ export type DeepReadonly<T> = {
     : Readonly<T[P]>;
 };
 
-type MapArgRecord<A extends Record<string, Argument<any, any>>> = {
-  [K in keyof A]: A[K]["value"];
-};
-
-const WatchArgument = Argument.define({
-  flagChar: "-w",
-  keyword: "--watch",
-  dataType: "boolean",
+const WatchOpt = defineOption({
+  char: "w",
+  name: "watch",
+  type: "boolean",
 });
 
-const BuildModeArgument = Argument.define({
-  flagChar: "-m",
-  keyword: "--mode",
-  dataType: "string",
+const BuildModeOpt = defineOption({
+  char: "m",
+  name: "mode",
+  type: "string",
   description: "The build mode, either 'development' or 'production'.",
+  default: "production",
+  required: true,
+  validate(value) {
+    if (value !== "development" && value !== "production") {
+      return {
+        message: "Invalid mode argument.",
+        received: value,
+        expected: "'development' or 'production'",
+      };
+    }
+    return "ok";
+  },
 });
 
 export abstract class Program {
@@ -41,10 +49,17 @@ export abstract class Program {
   resources?: AppResources;
   esbuildCtx = new ESBuild();
 
-  readonly args = {
-    watch: new WatchArgument(),
-    mode: new BuildModeArgument(),
-  } as const;
+  readonly args: {
+    watch: Option<"boolean", false>;
+    mode: Option<"string", true>;
+  };
+
+  constructor(init: CommandInitPhase) {
+    this.args = {
+      watch: init.option(WatchOpt),
+      mode: init.option(BuildModeOpt),
+    };
+  }
 
   get isDev() {
     return this.args.mode.value === "development";
@@ -86,14 +101,10 @@ export abstract class Program {
     this.envs.define("mode", this.isDev ? "development" : "production");
   }
 
-  /**
-   * @internal
-   */
+  /** @internal */
   abstract main<T extends this>(program: T): any;
 
-  /**
-   * @internal
-   */
+  /** @internal */
   async run() {
     try {
       this.config = await readConfig(this);
@@ -109,7 +120,10 @@ export abstract class Program {
   }
 
   async runWith(
-    args: MapArgRecord<this["args"]>,
+    args: {
+      watch?: boolean;
+      mode?: "development" | "production";
+    },
     config: Config,
     workingDir?: string,
   ) {
@@ -120,7 +134,7 @@ export abstract class Program {
       this.config = config;
       for (const [key, value] of Object.entries(args)) {
         // @ts-ignore
-        const arg: Argument<any, any> = this.args[key];
+        const arg: Option<any, any> = this.args[key];
         if (arg) {
           arg.setDefault(value);
         }

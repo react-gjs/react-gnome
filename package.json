@@ -1,6 +1,8 @@
 {
-  "name": "react-gnome",
-  "bin": "./bin/react-gnome.sh",
+  "name": "@reactgjs/react-gnome",
+  "bin": {
+    "react-gnome": "./bin/react-gnome.sh"
+  },
   "main": "./dist/legacy/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
@@ -40,7 +42,7 @@
   "dependencies": {
     "@reactgjs/renderer": "^0.0.1-beta.1",
     "buffer": "^6.0.3",
-    "clify.js": "ncpa0cpl/clify.js#0.0.4",
+    "clify.js": "^1.0.0-beta.1",
     "dilswer": "2.1.1",
     "esbuild": "^0.19.3",
     "fs-gjs": "^1.0.1",
@@ -52,6 +54,7 @@
   "devDependencies": {
     "@ncpa0cpl/nodepack": "^2.3.0",
     "@reactgjs/gest": "^0.5.0",
+    "@swc/core": "^1.5.5",
     "@types/tar": "^6.1.6",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
@@ -63,6 +66,7 @@
     "husky": "latest",
     "prettier": "^3.0.3",
     "prettier-plugin-jsdoc": "^1.0.2",
+    "ts-node": "^10.9.2",
     "typescript": "latest",
     "ws": "^8.14.1"
   },

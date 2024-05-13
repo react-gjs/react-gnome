@@ -1,23 +1,28 @@
-import { Argument } from "clify.js";
+import { exec } from "child_process";
+import { CommandInitPhase, defineOption } from "clify.js";
 import fs from "fs";
 import path from "path";
-import { html, Output } from "termx-markup";
+import { Output, html } from "termx-markup";
 import { getProjectConfigFile } from "../init-project/config-file";
 import { getEntryFile } from "../init-project/entry-file";
 
-const PackageManagerArg = Argument.define({
-  flagChar: "-p",
-  keyword: "--package-manager",
+const PackageManagerArg = defineOption({
+  char: "p",
+  name: "package-manager",
   description: "The package manager to use for scripts.",
-  dataType: "string",
+  type: "string",
 });
 
 export class InitProgram {
   readonly type = "init";
 
-  packageManager = new PackageManagerArg();
+  packageManager;
 
-  run() {
+  constructor(init: CommandInitPhase) {
+    this.packageManager = init.option(PackageManagerArg);
+  }
+
+  async run() {
     Output.print(html` <span color="green">Initializing new project.</span> `);
 
     const projectDir = process.cwd();
@@ -85,6 +90,56 @@ export class InitProgram {
 
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
+    const hasDep = (dep: string) => {
+      return (
+        (packageJson.dependencies && !!packageJson.dependencies[dep]) ||
+        (packageJson.devDependencies && !!packageJson.devDependencies[dep])
+      );
+    };
+
+    // Install required dependencies
+
+    Output.print(html`<span>Installing dependencies...</span>`);
+
+    const neededDeps: string[] = [];
+    if (!hasDep("react")) {
+      neededDeps.push("react");
+    }
+    if (!hasDep("@reactgjs/renderer")) {
+      neededDeps.push("@reactgjs/renderer");
+    }
+
+    const files = fs.readdirSync(projectDir);
+    if (files.includes("yarn.lock")) {
+      await execute(`yarn add -D ${neededDeps.join(" ")}`);
+    } else if (files.includes("package-lock.json")) {
+      await execute(`npm install --save-dev ${neededDeps.join(" ")}`);
+    } else if (files.includes("pnpm-lock.yaml")) {
+      await execute(`pnpm add -D ${neededDeps.join(" ")}`);
+    } else if (files.includes("bun.lockb")) {
+      await execute(`bun add -D ${neededDeps.join(" ")}`);
+    } else {
+      Output.print(
+        html`<span color="red">
+          Could not detect your package manager. Skipping.
+        </span>`,
+      );
+    }
+
     Output.print(html` <span color="green">Done.</span> `);
   }
+}
+
+function execute(
+  command: string,
+): Promise<{ stdout: string; stderr: string; code: number | null }> {
+  return new Promise((resolve) => {
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        resolve({ stdout, stderr, code: err.code ?? null });
+      } else {
+        resolve({ stdout, stderr, code: 0 });
+      }
+    });
+  });
 }

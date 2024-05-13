@@ -1,3 +1,3 @@
-const { build } = require("react-gnome/build");
+const { build } = require("@reactgjs/react-gnome/build");
 
 build();

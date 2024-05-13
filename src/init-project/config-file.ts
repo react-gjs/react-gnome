@@ -1,9 +1,9 @@
 export const getProjectConfigFile = () =>
   /* ts */ `
 export default () => {
-  /** @type {import("react-gnome").BuildConfig} */
+  /** @type {import("@reactgjs/react-gnome").BuildConfig} */
   const config = {
-    applicationName: "ReactGnomeApp",
+    applicationName: "SampleApp",
     applicationVersion: "1.0.0",
     entrypoint: "./src/start.tsx",
     outDir: "./dist",
