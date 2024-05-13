@@ -2,7 +2,7 @@ import { appIDToPath } from "../../utils/app-id-to-path";
 
 export const getInFile = (params: { appID: string }) =>
   /* js */ `
-#!@GJS@
+#!@GJS@ -m
 
 imports.package.init({
     name: '${params.appID}',

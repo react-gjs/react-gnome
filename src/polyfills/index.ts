@@ -1,1 +1,1 @@
-import "react-gjs-renderer";
+import "@reactgjs/renderer";

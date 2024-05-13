@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import type { Program } from "../../programs/base";
 import { generateUniqueName } from "../../utils/generate-unique-name";
+import { leftPad } from "../../utils/left-pad";
 import { GiImports } from "./default-gi-imports";
 
 class ExternalImport {
@@ -74,7 +75,7 @@ export const reactGnomePlugin = (
               );
               return {
                 contents: /* js */ `
-                import "react-gjs-renderer"; // renderer mus be imported before styles are added
+                import "@reactgjs/renderer"; // renderer mus be imported before styles are added
 
                 const resource = ${JSON.stringify(resource.resourceString)};
 
@@ -98,7 +99,7 @@ export const reactGnomePlugin = (
               const resource = program.resources!.registerResource(args.path);
               return {
                 contents: /* js */ `
-                import "react-gjs-renderer"; // renderer mus be imported before styles are added
+                import "@reactgjs/renderer"; // renderer mus be imported before styles are added
 
                 const resource = ${JSON.stringify(resource.resourceString)};
 
@@ -214,8 +215,8 @@ export const reactGnomePlugin = (
             ...imports,
             /* js */ `
 export function main() {
-${gtkInit}
-${bundle}
+${leftPad(gtkInit, 2, " ")}
+${leftPad(bundle, 2, " ")}
 };
 `,
           ].join("\n"),

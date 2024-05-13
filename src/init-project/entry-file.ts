@@ -4,16 +4,16 @@ import React from "react";
 import {
   Align,
   Markup,
-  render,
+  Renderer,
   ScrollBox,
   Span,
   Window,
-} from "react-gjs-renderer";
+} from "@reactgjs/renderer";
 import "react-gnome";
 import env from "gapp:env";
 
-render(
-    <Window quitAppOnClose title="React Gnome App">
+new Renderer({ appId: env.appId }).start(
+    <Window quitOnClose title="React Gnome App">
       <ScrollBox
         useChildHeight
         useChildWidth
@@ -26,8 +26,5 @@ render(
         </Markup>
       </ScrollBox>
     </Window>,
-    {
-      appId: env.appId,
-    }
 );
 `.trim() + "\n";
