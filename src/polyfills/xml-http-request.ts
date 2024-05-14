@@ -40,8 +40,8 @@ registerPolyfills("XMLHttpRequest")(() => {
   type EventListener =
     | ((ev: ProgressEvent) => void)
     | {
-        handleEvent: (ev: ProgressEvent) => void;
-      };
+      handleEvent: (ev: ProgressEvent) => void;
+    };
 
   enum RequestEvents {
     READY_STATE_CHANGE = "readystatechange",
@@ -203,9 +203,9 @@ registerPolyfills("XMLHttpRequest")(() => {
       } else if (this.is("application/octet-stream")) {
         return "arraybuffer";
       } else if (
-        this.isOfType("image") ||
-        this.isOfType("audio") ||
-        this.isOfType("video")
+        this.isOfType("image")
+        || this.isOfType("audio")
+        || this.isOfType("video")
       ) {
         return "blob";
       }
@@ -348,8 +348,8 @@ registerPolyfills("XMLHttpRequest")(() => {
         }
 
         if (
-          body instanceof ArrayBuffer ||
-          ("buffer" in body && body.buffer instanceof ArrayBuffer)
+          body instanceof ArrayBuffer
+          || ("buffer" in body && body.buffer instanceof ArrayBuffer)
         ) {
           this._body = typedArrayToString(body);
           return;
@@ -532,8 +532,7 @@ registerPolyfills("XMLHttpRequest")(() => {
         }>((resolve, reject) => {
           try {
             httpSession.queue_message(message, (_, msg) => {
-              const contentType =
-                msg!.response_headers!.get_one("Content-Type") ?? null;
+              const contentType = msg!.response_headers!.get_one("Content-Type") ?? null;
 
               resolve({
                 rawResponseData: msg!.response_body_data,

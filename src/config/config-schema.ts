@@ -2,8 +2,7 @@ import { DataType, OptionalField } from "dilswer";
 import type { Plugin as EsbuildPlugin } from "esbuild";
 
 export const EsbuildPluginDataType = DataType.Custom(
-  (v): v is EsbuildPlugin =>
-    typeof v === "object" && v !== null && "name" in v && "setup" in v,
+  (v): v is EsbuildPlugin => typeof v === "object" && v !== null && "name" in v && "setup" in v,
 )
   .setTitle("EsbuildPlugin")
   .setExtra({

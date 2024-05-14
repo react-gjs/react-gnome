@@ -1,4 +1,4 @@
-import { CommandInitPhase, Option, defineOption } from "clify.js";
+import { CommandInitPhase, defineOption, Option } from "clify.js";
 import type { Config } from "../config/config-type";
 import type { AppResources } from "../utils/app-resources";
 import { EnvVars } from "../utils/env-vars";
@@ -11,8 +11,7 @@ import { validateAppName } from "../utils/validate-app-name";
 import { validatePrefix } from "../utils/validate-prefix";
 
 export type DeepReadonly<T> = {
-  readonly [P in keyof T]: T[P] extends object
-    ? DeepReadonly<T[P]>
+  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]>
     : Readonly<T[P]>;
 };
 

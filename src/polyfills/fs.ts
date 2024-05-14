@@ -16,42 +16,32 @@ namespace fs {
 
   type Callback<R> = (err: any, result?: R) => void;
 
-  type Last<A extends any[]> = 5 extends A["length"]
-    ? A[4]
-    : 4 extends A["length"]
-    ? A[3]
-    : 3 extends A["length"]
-    ? A[2]
-    : 2 extends A["length"]
-    ? A[1]
+  type Last<A extends any[]> = 5 extends A["length"] ? A[4]
+    : 4 extends A["length"] ? A[3]
+    : 3 extends A["length"] ? A[2]
+    : 2 extends A["length"] ? A[1]
     : A[0];
 
-  type Poped<A extends any[]> = 5 extends A["length"]
-    ? [A[0], A[1], A[2], A[3]]
-    : 4 extends A["length"]
-    ? [A[0], A[1], A[2]]
-    : 3 extends A["length"]
-    ? [A[0], A[1]]
-    : 2 extends A["length"]
-    ? [A[0]]
+  type Poped<A extends any[]> = 5 extends A["length"] ? [A[0], A[1], A[2], A[3]]
+    : 4 extends A["length"] ? [A[0], A[1], A[2]]
+    : 3 extends A["length"] ? [A[0], A[1]]
+    : 2 extends A["length"] ? [A[0]]
     : [];
 
   type Depromisified<
     A extends any[] = any[],
     R = any,
-  > = undefined extends Last<A>
-    ? Depromisified<Poped<A>, R> & FnWithCallback<A, R>
+  > = undefined extends Last<A> ? Depromisified<Poped<A>, R> & FnWithCallback<A, R>
     : FnWithCallback<A, R>;
 
   function _depromisify<A extends any[], R>(
     fn: AsyncFunction<A, R>,
   ): Depromisified<A, R> {
     return Object.assign(
-      function (...args: [...A, Callback<R>]) {
-        const callback =
-          typeof args[args.length - 1] === "function"
-            ? (args.pop() as Callback<R>)
-            : null;
+      function(...args: [...A, Callback<R>]) {
+        const callback = typeof args[args.length - 1] === "function"
+          ? (args.pop() as Callback<R>)
+          : null;
 
         if (callback === null) {
           throw new ArgTypeError("Missing callback argument");
@@ -59,8 +49,7 @@ namespace fs {
 
         // @ts-expect-error
         fn(...args).then(
-          (result) =>
-            result !== undefined ? callback(null, result) : callback(null),
+          (result) => result !== undefined ? callback(null, result) : callback(null),
           (error) => callback(error),
         );
       },
@@ -230,8 +219,7 @@ namespace fs {
   ) => {
     _ensureWriteableData(data);
 
-    const encoding =
-      (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
     if (typeof data === "string") {
       const encoded = Buffer.from(data, encoding).valueOf();
@@ -248,8 +236,7 @@ namespace fs {
   ) => {
     _ensureWriteableData(data);
 
-    const encoding =
-      (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
     if (typeof data === "string") {
       const encoded = Buffer.from(data, encoding).valueOf();
@@ -320,10 +307,9 @@ namespace fs {
   };
 
   export const readdirSync: typeof fst.readdirSync = (path, options): any => {
-    const withFileTypes =
-      typeof options === "object" && options != null
-        ? options.withFileTypes ?? false
-        : false;
+    const withFileTypes = typeof options === "object" && options != null
+      ? options.withFileTypes ?? false
+      : false;
 
     if (withFileTypes) {
       return SyncFs.listDir(path.toString()).map(_fileInfoToDirent);
@@ -339,8 +325,7 @@ namespace fs {
       throw new Error("Not a symlink");
     }
 
-    const encoding =
-      (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
     if (encoding === "buffer") {
       return Buffer.from(info.symlinkTarget);

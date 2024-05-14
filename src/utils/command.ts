@@ -30,9 +30,11 @@ export class Command {
         } else {
           reject(
             new Error(
-              `Command '${this.command} ${this.args.join(
-                " ",
-              )}' failed with error code: ${code}.\n\n${stdout}\n\n${stderr}`,
+              `Command '${this.command} ${
+                this.args.join(
+                  " ",
+                )
+              }' failed with error code: ${code}.\n\n${stdout}\n\n${stderr}`,
             ),
           );
         }

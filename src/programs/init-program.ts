@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { CommandInitPhase, defineOption } from "clify.js";
 import fs from "fs";
 import path from "path";
-import { Output, html } from "termx-markup";
+import { html, Output } from "termx-markup";
 import { getProjectConfigFile } from "../init-project/config-file";
 import { getEntryFile } from "../init-project/entry-file";
 
@@ -92,8 +92,8 @@ export class InitProgram {
 
     const hasDep = (dep: string) => {
       return (
-        (packageJson.dependencies && !!packageJson.dependencies[dep]) ||
-        (packageJson.devDependencies && !!packageJson.devDependencies[dep])
+        (packageJson.dependencies && !!packageJson.dependencies[dep])
+        || (packageJson.devDependencies && !!packageJson.devDependencies[dep])
       );
     };
 

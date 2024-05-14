@@ -88,8 +88,8 @@ registerPolyfills(
       if (byte !== 0x25) {
         output[outputIndex++] = byte;
       } else if (
-        byte === 0x25 &&
-        (!isASCIIHex(input[i + 1]!) || !isASCIIHex(input[i + 2]!))
+        byte === 0x25
+        && (!isASCIIHex(input[i + 1]!) || !isASCIIHex(input[i + 2]!))
       ) {
         output[outputIndex++] = byte;
       } else {
@@ -119,7 +119,7 @@ registerPolyfills(
   // https://url.spec.whatwg.org/#fragment-percent-encode-set
   const extraFragmentPercentEncodeSet = new Set([
     p(" "),
-    p('"'),
+    p("\""),
     p("<"),
     p(">"),
     p("`"),
@@ -131,7 +131,7 @@ registerPolyfills(
   // https://url.spec.whatwg.org/#query-percent-encode-set
   const extraQueryPercentEncodeSet = new Set([
     p(" "),
-    p('"'),
+    p("\""),
     p("#"),
     p("<"),
     p(">"),
@@ -386,10 +386,10 @@ registerPolyfills(
   function isDoubleDot(buffer: string) {
     buffer = buffer.toLowerCase();
     return (
-      buffer === ".." ||
-      buffer === "%2e." ||
-      buffer === ".%2e" ||
-      buffer === "%2e%2e"
+      buffer === ".."
+      || buffer === "%2e."
+      || buffer === ".%2e"
+      || buffer === "%2e%2e"
     );
   }
 
@@ -399,9 +399,9 @@ registerPolyfills(
 
   function isWindowsDriveLetterString(str: string) {
     return (
-      str.length === 2 &&
-      isASCIIAlpha(str.codePointAt(0)!) &&
-      (str[1] === ":" || str[1] === "|")
+      str.length === 2
+      && isASCIIAlpha(str.codePointAt(0)!)
+      && (str[1] === ":" || str[1] === "|")
     );
   }
 
@@ -453,9 +453,9 @@ registerPolyfills(
     let R = 10;
 
     if (
-      input.length >= 2 &&
-      input.charAt(0) === "0" &&
-      input.charAt(1).toLowerCase() === "x"
+      input.length >= 2
+      && input.charAt(0) === "0"
+      && input.charAt(1).toLowerCase() === "x"
     ) {
       input = input.substring(2);
       R = 16;
@@ -824,9 +824,9 @@ registerPolyfills(
       return;
     }
     if (
-      url.scheme === "file" &&
-      path.length === 1 &&
-      isNormalizedWindowsDriveLetter(path[0])
+      url.scheme === "file"
+      && path.length === 1
+      && isNormalizedWindowsDriveLetter(path[0])
     ) {
       return;
     }
@@ -844,10 +844,10 @@ registerPolyfills(
     cannotBeABaseURL: boolean;
   }) {
     return (
-      url.host === null ||
-      url.host === "" ||
-      url.cannotBeABaseURL ||
-      url.scheme === "file"
+      url.host === null
+      || url.host === ""
+      || url.cannotBeABaseURL
+      || url.scheme === "file"
     );
   }
 
@@ -872,9 +872,9 @@ registerPolyfills(
   function startsWithWindowsDriveLetter(input: number[], pointer: number) {
     const length = input.length - pointer;
     return (
-      length >= 2 &&
-      isWindowsDriveLetterCodePoints(input[pointer]!, input[pointer + 1]!) &&
-      (length === 2 || fileOtherwiseCodePoints.has(input[pointer + 2]!))
+      length >= 2
+      && isWindowsDriveLetterCodePoints(input[pointer]!, input[pointer + 1]!)
+      && (length === 2 || fileOtherwiseCodePoints.has(input[pointer + 2]!))
     );
   }
 
@@ -994,10 +994,10 @@ registerPolyfills(
 
     "parse scheme"(c: number, cStr: string) {
       if (
-        isASCIIAlphanumeric(c) ||
-        c === p("+") ||
-        c === p("-") ||
-        c === p(".")
+        isASCIIAlphanumeric(c)
+        || c === p("+")
+        || c === p("-")
+        || c === p(".")
       ) {
         this.buffer += cStr.toLowerCase();
       } else if (c === p(":")) {
@@ -1011,8 +1011,8 @@ registerPolyfills(
           }
 
           if (
-            (includesCredentials(this.url) || this.url.port !== null) &&
-            this.buffer === "file"
+            (includesCredentials(this.url) || this.url.port !== null)
+            && this.buffer === "file"
           ) {
             return false;
           }
@@ -1031,16 +1031,16 @@ registerPolyfills(
         this.buffer = "";
         if (this.url.scheme === "file") {
           if (
-            this.input[this.pointer + 1] !== p("/") ||
-            this.input[this.pointer + 2] !== p("/")
+            this.input[this.pointer + 1] !== p("/")
+            || this.input[this.pointer + 2] !== p("/")
           ) {
             this.parseError = true;
           }
           this.state = "file";
         } else if (
-          isSpecial(this.url) &&
-          this.base !== null &&
-          this.base.scheme === this.url.scheme
+          isSpecial(this.url)
+          && this.base !== null
+          && this.base.scheme === this.url.scheme
         ) {
           this.state = "special relative or authority";
         } else if (isSpecial(this.url)) {
@@ -1215,11 +1215,11 @@ registerPolyfills(
         }
         this.buffer = "";
       } else if (
-        isNaN(c) ||
-        c === p("/") ||
-        c === p("?") ||
-        c === p("#") ||
-        (isSpecial(this.url) && c === p("\\"))
+        isNaN(c)
+        || c === p("/")
+        || c === p("?")
+        || c === p("#")
+        || (isSpecial(this.url) && c === p("\\"))
       ) {
         if (this.atFlag && this.buffer === "") {
           this.parseError = true;
@@ -1259,20 +1259,20 @@ registerPolyfills(
         this.buffer = "";
         this.state = "port";
       } else if (
-        isNaN(c) ||
-        c === p("/") ||
-        c === p("?") ||
-        c === p("#") ||
-        (isSpecial(this.url) && c === p("\\"))
+        isNaN(c)
+        || c === p("/")
+        || c === p("?")
+        || c === p("#")
+        || (isSpecial(this.url) && c === p("\\"))
       ) {
         --this.pointer;
         if (isSpecial(this.url) && this.buffer === "") {
           this.parseError = true;
           return failure;
         } else if (
-          this.stateOverride &&
-          this.buffer === "" &&
-          (includesCredentials(this.url) || this.url.port !== null)
+          this.stateOverride
+          && this.buffer === ""
+          && (includesCredentials(this.url) || this.url.port !== null)
         ) {
           this.parseError = true;
           return false;
@@ -1310,12 +1310,12 @@ registerPolyfills(
       if (isASCIIDigit(c)) {
         this.buffer += cStr;
       } else if (
-        isNaN(c) ||
-        c === p("/") ||
-        c === p("?") ||
-        c === p("#") ||
-        (isSpecial(this.url) && c === p("\\")) ||
-        this.stateOverride
+        isNaN(c)
+        || c === p("/")
+        || c === p("?")
+        || c === p("#")
+        || (isSpecial(this.url) && c === p("\\"))
+        || this.stateOverride
       ) {
         if (this.buffer !== "") {
           const port = parseInt(this.buffer);
@@ -1392,8 +1392,8 @@ registerPolyfills(
             !startsWithWindowsDriveLetter(
               this.input as number[],
               this.pointer,
-            ) &&
-            isNormalizedWindowsDriveLetterString(this.base.path[0]!)
+            )
+            && isNormalizedWindowsDriveLetterString(this.base.path[0]!)
           ) {
             this.url.path.push(this.base.path[0]!);
           }
@@ -1408,11 +1408,11 @@ registerPolyfills(
 
     "parse file host"(c: number, cStr: string) {
       if (
-        isNaN(c) ||
-        c === p("/") ||
-        c === p("\\") ||
-        c === p("?") ||
-        c === p("#")
+        isNaN(c)
+        || c === p("/")
+        || c === p("\\")
+        || c === p("?")
+        || c === p("#")
       ) {
         --this.pointer;
         if (!this.stateOverride && isWindowsDriveLetterString(this.buffer)) {
@@ -1479,10 +1479,10 @@ registerPolyfills(
 
     "parse path"(c: number) {
       if (
-        isNaN(c) ||
-        c === p("/") ||
-        (isSpecial(this.url) && c === p("\\")) ||
-        (!this.stateOverride && (c === p("?") || c === p("#")))
+        isNaN(c)
+        || c === p("/")
+        || (isSpecial(this.url) && c === p("\\"))
+        || (!this.stateOverride && (c === p("?") || c === p("#")))
       ) {
         if (isSpecial(this.url) && c === p("\\")) {
           this.parseError = true;
@@ -1494,16 +1494,16 @@ registerPolyfills(
             this.url.path.push("");
           }
         } else if (
-          isSingleDot(this.buffer) &&
-          c !== p("/") &&
-          !(isSpecial(this.url) && c === p("\\"))
+          isSingleDot(this.buffer)
+          && c !== p("/")
+          && !(isSpecial(this.url) && c === p("\\"))
         ) {
           this.url.path.push("");
         } else if (!isSingleDot(this.buffer)) {
           if (
-            this.url.scheme === "file" &&
-            this.url.path.length === 0 &&
-            isWindowsDriveLetterString(this.buffer)
+            this.url.scheme === "file"
+            && this.url.path.length === 0
+            && isWindowsDriveLetterString(this.buffer)
           ) {
             this.buffer = `${this.buffer[0]}:`;
           }
@@ -1522,9 +1522,9 @@ registerPolyfills(
         // TODO: If c is not a URL code point and not "%", parse error.
 
         if (
-          c === p("%") &&
-          (!isASCIIHex(this.input[this.pointer + 1] as number) ||
-            !isASCIIHex(this.input[this.pointer + 2] as number))
+          c === p("%")
+          && (!isASCIIHex(this.input[this.pointer + 1] as number)
+            || !isASCIIHex(this.input[this.pointer + 2] as number))
         ) {
           this.parseError = true;
         }
@@ -1549,9 +1549,9 @@ registerPolyfills(
         }
 
         if (
-          c === p("%") &&
-          (!isASCIIHex(this.input[this.pointer + 1] as number) ||
-            !isASCIIHex(this.input[this.pointer + 2] as number))
+          c === p("%")
+          && (!isASCIIHex(this.input[this.pointer + 1] as number)
+            || !isASCIIHex(this.input[this.pointer + 2] as number))
         ) {
           this.parseError = true;
         }
@@ -1569,9 +1569,9 @@ registerPolyfills(
 
     "parse query"(c: number, cStr: string) {
       if (
-        !isSpecial(this.url) ||
-        this.url.scheme === "ws" ||
-        this.url.scheme === "wss"
+        !isSpecial(this.url)
+        || this.url.scheme === "ws"
+        || this.url.scheme === "wss"
       ) {
         this.encodingOverride = "utf-8";
       }
@@ -1595,9 +1595,9 @@ registerPolyfills(
         // TODO: If c is not a URL code point and not "%", parse error.
 
         if (
-          c === p("%") &&
-          (!isASCIIHex(this.input[this.pointer + 1] as number) ||
-            !isASCIIHex(this.input[this.pointer + 2] as number))
+          c === p("%")
+          && (!isASCIIHex(this.input[this.pointer + 1] as number)
+            || !isASCIIHex(this.input[this.pointer + 2] as number))
         ) {
           this.parseError = true;
         }
@@ -1612,9 +1612,9 @@ registerPolyfills(
       if (!isNaN(c)) {
         // TODO: If c is not a URL code point and not "%", parse error.
         if (
-          c === p("%") &&
-          (!isASCIIHex(this.input[this.pointer + 1] as number) ||
-            !isASCIIHex(this.input[this.pointer + 2] as number))
+          c === p("%")
+          && (!isASCIIHex(this.input[this.pointer + 1] as number)
+            || !isASCIIHex(this.input[this.pointer + 2] as number))
         ) {
           this.parseError = true;
         }
@@ -1820,15 +1820,15 @@ registerPolyfills(
         for (const pair of init) {
           if (pair.length !== 2) {
             throw new TypeError(
-              "Failed to construct 'URLSearchParams': parameter 1 sequence's element does not " +
-                "contain exactly two elements.",
+              "Failed to construct 'URLSearchParams': parameter 1 sequence's element does not "
+                + "contain exactly two elements.",
             );
           }
           this._list.push([pair[0], pair[1]]);
         }
       } else if (
-        typeof init === "object" &&
-        Object.getPrototypeOf(init) === null
+        typeof init === "object"
+        && Object.getPrototypeOf(init) === null
       ) {
         for (const name of Object.keys(init)) {
           const value = (

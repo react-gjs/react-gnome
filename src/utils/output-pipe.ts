@@ -4,10 +4,10 @@ export type PipeTransformer = (chunk: string | Buffer) => string | Buffer;
 
 const isAbortError = (e: unknown): e is Error => {
   return (
-    typeof e === "object" &&
-    e !== null &&
-    e instanceof Error &&
-    e.name === "AbortError"
+    typeof e === "object"
+    && e !== null
+    && e instanceof Error
+    && e.name === "AbortError"
   );
 };
 
@@ -38,7 +38,7 @@ export class OutputPipe {
 
     pipeline(
       this.source,
-      async function* (source: NodeJS.ReadableStream) {
+      async function*(source: NodeJS.ReadableStream) {
         source.setEncoding("utf8");
         for await (const chunk of source) {
           yield self.transform(chunk);

@@ -93,8 +93,8 @@ export const parseEnvVarConfig = (program: Program) => {
       }
 
       if (
-        isAllowed(envVars.allow, key) &&
-        !isDisallowed(envVars.disallow, key)
+        isAllowed(envVars.allow, key)
+        && !isDisallowed(envVars.disallow, key)
       ) {
         vars.push([key, value]);
       }

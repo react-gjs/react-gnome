@@ -1,8 +1,9 @@
 import type { BuildOptions } from "esbuild";
 
 const consoleLogReplacement = /**
- * Js
- */ `
+   * Js
+   */
+  `
 const __console_proxy = {
   log: console.log?.bind(console),
   info: console.info?.bind(console),
@@ -42,21 +43,21 @@ const defaultBuildOptions = {
 type DefaultKeys = keyof typeof defaultBuildOptions;
 
 export const createBuildOptions = (
-  options: Omit<BuildOptions, DefaultKeys> &
-    Partial<Pick<BuildOptions, DefaultKeys>>,
+  options:
+    & Omit<BuildOptions, DefaultKeys>
+    & Partial<Pick<BuildOptions, DefaultKeys>>,
 ): BuildOptions => {
   return {
     ...defaultBuildOptions,
     ...options,
     define: {
       ...defaultBuildOptions.define,
-      ...(options.define ?? {}),
+      ...options.define,
     },
     banner: {
       ...options.banner,
-      js:
-        defaultBuildOptions.banner.js +
-        (options.banner?.js ? "\n" + options.banner.js : ""),
+      js: defaultBuildOptions.banner.js
+        + (options.banner?.js ? "\n" + options.banner.js : ""),
     },
   };
 };

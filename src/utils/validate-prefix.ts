@@ -15,10 +15,10 @@ export const validatePrefix = (prefix: string) => {
     }
 
     if (
-      part.startsWith("-") ||
-      part.endsWith("-") ||
-      part.startsWith("_") ||
-      part.endsWith("_")
+      part.startsWith("-")
+      || part.endsWith("-")
+      || part.startsWith("_")
+      || part.endsWith("_")
     ) {
       return errInvalidPrefix();
     }

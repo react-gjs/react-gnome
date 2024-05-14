@@ -8,8 +8,10 @@ export class EnvVars {
   }
 
   public toJavascriptModule() {
-    return `export default { ${Array.from(this.defined)
-      .map(([name, value]) => `${name}: ${JSON.stringify(value)}`)
-      .join(", ")} }`;
+    return `export default { ${
+      Array.from(this.defined)
+        .map(([name, value]) => `${name}: ${JSON.stringify(value)}`)
+        .join(", ")
+    } }`;
   }
 }

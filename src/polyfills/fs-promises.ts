@@ -217,8 +217,7 @@ namespace fspromises {
       return path.writeFile(data, options);
     }
 
-    const encoding =
-      (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
     if (typeof data === "string") {
       const encoded = Buffer.from(data, encoding).valueOf();
@@ -235,8 +234,7 @@ namespace fspromises {
       return path.appendFile(data, options);
     }
 
-    const encoding =
-      (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
     if (typeof data === "string") {
       const encoded = Buffer.from(data, encoding).valueOf();
@@ -313,15 +311,12 @@ namespace fspromises {
   };
 
   export const readdir: typeof fspt.readdir = (path, options): Promise<any> => {
-    const withFileTypes =
-      typeof options === "object" && options != null
-        ? options.withFileTypes ?? false
-        : false;
+    const withFileTypes = typeof options === "object" && options != null
+      ? options.withFileTypes ?? false
+      : false;
 
     if (withFileTypes) {
-      return Fs.listDir(path.toString()).then((files) =>
-        files.map(_fileInfoToDirent),
-      );
+      return Fs.listDir(path.toString()).then((files) => files.map(_fileInfoToDirent));
     }
 
     return Fs.listFilenames(path.toString());
@@ -341,8 +336,7 @@ namespace fspromises {
           );
         }
 
-        const encoding =
-          (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+        const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
         if (encoding === "buffer") {
           return Buffer.from(info.symlinkTarget);
@@ -375,8 +369,7 @@ namespace fspromises {
   ): Promise<any> => {
     return Fs.fileInfo(path.toString(), { followSymlinks: true }).then(
       (info) => {
-        const encoding =
-          typeof options === "string" ? options : options?.encoding;
+        const encoding = typeof options === "string" ? options : options?.encoding;
 
         if (encoding === "buffer") {
           return Buffer.from(info.filepath);
@@ -471,8 +464,8 @@ namespace fspromises {
         }
 
         if (
-          _checkFlag(flags, constants.O_SYNC) ||
-          _checkFlag(flags, constants.O_DSYNC)
+          _checkFlag(flags, constants.O_SYNC)
+          || _checkFlag(flags, constants.O_DSYNC)
         ) {
           this._openInSyncMode = true;
         }
@@ -620,11 +613,7 @@ namespace fspromises {
       if ("finishPending" in this._ioStream) {
         return this._ioStream.finishPending();
       }
-      return {
-        then(fn: Function) {
-          fn();
-        },
-      };
+      return Promise.resolve();
     }
 
     async stat(): Promise<Stats> {
@@ -647,8 +636,7 @@ namespace fspromises {
       let uarr: Uint8Array;
 
       if (typeof data === "string") {
-        const encoding =
-          (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+        const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
         const encoded = Buffer.from(data, encoding).valueOf();
 
@@ -674,17 +662,17 @@ namespace fspromises {
     readFile(
       options:
         | {
-            encoding: BufferEncoding;
-            flag?: string | number | undefined;
-          }
+          encoding: BufferEncoding;
+          flag?: string | number | undefined;
+        }
         | BufferEncoding,
     ): Promise<string>;
     async readFile(
       options?:
         | {
-            encoding?: BufferEncoding | null;
-            flag?: string | number | undefined;
-          }
+          encoding?: BufferEncoding | null;
+          flag?: string | number | undefined;
+        }
         | BufferEncoding
         | null,
     ): Promise<string | Buffer> {
@@ -692,8 +680,7 @@ namespace fspromises {
         throw new Error("This file cannot be read.");
       }
 
-      const encoding =
-        (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+      const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
       this._ioStream.seekFromStart(0);
       const br = this._ioStream.readAll();
@@ -760,8 +747,7 @@ namespace fspromises {
       this._ioStream.truncate(0);
 
       if (typeof data === "string") {
-        const encoding =
-          (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+        const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
 
         const encoded = Buffer.from(data, encoding).valueOf();
 

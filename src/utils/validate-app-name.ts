@@ -8,10 +8,10 @@ export const validateAppName = (appName: string) => {
   }
 
   if (
-    appName.startsWith("-") ||
-    appName.endsWith("-") ||
-    appName.startsWith("_") ||
-    appName.endsWith("_")
+    appName.startsWith("-")
+    || appName.endsWith("-")
+    || appName.startsWith("_")
+    || appName.endsWith("_")
   ) {
     return errInvalidAppName();
   }

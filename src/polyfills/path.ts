@@ -62,10 +62,10 @@ namespace posix_default {
           // NOOP
         } else if (lastSlash !== i - 1 && dots === 2) {
           if (
-            res.length < 2 ||
-            lastSegmentLength !== 2 ||
-            res.charCodeAt(res.length - 1) !== 46 /*.*/ ||
-            res.charCodeAt(res.length - 2) !== 46 /*.*/
+            res.length < 2
+            || lastSegmentLength !== 2
+            || res.charCodeAt(res.length - 1) !== 46 /*.*/
+            || res.charCodeAt(res.length - 2) !== 46 /*.*/
           ) {
             if (res.length > 2) {
               const lastSlashIndex = res.lastIndexOf(SEPARATOR_CHAR);
@@ -75,8 +75,7 @@ namespace posix_default {
                   lastSegmentLength = 0;
                 } else {
                   res = res.slice(0, lastSlashIndex);
-                  lastSegmentLength =
-                    res.length - 1 - res.lastIndexOf(SEPARATOR_CHAR);
+                  lastSegmentLength = res.length - 1 - res.lastIndexOf(SEPARATOR_CHAR);
                 }
                 lastSlash = i;
                 dots = 0;
@@ -96,9 +95,9 @@ namespace posix_default {
             lastSegmentLength = 2;
           }
         } else {
-          if (res.length > 0)
+          if (res.length > 0) {
             res += SEPARATOR_CHAR + path.slice(lastSlash + 1, i);
-          else res = path.slice(lastSlash + 1, i);
+          } else res = path.slice(lastSlash + 1, i);
           lastSegmentLength = i - lastSlash - 1;
         }
         lastSlash = i;
@@ -114,8 +113,7 @@ namespace posix_default {
 
   function __format(sep: string, pathObject: PathObject) {
     const dir = pathObject.dir || pathObject.root;
-    const base =
-      pathObject.base || (pathObject.name || "") + (pathObject.ext || "");
+    const base = pathObject.base || (pathObject.name || "") + (pathObject.ext || "");
     if (!dir) {
       return base;
     }
@@ -313,8 +311,9 @@ namespace posix_default {
   }
 
   export function basename(path: string, ext: string) {
-    if (ext !== undefined && typeof ext !== "string")
-      throw new TypeError('"ext" argument must be a string');
+    if (ext !== undefined && typeof ext !== "string") {
+      throw new TypeError("\"ext\" argument must be a string");
+    }
     __assertPath(path);
 
     let start = 0;
@@ -423,12 +422,12 @@ namespace posix_default {
     }
 
     if (
-      startDot === -1 ||
-      end === -1 ||
+      startDot === -1
+      || end === -1
       // We saw a non-dot character immediately before the dot
-      preDotState === 0 ||
+      || preDotState === 0
       // The (right-most) trimmed path component is exactly '..'
-      (preDotState === 1 && startDot === end - 1 && startDot === startPart + 1)
+      || (preDotState === 1 && startDot === end - 1 && startDot === startPart + 1)
     ) {
       return "";
     }
@@ -438,8 +437,8 @@ namespace posix_default {
   export function format(pathObject: string) {
     if (pathObject === null || typeof pathObject !== "object") {
       throw new TypeError(
-        'The "pathObject" argument must be of type Object. Received type ' +
-          typeof pathObject,
+        "The \"pathObject\" argument must be of type Object. Received type "
+          + typeof pathObject,
       );
     }
     return __format(SEPARATOR_CHAR, pathObject);
@@ -499,17 +498,17 @@ namespace posix_default {
     }
 
     if (
-      startDot === -1 ||
-      end === -1 ||
+      startDot === -1
+      || end === -1
       // We saw a non-dot character immediately before the dot
-      preDotState === 0 ||
+      || preDotState === 0
       // The (right-most) trimmed path component is exactly '..'
-      (preDotState === 1 && startDot === end - 1 && startDot === startPart + 1)
+      || (preDotState === 1 && startDot === end - 1 && startDot === startPart + 1)
     ) {
       if (end !== -1) {
-        if (startPart === 0 && isAbsolute)
+        if (startPart === 0 && isAbsolute) {
           ret.base = ret.name = path.slice(1, end);
-        else ret.base = ret.name = path.slice(startPart, end);
+        } else ret.base = ret.name = path.slice(startPart, end);
       }
     } else {
       if (startPart === 0 && isAbsolute) {

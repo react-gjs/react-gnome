@@ -82,19 +82,23 @@ async function buildPolyfillsBundle(
   const index = /* js */ `
 import { registerPolyfills } from "./polyfills/esm/shared/polyfill-global.mjs";
 ${polyfillsPaths.map((p) => /* js */ `import "${p}";`).join("\n")}
-${customPolyfills
-  .map((p, i) => /* js */ `import p${i} from "${p}";`)
-  .join("\n")}
-${customPolyfills
-  .map(
-    (_, i) => /* js */ `
+${
+    customPolyfills
+      .map((p, i) => /* js */ `import p${i} from "${p}";`)
+      .join("\n")
+  }
+${
+    customPolyfills
+      .map(
+        (_, i) => /* js */ `
 const p${i}keys = Object.keys(p${i});
 registerPolyfills(...p${i}keys)(() => {
   return p${i};
 })
 `,
-  )
-  .join("\n")}
+      )
+      .join("\n")
+  }
 `.trim();
 
   const requirements: [string, string | undefined][] = [];
@@ -123,12 +127,11 @@ registerPolyfills(...p${i}keys)(() => {
 
           build.onLoad({ namespace: "gi", filter: /.*/ }, (args) => {
             const name = args.path.replace(/^\/\//, "").replace(/\?.+/, "");
-            const version =
-              args.path.indexOf("?") !== -1
-                ? args.path.slice(
-                    args.path.indexOf("?") + "version=".length + 1,
-                  )
-                : undefined;
+            const version = args.path.indexOf("?") !== -1
+              ? args.path.slice(
+                args.path.indexOf("?") + "version=".length + 1,
+              )
+              : undefined;
             requirements.push([name, version]);
             return {
               contents: /* js */ `export default ${name};`,

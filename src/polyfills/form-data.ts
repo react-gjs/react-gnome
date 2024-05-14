@@ -56,7 +56,7 @@ registerPolyfills("FormData")(() => {
     entries(): IterableIterator<[string, FormDataEntryValue]> {
       const entries = this._entries;
 
-      const generator = function* (): Generator<[string, string]> {
+      const generator = function*(): Generator<[string, string]> {
         for (const [key, value] of entries) {
           for (const v of value) {
             yield [key, v];
@@ -80,7 +80,7 @@ registerPolyfills("FormData")(() => {
     values(): IterableIterator<FormDataEntryValue> {
       const entries = this._entries;
 
-      const generator = function* (): Generator<string> {
+      const generator = function*(): Generator<string> {
         for (const [, value] of entries) {
           for (const v of value) {
             yield v;

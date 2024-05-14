@@ -90,12 +90,12 @@ registerPolyfills("fetch")(() => {
       const abortReason = options.signal?.reason;
       const error = wasAborted
         ? () =>
-            abortReason ??
-            new Error("Request was aborted. Cannot read the response body.")
+          abortReason
+            ?? new Error("Request was aborted. Cannot read the response body.")
         : () =>
-            new Error(
-              "HTTP Request has failed, cannot read the response body.",
-            );
+          new Error(
+            "HTTP Request has failed, cannot read the response body.",
+          );
 
       return {
         status: status_code,

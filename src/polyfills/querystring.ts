@@ -27,15 +27,11 @@ namespace QueryString_default {
   const ArrayIsArray = (v: any): v is any[] => Array.isArray(v);
   const MathAbs = (v: number) => Math.abs(v);
   const NumberIsFinite = (v: number) => Number.isFinite(v);
-  const NumberPrototypeToString = (v: number, radix?: number) =>
-    Number.prototype.toString.call(v, radix);
+  const NumberPrototypeToString = (v: number, radix?: number) => Number.prototype.toString.call(v, radix);
   const ObjectKeys = (v: object) => Object.keys(v);
-  const StringPrototypeCharCodeAt = (v: string, i: number) =>
-    String.prototype.charCodeAt.call(v, i);
-  const StringPrototypeSlice = (v: string, start?: number, end?: number) =>
-    String.prototype.slice.call(v, start, end);
-  const StringPrototypeToUpperCase = (v: string) =>
-    String.prototype.toUpperCase.call(v);
+  const StringPrototypeCharCodeAt = (v: string, i: number) => String.prototype.charCodeAt.call(v, i);
+  const StringPrototypeSlice = (v: string, start?: number, end?: number) => String.prototype.slice.call(v, start, end);
+  const StringPrototypeToUpperCase = (v: string) => String.prototype.toUpperCase.call(v);
 
   // #region internals
 
@@ -47,31 +43,271 @@ namespace QueryString_default {
   }
 
   const hexTable = new Array(256);
-  for (let i = 0; i < 256; ++i)
-    hexTable[i] =
-      "%" +
-      StringPrototypeToUpperCase(
+  for (let i = 0; i < 256; ++i) {
+    hexTable[i] = "%"
+      + StringPrototypeToUpperCase(
         (i < 16 ? "0" : "") + NumberPrototypeToString(i, 16),
       );
+  }
 
   // prettier-ignore
   const isHexTable = new Int8Array([
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0 - 15
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 16 - 31
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 32 - 47
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, // 48 - 63
-    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 64 - 79
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 80 - 95
-    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 96 - 111
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 112 - 127
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 128 ...
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // ... 256
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 0 - 15
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 16 - 31
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 32 - 47
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 48 - 63
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 64 - 79
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 80 - 95
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 96 - 111
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 112 - 127
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 128 ...
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // ... 256
   ]);
 
   function encodeStr(
@@ -112,10 +348,9 @@ namespace QueryString_default {
       }
       if (c < 0xd800 || c >= 0xe000) {
         lastPos = i + 1;
-        out +=
-          hexTable[0xe0 | (c >> 12)]! +
-          hexTable[0x80 | ((c >> 6) & 0x3f)]! +
-          hexTable[0x80 | (c & 0x3f)]!;
+        out += hexTable[0xe0 | (c >> 12)]!
+          + hexTable[0x80 | ((c >> 6) & 0x3f)]!
+          + hexTable[0x80 | (c & 0x3f)]!;
         continue;
       }
       // Surrogate pair
@@ -130,11 +365,10 @@ namespace QueryString_default {
 
       lastPos = i + 1;
       c = 0x10000 + (((c & 0x3ff) << 10) | c2);
-      out +=
-        hexTable[0xf0 | (c >> 18)]! +
-        hexTable[0x80 | ((c >> 12) & 0x3f)]! +
-        hexTable[0x80 | ((c >> 6) & 0x3f)]! +
-        hexTable[0x80 | (c & 0x3f)]!;
+      out += hexTable[0xf0 | (c >> 18)]!
+        + hexTable[0x80 | ((c >> 12) & 0x3f)]!
+        + hexTable[0x80 | ((c >> 6) & 0x3f)]!
+        + hexTable[0x80 | (c & 0x3f)]!;
     }
     if (lastPos === 0) return str;
     if (lastPos < len) return out + StringPrototypeSlice(str, lastPos);
@@ -145,22 +379,262 @@ namespace QueryString_default {
 
   // prettier-ignore
   const unhexTable = new Int8Array([
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0 - 15
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 16 - 31
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 32 - 47
-    +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, -1, -1, -1, -1, -1, -1, // 48 - 63
-    -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 64 - 79
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 80 - 95
-    -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 96 - 111
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 112 - 127
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 128 ...
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  // ... 255
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 0 - 15
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 16 - 31
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 32 - 47
+    +0,
+    +1,
+    +2,
+    +3,
+    +4,
+    +5,
+    +6,
+    +7,
+    +8,
+    +9,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 48 - 63
+    -1,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 64 - 79
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 80 - 95
+    -1,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 96 - 111
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 112 - 127
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // 128 ...
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1, // ... 255
   ]);
 
   function unescapeBuffer(s: string, decodeSpaces?: boolean): Buffer {
@@ -221,14 +695,134 @@ namespace QueryString_default {
   // alpha (lowercase)
   // prettier-ignore
   const noEscape = new Int8Array([
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0 - 15
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 16 - 31
-    0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, // 32 - 47
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, // 48 - 63
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 64 - 79
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, // 80 - 95
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 96 - 111
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0,  // 112 - 127
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 0 - 15
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 16 - 31
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0, // 32 - 47
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // 48 - 63
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1, // 64 - 79
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1, // 80 - 95
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1, // 96 - 111
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0, // 112 - 127
   ]);
 
   /**
@@ -296,10 +890,9 @@ namespace QueryString_default {
     if (options && typeof options.encodeURIComponent === "function") {
       encode = options.encodeURIComponent;
     }
-    const convert =
-      encode === QueryString_default.escape
-        ? encodeStringified
-        : encodeStringifiedCustom;
+    const convert = encode === QueryString_default.escape
+      ? encodeStringified
+      : encodeStringifiedCustom;
 
     if (obj !== null && typeof obj === "object") {
       const keys = ObjectKeys(obj);
@@ -337,8 +930,9 @@ namespace QueryString_default {
     if (str.length === 0) return [];
     if (str.length === 1) return [StringPrototypeCharCodeAt(str, 0)];
     const ret = new Array(str.length);
-    for (let i = 0; i < str.length; ++i)
+    for (let i = 0; i < str.length; ++i) {
       ret[i] = StringPrototypeCharCodeAt(str, i);
+    }
     return ret;
   }
 
@@ -363,9 +957,9 @@ namespace QueryString_default {
       // A simple Array-specific property check is enough here to
       // distinguish from a string value and is faster and still safe
       // since we are generating all of the values being assigned.
-      if ((curValue as string[]).pop)
+      if ((curValue as string[]).pop) {
         (curValue as string[])[curValue.length] = value;
-      else obj[key] = [curValue as string, value];
+      } else obj[key] = [curValue as string, value];
     }
   }
 
