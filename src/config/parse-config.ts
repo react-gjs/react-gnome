@@ -31,7 +31,15 @@ export function parseConfig(filePath: string, context: ConfigContext) {
 
   if (p.ext === ".json") {
     return parseJsonConfig(filePath);
-  } else if ([".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"].includes(p.ext)) {
+  } else if ([".ts", ".cts", ".mts"].includes(p.ext)) {
+    // @ts-expect-error
+    if (process[Symbol.for("ts-node.register.instance")] == null) {
+      throw new Error(
+        "Invalid config file: To use TypeScript for the config file ts-node package must be installed.",
+      );
+    }
+    return parseJsConfig(filePath, context);
+  } else if ([".js", ".cjs", ".mjs"].includes(p.ext)) {
     return parseJsConfig(filePath, context);
   } else {
     throw new Error(`Unsupported config file type: '${p.ext}'.`);

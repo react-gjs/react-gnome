@@ -55,6 +55,7 @@
     "@ncpa0cpl/nodepack": "^2.3.3",
     "@reactgjs/gest": "^0.5.0",
     "@swc/core": "^1.5.5",
+    "@types/node": "^20.12.12",
     "@types/tar": "^6.1.6",
     "dprint": "^0.45.1",
     "git-hook-tasks": "ncpa0cpl/git-hook-tasks",

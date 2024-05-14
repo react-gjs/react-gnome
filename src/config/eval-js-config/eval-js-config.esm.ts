@@ -4,9 +4,9 @@ export const evalJsConfigFile = async (
   config: string,
 ): Promise<() => unknown> => {
   const ext = path.extname(config);
-  if (ext === ".cjs" || ext === ".cts" || ext === ".ts") {
+  if (ext === ".cjs" || ext === ".cts") {
     throw new Error(
-      `Invalid config file type: '${ext}'. react-gnome is running in ESModule mode and can accept only configs in ESModule format. To use CommonJS, set the 'type' field in your package.json to 'commonjs'.`,
+      `Invalid config file: react-gnome CLI is running in ESM mode and can only accept configs in ESModule format. To run react-gnome in CommonJS mode, set the 'type' field in your package.json to 'commonjs'.`,
     );
   }
 

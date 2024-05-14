@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { CommandInitPhase, defineOption } from "clify.js";
 import fs from "fs";
 import path from "path";
-import { html, Output } from "termx-markup";
+import { Output, html } from "termx-markup";
 import { getProjectConfigFile } from "../init-project/config-file";
 import { getEntryFile } from "../init-project/entry-file";
 
@@ -101,23 +101,37 @@ export class InitProgram {
 
     Output.print(html`<span>Installing dependencies...</span>`);
 
-    const neededDeps: string[] = [];
+    const neededDeps = {
+      dev: <string[]>[],
+      prod: <string[]>[],
+    }
     if (!hasDep("react")) {
-      neededDeps.push("react");
+      neededDeps.prod.push("react");
     }
     if (!hasDep("@reactgjs/renderer")) {
-      neededDeps.push("@reactgjs/renderer");
+      neededDeps.prod.push("@reactgjs/renderer");
     }
 
     const files = fs.readdirSync(projectDir);
+
+    if (files.includes("tsconfig.json") || files.some(f => f.endsWith(".ts"))) {
+      neededDeps.dev.push("typescript");
+      neededDeps.dev.push("@types/react");
+      neededDeps.dev.push("ts-node");
+    }
+
     if (files.includes("yarn.lock")) {
-      await execute(`yarn add -D ${neededDeps.join(" ")}`);
+      await execute(`yarn add -D ${neededDeps.dev.join(" ")}`);
+      await execute(`yarn add ${neededDeps.prod.join(" ")}`);
     } else if (files.includes("package-lock.json")) {
-      await execute(`npm install --save-dev ${neededDeps.join(" ")}`);
+      await execute(`npm install --save-dev ${neededDeps.dev.join(" ")}`);
+      await execute(`npm install --save ${neededDeps.prod.join(" ")}`);
     } else if (files.includes("pnpm-lock.yaml")) {
-      await execute(`pnpm add -D ${neededDeps.join(" ")}`);
+      await execute(`pnpm add -D ${neededDeps.dev.join(" ")}`);
+      await execute(`pnpm add ${neededDeps.prod.join(" ")}`);
     } else if (files.includes("bun.lockb")) {
-      await execute(`bun add -D ${neededDeps.join(" ")}`);
+      await execute(`bun add -D ${neededDeps.dev.join(" ")}`);
+      await execute(`bun add ${neededDeps.prod.join(" ")}`);
     } else {
       Output.print(
         html`<span color="red">
