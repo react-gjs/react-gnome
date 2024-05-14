@@ -96,7 +96,9 @@ export default describe("AbortController", () => {
       controller.abort();
 
       expect(controller.signal.reason).toMatch(match.instanceOf(Error));
-      expect(controller.signal.reason.message).toBe("signal is aborted without reason");
+      expect(controller.signal.reason.message).toBe(
+        "signal is aborted without reason",
+      );
     });
 
     it("should always throw the given reason", () => {

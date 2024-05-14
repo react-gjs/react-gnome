@@ -532,7 +532,8 @@ registerPolyfills("XMLHttpRequest")(() => {
         }>((resolve, reject) => {
           try {
             httpSession.queue_message(message, (_, msg) => {
-              const contentType = msg!.response_headers!.get_one("Content-Type") ?? null;
+              const contentType = msg!.response_headers!.get_one("Content-Type")
+                ?? null;
 
               resolve({
                 rawResponseData: msg!.response_body_data,

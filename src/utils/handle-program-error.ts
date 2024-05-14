@@ -4,7 +4,8 @@ import { html, Output } from "termx-markup";
 const Stderr = new Output(console.error);
 
 export const handleProgramError = (e: unknown) => {
-  const isObject = (o: unknown): o is object => typeof o === "object" && o != null;
+  const isObject = (o: unknown): o is object =>
+    typeof o === "object" && o != null;
 
   const isValidationError = (e: unknown): e is ValidationError => {
     return (isObject(e) && e instanceof Error && "fieldPath" in e) || false;

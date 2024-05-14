@@ -4,7 +4,7 @@ registerPolyfills(
   "AbortController",
   "AbortSignal",
   "AbortError",
-  "TimeoutError"
+  "TimeoutError",
 )(() => {
   enum Events {
     Abort = "abort",
@@ -107,7 +107,7 @@ registerPolyfills(
       const signal = new AbortSignal();
 
       for (const s of signals) {
-        s.addEventListener(Events.Abort, function (this: AbortSignal) {
+        s.addEventListener(Events.Abort, function(this: AbortSignal) {
           if (!signal.aborted) signal._abort(this.reason);
         });
       }

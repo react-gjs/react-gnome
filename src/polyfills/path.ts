@@ -75,7 +75,8 @@ namespace posix_default {
                   lastSegmentLength = 0;
                 } else {
                   res = res.slice(0, lastSlashIndex);
-                  lastSegmentLength = res.length - 1 - res.lastIndexOf(SEPARATOR_CHAR);
+                  lastSegmentLength = res.length - 1
+                    - res.lastIndexOf(SEPARATOR_CHAR);
                 }
                 lastSlash = i;
                 dots = 0;
@@ -113,7 +114,8 @@ namespace posix_default {
 
   function __format(sep: string, pathObject: PathObject) {
     const dir = pathObject.dir || pathObject.root;
-    const base = pathObject.base || (pathObject.name || "") + (pathObject.ext || "");
+    const base = pathObject.base
+      || (pathObject.name || "") + (pathObject.ext || "");
     if (!dir) {
       return base;
     }
@@ -427,7 +429,8 @@ namespace posix_default {
       // We saw a non-dot character immediately before the dot
       || preDotState === 0
       // The (right-most) trimmed path component is exactly '..'
-      || (preDotState === 1 && startDot === end - 1 && startDot === startPart + 1)
+      || (preDotState === 1 && startDot === end - 1
+        && startDot === startPart + 1)
     ) {
       return "";
     }
@@ -503,7 +506,8 @@ namespace posix_default {
       // We saw a non-dot character immediately before the dot
       || preDotState === 0
       // The (right-most) trimmed path component is exactly '..'
-      || (preDotState === 1 && startDot === end - 1 && startDot === startPart + 1)
+      || (preDotState === 1 && startDot === end - 1
+        && startDot === startPart + 1)
     ) {
       if (end !== -1) {
         if (startPart === 0 && isAbsolute) {

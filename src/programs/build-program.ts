@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import rimraf from "rimraf";
 import tar from "tar";
-import { Output, html } from "termx-markup";
+import { html, Output } from "termx-markup";
 import { getAppData } from "../packaging/templates/data/appdata";
 import { getDataBusname } from "../packaging/templates/data/busname";
 import { getDataDesktopEntry } from "../packaging/templates/data/desktop-entry";

@@ -31,7 +31,8 @@ namespace fs {
   type Depromisified<
     A extends any[] = any[],
     R = any,
-  > = undefined extends Last<A> ? Depromisified<Poped<A>, R> & FnWithCallback<A, R>
+  > = undefined extends Last<A>
+    ? Depromisified<Poped<A>, R> & FnWithCallback<A, R>
     : FnWithCallback<A, R>;
 
   function _depromisify<A extends any[], R>(
@@ -49,7 +50,8 @@ namespace fs {
 
         // @ts-expect-error
         fn(...args).then(
-          (result) => result !== undefined ? callback(null, result) : callback(null),
+          (result) =>
+            result !== undefined ? callback(null, result) : callback(null),
           (error) => callback(error),
         );
       },
@@ -219,7 +221,8 @@ namespace fs {
   ) => {
     _ensureWriteableData(data);
 
-    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options)
+      ?? "utf8";
 
     if (typeof data === "string") {
       const encoded = Buffer.from(data, encoding).valueOf();
@@ -236,7 +239,8 @@ namespace fs {
   ) => {
     _ensureWriteableData(data);
 
-    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options)
+      ?? "utf8";
 
     if (typeof data === "string") {
       const encoded = Buffer.from(data, encoding).valueOf();
@@ -325,7 +329,8 @@ namespace fs {
       throw new Error("Not a symlink");
     }
 
-    const encoding = (typeof options === "object" ? options?.encoding : options) ?? "utf8";
+    const encoding = (typeof options === "object" ? options?.encoding : options)
+      ?? "utf8";
 
     if (encoding === "buffer") {
       return Buffer.from(info.symlinkTarget);

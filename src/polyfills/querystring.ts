@@ -27,11 +27,15 @@ namespace QueryString_default {
   const ArrayIsArray = (v: any): v is any[] => Array.isArray(v);
   const MathAbs = (v: number) => Math.abs(v);
   const NumberIsFinite = (v: number) => Number.isFinite(v);
-  const NumberPrototypeToString = (v: number, radix?: number) => Number.prototype.toString.call(v, radix);
+  const NumberPrototypeToString = (v: number, radix?: number) =>
+    Number.prototype.toString.call(v, radix);
   const ObjectKeys = (v: object) => Object.keys(v);
-  const StringPrototypeCharCodeAt = (v: string, i: number) => String.prototype.charCodeAt.call(v, i);
-  const StringPrototypeSlice = (v: string, start?: number, end?: number) => String.prototype.slice.call(v, start, end);
-  const StringPrototypeToUpperCase = (v: string) => String.prototype.toUpperCase.call(v);
+  const StringPrototypeCharCodeAt = (v: string, i: number) =>
+    String.prototype.charCodeAt.call(v, i);
+  const StringPrototypeSlice = (v: string, start?: number, end?: number) =>
+    String.prototype.slice.call(v, start, end);
+  const StringPrototypeToUpperCase = (v: string) =>
+    String.prototype.toUpperCase.call(v);
 
   // #region internals
 
