@@ -36,6 +36,10 @@ export class StartProgram extends BuildProgram {
 
     await this.prepareBuildFiles(appName, buildDirPath);
 
+    if (this.config.beforeBuild) {
+      await this.config.beforeBuild(buildDirPath);
+    }
+
     await new Command("meson", ["setup", "_build"], {
       cwd: buildDirPath,
     }).run();

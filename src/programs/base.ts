@@ -12,7 +12,7 @@ import { validatePrefix } from "../utils/validate-prefix";
 
 export type DeepReadonly<T> = {
   readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]>
-    : Readonly<T[P]>;
+    : T[P];
 };
 
 const WatchOpt = defineOption({

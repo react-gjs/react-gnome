@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import rimraf from "rimraf";
 import tar from "tar";
-import { html, Output } from "termx-markup";
+import { Output, html } from "termx-markup";
 import { getAppData } from "../packaging/templates/data/appdata";
 import { getDataBusname } from "../packaging/templates/data/busname";
 import { getDataDesktopEntry } from "../packaging/templates/data/desktop-entry";
@@ -259,6 +259,10 @@ export class BuildProgram extends Program {
       appName,
       buildDirPath,
     );
+
+    if (this.config.beforeBuild) {
+      await this.config.beforeBuild(buildDirPath);
+    }
 
     await new Command("meson", ["setup", "_build"], {
       cwd: buildDirPath,

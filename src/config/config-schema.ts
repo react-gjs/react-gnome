@@ -98,6 +98,9 @@ export const ConfigSchema = DataType.RecordOf({
     ),
   ),
   treeShake: OptionalField(DataType.Boolean),
+  beforeBuild: OptionalField(DataType.Custom((v): v is ((buildDir: string) => any) => {
+    return typeof v === "function";
+  })),
 });
 
 ConfigSchema.setTitle("Config");
@@ -180,6 +183,10 @@ ConfigSchema.recordOf.friendlyName.type.setDescription(
 
 ConfigSchema.recordOf.license.type.setDescription(
   "The license of the application.\n\nDefault is `GPL-2.0`.",
+);
+
+ConfigSchema.recordOf.beforeBuild.type.setDescription(
+  "A function that will be called before the \"meson build\" command is executed. It will receive the build directory path as an argument.",
 );
 
 const polyfills = ConfigSchema.recordOf.polyfills.type;
