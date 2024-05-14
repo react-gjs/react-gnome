@@ -1,3 +1,3 @@
-import { build } from "@reactgjs/react-gnome/build";
+import { start } from "@reactgjs/react-gnome/cli";
 
-build();
+start();

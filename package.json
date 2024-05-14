@@ -11,10 +11,10 @@
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.cjs"
     },
-    "./build": {
-      "types": "./dist/types/build.d.ts",
-      "import": "./dist/esm/build.mjs",
-      "require": "./dist/cjs/build.cjs"
+    "./cli": {
+      "types": "./dist/types/cli.d.ts",
+      "import": "./dist/esm/cli.mjs",
+      "require": "./dist/cjs/cli.cjs"
     },
     "./polyfills/esm/*.mjs": "./polyfills/esm/*.mjs"
   },
