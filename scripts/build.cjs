@@ -37,7 +37,7 @@ async function main() {
         outDir: p("polyfills"),
         tsConfig: p("tsconfig.json"),
         formats: ["esm"],
-        exclude: [/\.d\.ts$/, /index.ts/],
+        exclude: [/\.d\.ts$/, /index.ts/, /\.json$/],
       }),
     ]);
 
@@ -45,23 +45,7 @@ async function main() {
 
     const configJsonSchema = toJsonSchema(ConfigSchema, {
       additionalProperties: false,
-      customParser: {
-        Function() {
-          return {
-            title: "EsBuild Plugin Setup Function",
-          };
-        },
-        Custom() {
-          // EsBuild Plugin
-          return {
-            type: "object",
-            properties: {
-              name: { type: "string" },
-            },
-            additionalProperties: false,
-          };
-        },
-      },
+      incompatibleTypes: "omit",
     });
 
     await fs.writeFile(
@@ -72,10 +56,16 @@ async function main() {
     const configTsType = toTsType(ConfigSchema, {
       mode: "named-expanded",
       onDuplicateName: "rename",
+      declaration: true,
       getExternalTypeImport: (type) => {
         const metadata = getMetadata(type);
         if (metadata.extra && metadata.extra.extraType === "external-import") {
           return metadata.extra;
+        }
+        if (metadata.extra && metadata.extra.typeDef) {
+          return {
+            typeName: metadata.extra.typeDef,
+          };
         }
       },
     });

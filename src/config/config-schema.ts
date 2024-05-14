@@ -102,7 +102,7 @@ export const ConfigSchema = DataType.RecordOf({
   beforeBuild: OptionalField(
     DataType.Custom((v): v is (buildDir: string) => any => {
       return typeof v === "function";
-    }),
+    }).setExtra({typeDef: "(buildDir: string) => any"})
   ),
 });
 
