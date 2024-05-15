@@ -1,11 +1,10 @@
-export const getEntryFile = () =>
+export const getTsEntryFile = () =>
   /* ts */ `
+/// <reference types="gjs-esm-types" />
 import React from "react";
 import {
-  Align,
   Markup,
   Renderer,
-  ScrollBox,
   Span,
   Window,
 } from "@reactgjs/renderer";

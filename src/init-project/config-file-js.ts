@@ -1,11 +1,11 @@
-export const getProjectConfigFile = () =>
+export const getJsProjectConfigFile = () =>
   /* ts */ `
 export default () => {
   /** @type {import("@reactgjs/react-gnome").BuildConfig} */
   const config = {
     applicationName: "SampleApp",
     applicationVersion: "1.0.0",
-    entrypoint: "./src/start.tsx",
+    entrypoint: "./src/start.jsx",
     outDir: "./dist",
     giVersions: {
       Soup: "2.4",
