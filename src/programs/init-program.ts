@@ -3,7 +3,7 @@ import { CommandInitPhase, defineOption } from "clify.js";
 import fsbase from "fs";
 import fs from "fs/promises";
 import path from "path";
-import { Output, html } from "termx-markup";
+import { html, Output } from "termx-markup";
 import { getJsProjectConfigFile } from "../init-project/config-file-js";
 import { getTsProjectConfigFile } from "../init-project/config-file-ts";
 import { getJsEntryFile } from "../init-project/entry-file-js";

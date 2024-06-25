@@ -562,7 +562,6 @@ registerPolyfills("XMLHttpRequest")(() => {
 
         this._finishRequest(response.statusCode);
       } catch (e) {
-        console.error(e);
         this._eventController.emit(
           RequestEvents.ERROR,
           new ProgressEvent(RequestEvents.ERROR, this),
