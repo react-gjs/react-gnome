@@ -270,10 +270,10 @@
   resolved "https://registry.yarnpkg.com/@oxlint/win32-x64/-/win32-x64-0.3.4.tgz#78c901fd6d5a1d0c4e04ad7dd3eee06d284b976d"
   integrity sha512-MRLiStH88hIKHJ4+VzsD8eEmcJuNsfpzwCu7ndnBzdI7q7ujkSecNPdjxtSiNxoFTRDTJT5F48+vesXCHehwXg==
 
-"@reactgjs/gest@^0.6.0-beta.3":
-  version "0.6.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@reactgjs/gest/-/gest-0.6.0-beta.3.tgz#855807867bfc9f0511e967a7b086ca89b4e8fa3c"
-  integrity sha512-ufQJ8Q5Yk4kWRewyrDt9b3eieG1p9PC7weV54H0iYUUbJr+nSF/YT2lPpmVK7U6p4x7fdx5wdeAquhlHpWGXPA==
+"@reactgjs/gest@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@reactgjs/gest/-/gest-0.6.0.tgz#9dc11100cd97e4b21fe589ab3b0f9015f57e30c4"
+  integrity sha512-8vjt5PmTirDyaxwLIeEo0xH3JnOXytW/6b0TfKqVQa/PY3atYuwtX21zb7Knd5z4rjjhI0p+b/cMlX0+wFJkww==
   dependencies:
     "@ncpa0cpl/mutex.js" "^1.0.1"
     esbuild "~0.24.0"
