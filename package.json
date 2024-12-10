@@ -1,6 +1,9 @@
 {
   "name": "@reactgjs/react-gnome",
-  "bin": "./bin/react-gnome.sh",
+  "version": "1.0.0",
+  "bin": {
+    "react-gnome": "./bin/react-gnome.sh"
+  },
   "main": "./dist/legacy/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
@@ -16,7 +19,17 @@
     },
     "./polyfills/esm/*.mjs": "./polyfills/esm/*.mjs"
   },
-  "version": "1.0.0",
+  "files": [
+    "bin",
+    "dist",
+    "polydills",
+    "cli.js",
+    "gapp:env.d.ts",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "resources.d.ts"
+  ],
   "scripts": {
     "fix:lint": "oxlint --fix .",
     "fix:fmt": "dprint fmt ./src/**/* && dprint fmt ./__tests__/**/*",
@@ -24,8 +37,7 @@
     "test:lint": "oxlint .",
     "test:fmt": "dprint check ./src/**/* && dprint check ./__tests__/**/*",
     "test:tsc": "tsc --noEmit",
-    "build": "node ./scripts/build.cjs",
-    "postinstall": "bash -c \"if [ ! -e .no-postinstall ]; then node ./dist/legacy/add-config-schema.js; fi\""
+    "build": "node ./scripts/build.cjs"
   },
   "keywords": [],
   "repository": {
@@ -38,11 +50,11 @@
     "email": ""
   },
   "dependencies": {
-    "@reactgjs/renderer": "^0.0.1-beta.1",
+    "@reactgjs/renderer": "^0.0.1-beta.3",
     "buffer": "^6.0.3",
-    "clify.js": "^1.0.0-beta.1",
+    "clify.js": "^1.0.0-beta.5",
     "dilswer": "2.1.1",
-    "esbuild": "^0.21.2",
+    "esbuild": "^0.24.0",
     "fs-gjs": "^1.0.1",
     "rimraf": "^4.4.1",
     "tar": "^6.2.0",

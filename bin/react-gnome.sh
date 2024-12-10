@@ -1,10 +1,15 @@
 #!/bin/bash
 
-PKG_JSON_MODULE=$(node -p "require('./package.json').type ?? 'commonjs'")
+PKG_JSON_MODULE=$(cat package.json | grep '"type":' | sed 's/.*: "\(.*\)",\?/\1/')
 HERE=$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")
 
 if which ts-node >/dev/null 2>&1; then
-    if node -p "try { require('@swc/core'); } catch { process.exit(1); }" >/dev/null; then
+    HAS_SWC=false
+    if [ -e "node_modules/@swc/core/package.json" ]; then
+        HAS_SWC=true
+    fi
+
+    if "$HAS_SWC" == true; then
         if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
             ts-node --swc "$HERE"/react-gnome.cjs "$@"
         else
