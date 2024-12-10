@@ -36,6 +36,6 @@ jobs:
       - name: Run Prettier Check
         run: ./.yarn/yarn.cjs test:fmt
       - name: Run Unit Test
-        run: ./.yarn/yarn.cjs test:unit
+        run: ./.yarn/yarn.cjs test:unit -m 0
       - name: Attempt Build
         run: ./.yarn/yarn.cjs build
