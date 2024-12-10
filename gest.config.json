@@ -1,5 +1,6 @@
 {
   "$schema": "node_modules/@reactgjs/gest/dist/gest-config.schema.json",
   "testDirectory": "./__tests__",
-  "parallel": 2
+  "parallel": 4,
+  "multiprocessing": true
 }
