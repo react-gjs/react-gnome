@@ -270,14 +270,14 @@
   resolved "https://registry.yarnpkg.com/@oxlint/win32-x64/-/win32-x64-0.3.4.tgz#78c901fd6d5a1d0c4e04ad7dd3eee06d284b976d"
   integrity sha512-MRLiStH88hIKHJ4+VzsD8eEmcJuNsfpzwCu7ndnBzdI7q7ujkSecNPdjxtSiNxoFTRDTJT5F48+vesXCHehwXg==
 
-"@reactgjs/gest@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@reactgjs/gest/-/gest-0.6.0.tgz#9dc11100cd97e4b21fe589ab3b0f9015f57e30c4"
-  integrity sha512-8vjt5PmTirDyaxwLIeEo0xH3JnOXytW/6b0TfKqVQa/PY3atYuwtX21zb7Knd5z4rjjhI0p+b/cMlX0+wFJkww==
+"@reactgjs/gest@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@reactgjs/gest/-/gest-0.6.3.tgz#2d0b4ffabfce915ac2848499c86a237f9c13d99d"
+  integrity sha512-3q5tPr6i7yFZWzcXaHnlK3vooeX1S9D5KmF4d9dtflckjVMiVcehjA7E9vX6/sRwgbZbA+QJjiYYcmJgv4J8Vg==
   dependencies:
     "@ncpa0cpl/mutex.js" "^1.0.1"
     esbuild "~0.24.0"
-    gjs-multiprocess "0.0.1"
+    gjs-multiprocess "0.0.5"
     path-gjsify "^1.0.0"
 
 "@reactgjs/renderer@^0.0.1-beta.3":
@@ -1032,10 +1032,10 @@ gjs-esm-types@^0.0.4:
   resolved "https://registry.yarnpkg.com/gjs-esm-types/-/gjs-esm-types-0.0.4.tgz#60329a81d99c0252ae7c71c927ae0f2ef956465f"
   integrity sha512-5w9Y7etV9HorOVUswpMAM+tq5GpwLHKSqGREF392bjar6qzN2TwyCOfhnjoPbIfW9Kb1655bys54znMFfvc7ZQ==
 
-gjs-multiprocess@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/gjs-multiprocess/-/gjs-multiprocess-0.0.1.tgz#41f8c8642ed1a85300b9a53272be970eb2285dd9"
-  integrity sha512-Qhoz4Om+Wo2XoHmtPLnM17egHW9+Ggl27FD48XmdjdR5JdCBFbV+3ClXQXevbi1wXV54aG/OhJDT5gHaEmxaRw==
+gjs-multiprocess@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/gjs-multiprocess/-/gjs-multiprocess-0.0.5.tgz#0d9677ce6fbe891a238117936457d85a7ad8bd4c"
+  integrity sha512-6/JSz9Ig4xAl6BH2OJQrTM45JVW48cJIVJ/abaZMZnnSciAYXO3LyBkLZ6e09ptn6ZJYrqFre/DatlTBnyyjDw==
 
 glob-parent@^5.1.2, glob-parent@~5.1.2:
   version "5.1.2"
