@@ -68,7 +68,7 @@
     "@types/node": "^20.12.12",
     "@types/tar": "^6.1.6",
     "dprint": "^0.45.1",
-    "git-hook-tasks": "ncpa0cpl/git-hook-tasks",
+    "git-hook-tasks": "git+https://github.com/ncpa0cpl/git-hook-tasks#4215793",
     "gjs-esm-types": "^0.0.4",
     "husky": "latest",
     "oxlint": "^0.3.4",
