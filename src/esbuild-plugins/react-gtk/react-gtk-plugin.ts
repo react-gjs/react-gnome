@@ -23,20 +23,20 @@ class ExternalImport {
   }
 }
 
-export type GnomePluginOptions = {
+export type ReactGtkEsbuildPluginOptions = {
   giRequirements?: [string, string | undefined][];
 };
 
-export const reactGnomePlugin = (
+export const reactGtkPlugin = (
   program: Program,
-  options: GnomePluginOptions,
+  options: ReactGtkEsbuildPluginOptions,
 ) => {
   const externalPackages = new Set(program.config.externalPackages ?? []);
   externalPackages.add("system");
   externalPackages.add("gettext");
 
   return {
-    name: "react-gnome-esbuild-plugin",
+    name: "react-gtk-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
       const gi = new GiImports(program.config.giVersions);
       const externalImports: ExternalImport[] = [];
@@ -104,7 +104,7 @@ export const reactGnomePlugin = (
                 const resource = ${JSON.stringify(resource.resourceString)};
 
                 if(applicationCss) {
-                  applicationCss.addStyles({ 
+                  applicationCss.addStyles({
                     resource: resource.substring("resource://".length),
                   });
                 }

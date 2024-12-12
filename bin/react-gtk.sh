@@ -11,33 +11,33 @@ if which ts-node >/dev/null 2>&1; then
 
     if "$HAS_SWC" == true; then
         if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
-            ts-node --swc "$HERE"/react-gnome.cjs "$@"
+            ts-node --swc "$HERE"/react-gtk.cjs "$@"
         else
             if [ "$PKG_JSON_MODULE" = "module" ]; then
-                ts-node-esm --swc "$HERE"/react-gnome.mjs "$@"
+                ts-node-esm --swc "$HERE"/react-gtk.mjs "$@"
             else
-                ts-node --swc "$HERE"/react-gnome.js "$@"
+                ts-node --swc "$HERE"/react-gtk.js "$@"
             fi
         fi
     else
         if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
-            ts-node -T "$HERE"/react-gnome.cjs "$@"
+            ts-node -T "$HERE"/react-gtk.cjs "$@"
         else
             if [ "$PKG_JSON_MODULE" = "module" ]; then
-                ts-node-esm -T "$HERE"/react-gnome.mjs "$@"
+                ts-node-esm -T "$HERE"/react-gtk.mjs "$@"
             else
-                ts-node -T "$HERE"/react-gnome.js "$@"
+                ts-node -T "$HERE"/react-gtk.js "$@"
             fi
         fi
     fi
 else
     if [ "$PKG_JSON_MODULE" = "commonjs" ]; then
-        node "$HERE"/react-gnome.cjs "$@"
+        node "$HERE"/react-gtk.cjs "$@"
     else
         if [ "$PKG_JSON_MODULE" = "module" ]; then
-            node "$HERE"/react-gnome.mjs "$@"
+            node "$HERE"/react-gtk.mjs "$@"
         else
-            node "$HERE"/react-gnome.js "$@"
+            node "$HERE"/react-gtk.js "$@"
         fi
     fi
 fi

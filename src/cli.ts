@@ -5,7 +5,7 @@ import { InitProgram } from "./programs/init-program";
 import { StartProgram } from "./programs/start-program";
 
 const program = configure((main) => {
-  main.setName("react-gnome");
+  main.setName("react-gtk");
   main.setDescription("Build GTK apps with React.");
 
   main.command("bundle", (cmd) => {
@@ -49,15 +49,11 @@ const program = configure((main) => {
 
 /**
  * Invokes the CLI program.
- * 
+ *
  * if `command` or `args` are not provided, `process.argv` will be used.
  */
-export async function start(
-  command?: string,
-  args?: Record<string, any>,
-) {
+export async function start(command?: string, args?: Record<string, any>) {
   program.run(command, args);
 }
 
 export { BuildProgram, BundleProgram, InitProgram, StartProgram };
-

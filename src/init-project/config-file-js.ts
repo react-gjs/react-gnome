@@ -1,7 +1,7 @@
 export const getJsProjectConfigFile = () =>
   /* ts */ `
 export default () => {
-  /** @type {import("@reactgjs/react-gnome").BuildConfig} */
+  /** @type {import("@reactgjs/react-gtk").BuildConfig} */
   const config = {
     applicationName: "SampleApp",
     applicationVersion: "1.0.0",

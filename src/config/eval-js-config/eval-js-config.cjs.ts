@@ -11,7 +11,7 @@ export const evalJsConfigFile = async (
   const ext = path.extname(config);
   if (ext === ".mjs" || ext === ".mts") {
     throw new Error(
-      `Invalid config file: react-gnome CLI is running in CommonJS mode and can accept only configs in CommonJS module format. To run react-gnome in ESM mode, set the 'type' field in your package.json to 'module'.`,
+      `Invalid config file: react-gtk CLI is running in CommonJS mode and can accept only configs in CommonJS module format. To run react-gtk in ESM mode, set the 'type' field in your package.json to 'module'.`,
     );
   }
 

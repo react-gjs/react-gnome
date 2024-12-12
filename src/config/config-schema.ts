@@ -149,7 +149,7 @@ ConfigSchema.recordOf.treeShake.type.setDescription(
 );
 
 ConfigSchema.recordOf.esbuildPlugins.type.setDescription(
-  "Esbuild plugins.\nPlugins can only be added via a JavaScript config file. If you are using a JSON config file and want to add a plugin, you will need to create a `react-gnome.config.js` file and use that instead.",
+  "Esbuild plugins.\nPlugins can only be added via a JavaScript config file. If you are using a JSON config file and want to add a plugin, you will need to create a `react-gtk.config.js` file and use that instead.",
 );
 
 ConfigSchema.recordOf.giVersions.type.setDescription(
@@ -257,7 +257,7 @@ polyfills.recordOf.node.type.recordOf.os.type.setDescription(
 const { customPolyfills } = ConfigSchema.recordOf;
 
 customPolyfills.type.setDescription(
-  "Custom polyfills that should be included in the generated bundle.\n\nThis is useful for polyfills that are not included in the polyfills provided by react-gnome.",
+  "Custom polyfills that should be included in the generated bundle.\n\nThis is useful for polyfills that are not included in the polyfills provided by react-gtk.",
 );
 
 customPolyfills.type.arrayOf[0].recordOf.filepath.setDescription(

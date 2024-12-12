@@ -10,7 +10,7 @@
       "url": "./node_modules/git-hook-tasks/dist/config/json-schema.json"
     },
     {
-      "fileMatch": ["react-gnome.config.json"],
+      "fileMatch": ["react-gtk.config.json"],
       "url": "./dist/config-schema.json"
     },
     {

@@ -84,7 +84,7 @@ export class InitProgram {
 
     const configFilePath = path.resolve(
       projectDir,
-      useTypescript ? "react-gnome.config.ts" : "react-gnome.config.mjs",
+      useTypescript ? "react-gtk.config.ts" : "react-gtk.config.mjs",
     );
     if (!fsbase.existsSync(configFilePath)) {
       const configFileContent = useTypescript
@@ -93,7 +93,7 @@ export class InitProgram {
 
       Output.print(
         html`<span>
-        Creating config file:
+          Creating config file:
           <span color="white">
             ./${path.relative(projectDir, configFilePath)}
           </span>
@@ -110,7 +110,7 @@ export class InitProgram {
 
         Output.print(
           html`<span>
-          Creating tsconfig file:
+            Creating tsconfig file:
             <span color="white">
               ./${path.relative(projectDir, tsconfigPath)}
             </span>
@@ -135,9 +135,9 @@ export class InitProgram {
 
     const scripts = packageJson.scripts ?? {};
 
-    scripts.build = `react-gnome build`;
-    scripts.bundle = `react-gnome bundle`;
-    scripts.start = `react-gnome start -m development -w`;
+    scripts.build = `react-gtk build`;
+    scripts.bundle = `react-gtk bundle`;
+    scripts.start = `react-gtk start -m development -w`;
     scripts["install-pkg"] = "meson install -C ./dist/.build/_build";
 
     packageJson.type = "module";

@@ -12,7 +12,7 @@ imports.package.init({
 });
 
 Object.assign(globalThis, {
-  MAIN_LOOP_NAME: "react-gnome-app:main-loop"
+  MAIN_LOOP_NAME: "react-gtk-app:main-loop"
 });
 
 import('resource:///${appIDToPath(params.appID)}/js/main.js')

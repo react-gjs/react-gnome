@@ -1,6 +1,6 @@
 # Polyfills
 
-React Gnome has a set of polyfills that can be enabled in the config file.
+React GTK has a set of polyfills that can be enabled in the config file.
 
 ## Global Polyfills
 
@@ -28,7 +28,7 @@ None of the Node.js core modules are available in GJS environments, but can be a
 
 
 ```tsx
-import type { BuildConfig } from "@reactgjs/react-gnome";
+import type { BuildConfig } from "@reactgjs/react-gtk";
 
 export default () => {
   const config: BuildConfig = {
@@ -61,11 +61,11 @@ export default () => {
 
 ## Custom Polyfills
 
-If a node module or a global you need is not available among the polyfills provided by React Gnome,
+If a node module or a global you need is not available among the polyfills provided by React GTK,
 you can simply add them through the `customPolyfills` option in the config file.
 
 ```tsx
-import type { BuildConfig } from "@reactgjs/react-gnome";
+import type { BuildConfig } from "@reactgjs/react-gtk";
 
 export default () => {
   const config: BuildConfig = {

@@ -3,7 +3,7 @@ import path from "path";
 import type { Program } from "../../programs/base";
 import { createNodePolyfillMap } from "./create-node-polyfill-map";
 
-export const POLYFILL_IMPORT_NS = "react-gnome-polyfills";
+export const POLYFILL_IMPORT_NS = "react-gtk-polyfills";
 
 const NodePolyfills = createNodePolyfillMap([
   {
@@ -35,7 +35,7 @@ const NodePolyfills = createNodePolyfillMap([
 
 export const importPolyfillsPlugin = (program: Program) => {
   return {
-    name: "react-gnome-import-polyfills-esbuild-plugin",
+    name: "react-gtk-import-polyfills-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
       NodePolyfills.addResolvers(program, build);
 

@@ -13,7 +13,7 @@ console.log(env.appName); // 'Example App'
 Setting the environment variables in the config:
 
 ```tsx
-import type { BuildConfig } from "@reactgjs/react-gnome";
+import type { BuildConfig } from "@reactgjs/react-gtk";
 
 export default () => {
   const config: BuildConfig = {

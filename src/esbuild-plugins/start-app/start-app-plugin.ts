@@ -27,7 +27,7 @@ export const startAppPlugin = (params: {
   let cleanup: () => any = () => {};
 
   return {
-    name: "react-gnome-start-app-esbuild-plugin",
+    name: "react-gtk-start-app-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
       build.onEnd(async () => {
         await cleanup();

@@ -1,7 +1,9 @@
 import type esbuild from "esbuild";
 import { importPolyfillsPlugin } from "../esbuild-plugins/import-polyfills/import-polyfills";
-import type { GnomePluginOptions } from "../esbuild-plugins/react-gnome/react-gnome-plugin";
-import { reactGnomePlugin } from "../esbuild-plugins/react-gnome/react-gnome-plugin";
+import {
+  ReactGtkEsbuildPluginOptions,
+  reactGtkPlugin,
+} from "../esbuild-plugins/react-gtk/react-gtk-plugin";
 import { watchLoggerPlugin } from "../esbuild-plugins/watch-logger/watch-logger-plugin";
 import type { Program } from "../programs/base";
 
@@ -10,12 +12,15 @@ export type AdditionalPlugins = {
   after?: esbuild.Plugin[];
 };
 
-export const getPlugins = (program: Program, options: GnomePluginOptions) => {
+export const getPlugins = (
+  program: Program,
+  options: ReactGtkEsbuildPluginOptions,
+) => {
   const additionalPlugins = program.additionalPlugins();
 
   const plugins = [
     importPolyfillsPlugin(program),
-    reactGnomePlugin(program, options),
+    reactGtkPlugin(program, options),
   ];
 
   if (additionalPlugins.before) {

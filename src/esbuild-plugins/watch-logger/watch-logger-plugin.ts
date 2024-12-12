@@ -4,7 +4,7 @@ import { html, Output } from "termx-markup";
 export const watchLoggerPlugin = () => {
   let isFirstBuild = true;
   return {
-    name: "react-gnome-watch-logger-esbuild-plugin",
+    name: "react-gtk-watch-logger-esbuild-plugin",
     setup(build: esbuild.PluginBuild) {
       build.onStart(() => {
         if (!isFirstBuild) {

@@ -1,8 +1,8 @@
 {
-  "name": "@reactgjs/react-gnome",
+  "name": "@reactgjs/react-gtk",
   "version": "1.0.0",
   "bin": {
-    "react-gnome": "./bin/react-gnome.sh"
+    "react-gtk": "./bin/react-gtk.sh"
   },
   "main": "./dist/legacy/index.js",
   "types": "./dist/types/index.d.ts",
@@ -41,7 +41,7 @@
   },
   "keywords": [],
   "repository": {
-    "url": "https://github.com/react-gjs/react-gnome"
+    "url": "https://github.com/react-gjs/react-gtk"
   },
   "description": "",
   "license": "MIT",

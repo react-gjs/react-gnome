@@ -1,6 +1,6 @@
 export const getTsProjectConfigFile = () =>
   /* ts */ `
-import { BuildConfig } from "@reactgjs/react-gnome";
+import { BuildConfig } from "@reactgjs/react-gtk";
 
 export default () => {
   const config: BuildConfig = {
