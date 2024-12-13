@@ -16,5 +16,9 @@ export const readConfig = async (program: Program) => {
     mode: program.isDev ? "development" : "production",
   });
 
+  if (config.sourcemap == null) {
+    config.sourcemap = true;
+  }
+
   return config;
 };

@@ -24,6 +24,7 @@ import { AppResources } from "../utils/app-resources";
 import { Command } from "../utils/command";
 import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
+import { getRuntimeInit } from "../utils/get-runtime-init";
 import { pascalToKebab } from "../utils/pascal-to-kebab";
 import { Program } from "./base";
 import { createBuildOptions } from "./default-build-options";
@@ -166,6 +167,7 @@ export class BuildProgram extends Program {
 
     const gresource = getGResourceXml({
       appID: context.appID,
+      files: this.config.sourcemap ? ["main.js.map"] : [],
     });
 
     const srcMesonBuild = getSrcMesonBuild();
@@ -227,6 +229,15 @@ export class BuildProgram extends Program {
     return context;
   }
 
+  protected async afterBuild() {
+    if (this.config.sourcemap && !this.watchMode) {
+      const buildDirPath = path.resolve(this.cwd, this.config.outDir, ".build");
+      const mapFilePath = path.resolve(buildDirPath, "src", "main.js.map");
+      const mapContent = await fs.readFile(mapFilePath, "utf-8");
+      await fs.writeFile(mapFilePath, `export const map = ${mapContent};`);
+    }
+  }
+
   /**
    * @internal
    */
@@ -241,13 +252,18 @@ export class BuildProgram extends Program {
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
     const polyfills = await getGlobalPolyfills(this);
+    const initScript = await getRuntimeInit();
 
     await this.esbuildCtx.init(
       createBuildOptions({
-        banner: { js: polyfills.bundle },
+        banner: { js: `${polyfills.bundle}\n${initScript.bundle}` },
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(buildDirPath, "src", "main.js"),
-        plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
+        plugins: getPlugins(this, {
+          giRequirements: polyfills.requirements.concat(
+            initScript.requirements,
+          ),
+        }),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
       }),

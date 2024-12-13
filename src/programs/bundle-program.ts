@@ -2,6 +2,7 @@ import path from "path";
 import { html, Output } from "termx-markup";
 import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
+import { getRuntimeInit } from "../utils/get-runtime-init";
 import { Program } from "./base";
 import { createBuildOptions } from "./default-build-options";
 
@@ -25,13 +26,18 @@ export class BundleProgram extends Program {
     }
 
     const polyfills = await getGlobalPolyfills(this);
+    const initScript = await getRuntimeInit();
 
     await this.esbuildCtx.init(
       createBuildOptions({
-        banner: { js: polyfills.bundle },
+        banner: { js: `${polyfills.bundle}\n${initScript.bundle}` },
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
-        plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
+        plugins: getPlugins(this, {
+          giRequirements: polyfills.requirements.concat(
+            initScript.requirements,
+          ),
+        }),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
       }),

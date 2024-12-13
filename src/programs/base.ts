@@ -11,8 +11,7 @@ import { validateAppName } from "../utils/validate-app-name";
 import { validatePrefix } from "../utils/validate-prefix";
 
 export type DeepReadonly<T> = {
-  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]>
-    : T[P];
+  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
 };
 
 const WatchOpt = defineOption({
@@ -103,12 +102,18 @@ export abstract class Program {
   /** @internal */
   abstract main<T extends this>(program: T): any;
 
+  protected afterBuild?(): void;
+
   /** @internal */
   async run() {
     try {
       this.config = await readConfig(this);
       this.populateDefaultEnvVars();
-      return await this.main(this);
+      const result = await this.main(this);
+      if (this.afterBuild) {
+        await this.afterBuild();
+      }
+      return result;
     } catch (e) {
       handleProgramError(e);
     } finally {

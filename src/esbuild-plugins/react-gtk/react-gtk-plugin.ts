@@ -221,7 +221,28 @@ ${leftPad(bundle, 2, " ")}
 `,
           ].join("\n"),
         );
+
+        if (program.config.sourcemap) {
+          const mapJson = await fs.readFile(
+            build.initialOptions.outfile! + ".map",
+            "utf8",
+          );
+          const map = JSON.parse(mapJson);
+          delete map.sourcesContent;
+          map.rowOffset = countLines(imports.join("\n")) + 3;
+          map.colOffset = 2;
+          map.root = build.initialOptions.outfile!;
+          map.wd = program.cwd;
+          await fs.writeFile(
+            build.initialOptions.outfile! + ".map",
+            `export const map = ${JSON.stringify(JSON.stringify(map))};`,
+          );
+        }
       });
     },
   };
 };
+
+function countLines(str: string) {
+  return str.split("\n").length;
+}

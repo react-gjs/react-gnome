@@ -105,6 +105,7 @@ export const ConfigSchema = DataType.RecordOf({
       return typeof v === "function";
     }).setExtra({ typeDef: "(buildDir: string) => any" }),
   ),
+  sourcemap: OptionalField(DataType.Boolean),
 });
 
 ConfigSchema.setTitle("Config");

@@ -16,7 +16,7 @@ async function main() {
         tsConfig: p("tsconfig.json"),
         formats: ["cjs", "esm", "legacy"],
         declarations: true,
-        exclude: [/\/polyfills\//],
+        exclude: [/\/polyfills\//, /\/runtime\//],
         isomorphicImports: {
           "./config/eval-js-config/eval-js-config.ts": {
             js: "./config/eval-js-config/eval-js-config.cjs.ts",
@@ -35,6 +35,15 @@ async function main() {
         target: "ESNext",
         srcDir: p("src/polyfills"),
         outDir: p("polyfills"),
+        tsConfig: p("tsconfig.json"),
+        formats: ["esm"],
+        exclude: [/\.d\.ts$/, /index.ts/, /\.json$/],
+      }),
+      // Build polyfill packages
+      await build({
+        target: "ESNext",
+        srcDir: p("src/runtime"),
+        outDir: p("runtime"),
         tsConfig: p("tsconfig.json"),
         formats: ["esm"],
         exclude: [/\.d\.ts$/, /index.ts/, /\.json$/],

@@ -8,6 +8,7 @@ import { Command } from "../utils/command";
 import type { AdditionalPlugins } from "../utils/get-plugins";
 import { getPlugins } from "../utils/get-plugins";
 import { getGlobalPolyfills } from "../utils/get-polyfills";
+import { getRuntimeInit } from "../utils/get-runtime-init";
 import { BuildProgram } from "./build-program";
 import { createBuildOptions } from "./default-build-options";
 
@@ -64,13 +65,18 @@ export class StartProgram extends BuildProgram {
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
     const polyfills = await getGlobalPolyfills(this);
+    const initScript = await getRuntimeInit();
 
     await this.esbuildCtx.init(
       createBuildOptions({
-        banner: { js: polyfills.bundle },
+        banner: { js: `${polyfills.bundle}\n${initScript.bundle}` },
         entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
         outfile: path.resolve(buildDirPath, "src", "main.js"),
-        plugins: getPlugins(this, { giRequirements: polyfills.requirements }),
+        plugins: getPlugins(this, {
+          giRequirements: polyfills.requirements.concat(
+            initScript.requirements,
+          ),
+        }),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
       }),
@@ -78,5 +84,7 @@ export class StartProgram extends BuildProgram {
     );
 
     await this.esbuildCtx.start();
+
+    Output.print(html` <span color="lightGreen"> Build completed. </span> `);
   }
 }
