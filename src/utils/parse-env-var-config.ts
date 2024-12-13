@@ -102,15 +102,12 @@ export const parseEnvVarConfig = (program: Program) => {
   }
 
   // Add env file vars
-  const cwdFiles = fs.readdirSync(program.cwd);
   const envFileName = envVars?.envFilePath ?? ".env";
   const failIfNoEnvFile = envVars?.envFilePath !== undefined;
 
-  if (cwdFiles.includes(envFileName)) {
-    const envFileData = fs.readFileSync(
-      path.resolve(program.cwd, envFileName),
-      "utf-8",
-    );
+  const envFilepath = path.resolve(program.cwd, envFileName);
+  if (fs.existsSync(envFilepath)) {
+    const envFileData = fs.readFileSync(envFilepath, "utf-8");
 
     for (const envVarEntry of parseDotEnv(envFileData)) {
       if (vars.some(([k]) => k === envVarEntry[0])) {

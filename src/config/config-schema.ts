@@ -80,6 +80,7 @@ export const ConfigSchema = DataType.RecordOf({
       base64: OptionalField(DataType.Boolean),
       fetch: OptionalField(DataType.Boolean),
       WebSocket: OptionalField(DataType.Boolean),
+      queueMicrotask: OptionalField(DataType.Boolean),
       node: OptionalField(
         DataType.RecordOf({
           path: OptionalField(DataType.Boolean),

@@ -57,6 +57,10 @@ export const getGlobalPolyfills = (program: Program): Promise<Polyfills> => {
     polyFilepaths.push("./polyfills/esm/websocket.mjs");
   }
 
+  if (polyfills?.queueMicrotask) {
+    polyFilepaths.push("./polyfills/esm/queue-microtask.mjs");
+  }
+
   const customPolyfills: string[] = [];
 
   if (program.config.customPolyfills) {
