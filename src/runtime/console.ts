@@ -2,6 +2,11 @@ import Gio from "gi://Gio";
 import GLib from "gi://GLib?version=2.0";
 import { SourceMap, SourceMapReader } from "./helpers/sourcemap-reader";
 
+declare global {
+  const __MODE__: "development" | "production";
+  const __SOURCE_MAPS_ENABLED__: boolean;
+}
+
 const EOL = "\n";
 
 const COLOR = {
@@ -471,7 +476,7 @@ class ConsoleUtils {
   private static groupIndent = 0;
   private static counters = new Map<unknown, number>();
   private static timers = new Map<unknown, number>();
-  static pretty = true;
+  static pretty = __MODE__ === "development";
 
   static incrementCounter(label: string) {
     const count = this.counters.get(label) ?? 0;
@@ -633,7 +638,46 @@ class ConsoleUtils {
       }
     }
 
-    print(formattedOutput);
+    if (__MODE__ === "development") {
+      print(formattedOutput);
+    } else {
+      let severity;
+      switch (logLevel) {
+        case LogLevel.Log:
+        case LogLevel.Dir:
+        case LogLevel.Dirxml:
+        case LogLevel.Trace:
+        case LogLevel.Group:
+        case LogLevel.GroupCollapsed:
+        case LogLevel.TimeLog:
+        case LogLevel.TimeEnd:
+          severity = GLib.LogLevelFlags.LEVEL_MESSAGE;
+          break;
+        case LogLevel.Debug:
+          severity = GLib.LogLevelFlags.LEVEL_DEBUG;
+          break;
+        case LogLevel.Count:
+        case LogLevel.Info:
+          severity = GLib.LogLevelFlags.LEVEL_INFO;
+          break;
+        case LogLevel.Warn:
+        case LogLevel.CountReset:
+        case LogLevel.ReportWarning:
+          severity = GLib.LogLevelFlags.LEVEL_WARNING;
+          break;
+        case LogLevel.Error:
+        case LogLevel.Assert:
+          severity = GLib.LogLevelFlags.LEVEL_CRITICAL;
+          break;
+        default:
+          severity = GLib.LogLevelFlags.LEVEL_MESSAGE;
+      }
+
+      // @ts-expect-error
+      GLib.log_structured("ReactGTK", severity, {
+        MESSAGE: formattedOutput,
+      });
+    }
   }
 }
 
@@ -781,16 +825,12 @@ type AppSourceMaps = SourceMap & {
   wd: string;
 };
 
-declare global {
-  const __SOURCE_MAPS_ENABLED: boolean;
-}
-
 class StacktraceResolver {
   static sourcmapReader?: SourceMapReader;
   static map: AppSourceMaps;
 
   static {
-    if (__SOURCE_MAPS_ENABLED) {
+    if (__SOURCE_MAPS_ENABLED__) {
       try {
         const file = Gio.File.new_for_uri(
           `${imports.package.moduledir}/main.js.map`,

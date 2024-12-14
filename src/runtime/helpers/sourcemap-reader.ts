@@ -1,4 +1,3 @@
-import Fs from "fs-gjs";
 import path from "path-gjsify";
 import type { Segment } from "./base64-vlq";
 import { Base64VLQ } from "./base64-vlq";
@@ -27,16 +26,6 @@ type MapState = [
 ];
 
 export class SourceMapReader {
-  static async newFromMapFile(mapFilepath: string) {
-    try {
-      const fileContent = await Fs.readTextFile(mapFilepath);
-      const map = JSON.parse(fileContent);
-      return new SourceMapReader(map, mapFilepath);
-    } catch (err) {
-      return undefined;
-    }
-  }
-
   private converter = new Base64VLQ();
 
   constructor(
@@ -117,20 +106,18 @@ export class SourceMapReader {
                 file: this.getFile(state[1]),
                 line: state[2] + 1,
                 column: state[3] + 1,
-                symbolName:
-                  decodedSegment[4] != null
-                    ? this.map.names[state[4]]
-                    : undefined,
+                symbolName: decodedSegment[4] != null
+                  ? this.map.names[state[4]]
+                  : undefined,
               };
             } else if (outColumn >= prevOutCol && outColumn <= currentOutCol) {
               return {
                 file: this.getFile(state[1]),
                 line: state[2] + 1,
                 column: prevState[3] + 1,
-                symbolName:
-                  prevSegment[4] != null
-                    ? this.map.names[prevState[4]]
-                    : undefined,
+                symbolName: prevSegment[4] != null
+                  ? this.map.names[prevState[4]]
+                  : undefined,
               };
             }
           }

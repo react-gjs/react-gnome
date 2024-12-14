@@ -218,8 +218,6 @@ ${leftPad(gtkInit, 2, " ")}
 ${leftPad(bundle, 2, " ")}
 };
 `,
-            "const __SOURCE_MAPS_ENABLED = "
-            + (program.config.sourcemap ? "true" : "false") + ";",
           ].join("\n"),
         );
 

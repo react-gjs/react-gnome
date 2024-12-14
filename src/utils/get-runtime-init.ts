@@ -3,10 +3,11 @@ import esbuild from "esbuild";
 import fs from "fs";
 import path from "path";
 import { getDirPath } from "../get-dirpath/get-dirpath";
+import { Program } from "../programs/base";
 
 const ALLOWED_EXTENSIONS = [".ts", ".js", ".mjs", ".cjs"];
 
-export function getRuntimeInit() {
+export function getRuntimeInit(program: Program) {
   const rootPath = getDirPath();
   const files = fs.readdirSync(path.join(rootPath, "runtime/esm"));
   const modules: string[] = [];
@@ -16,10 +17,10 @@ export function getRuntimeInit() {
       modules.push("./runtime/esm/" + filename);
     }
   }
-  return buildInitBundle(modules);
+  return buildInitBundle(modules, program);
 }
 
-async function buildInitBundle(scriptsFilepaths: string[]) {
+async function buildInitBundle(scriptsFilepaths: string[], program: Program) {
   const rootPath = getDirPath();
   const modules = scriptsFilepaths.map((p, i) => ({
     path: p,
@@ -54,10 +55,15 @@ async function buildInitBundle(scriptsFilepaths: string[]) {
       resolveDir: rootPath,
       sourcefile: "runtime.ts",
     },
+    treeShaking: true,
     bundle: true,
     write: false,
     format: "iife",
     target: "esnext",
+    define: {
+      __MODE__: JSON.stringify(program.isDev ? "development" : "production"),
+      __SOURCE_MAPS_ENABLED__: String(!!program.config.sourcemap),
+    },
     plugins: [
       {
         name: "replace-gi-imports",

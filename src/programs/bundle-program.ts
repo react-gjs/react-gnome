@@ -26,7 +26,7 @@ export class BundleProgram extends Program {
     }
 
     const polyfills = await getGlobalPolyfills(this);
-    const initScript = await getRuntimeInit();
+    const initScript = await getRuntimeInit(this);
 
     await this.esbuildCtx.init(
       createBuildOptions({

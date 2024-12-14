@@ -65,7 +65,7 @@ export class StartProgram extends BuildProgram {
     if (existsSync(buildDirPath)) await rimraf(buildDirPath, {});
 
     const polyfills = await getGlobalPolyfills(this);
-    const initScript = await getRuntimeInit();
+    const initScript = await getRuntimeInit(this);
 
     await this.esbuildCtx.init(
       createBuildOptions({
