@@ -8,4 +8,5 @@ install-state.gz
 .yarn/unplugged
 .yarn/install-state.gz
 /polyfills/
+/runtime/
 /gest/dist
