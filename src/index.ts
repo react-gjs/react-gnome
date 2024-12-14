@@ -20,3 +20,5 @@ declare global {
     mapStackTrace(stackTrace: string): string;
   }
 }
+
+export * from "@reactgjs/renderer";
