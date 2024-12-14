@@ -227,11 +227,13 @@ function fmtArray(arr: Array<unknown> | TypedArray, ctx: FmtContext): string {
   if (totalEntriesLen < 28) {
     fmtd += `${entries.join(", ")}${bracket("]", ctx.depth)}`;
   } else {
-    fmtd += `${EOL}${entries
-      .map((e) => `${indent}${e}`)
-      .join(
-        `,${EOL}`,
-      )},${EOL}${makeIndent(ctx.depth - 1)}${bracket("]", ctx.depth)}`;
+    fmtd += `${EOL}${
+      entries
+        .map((e) => `${indent}${e}`)
+        .join(
+          `,${EOL}`,
+        )
+    },${EOL}${makeIndent(ctx.depth - 1)}${bracket("]", ctx.depth)}`;
   }
 
   ctx.parentRefs.delete(arr);
@@ -368,11 +370,13 @@ function hasFormatSpecifiers(str: string) {
 function formatOptimally(item: unknown) {
   // Handle optimal error formatting.
   if (item instanceof Error || item instanceof GLib.Error) {
-    return `${item.toString()}${item.stack ? EOL : ""}${item.stack
-      ?.split(EOL)
-      // Pad each stacktrace line.
-      .map((line) => line.padStart(2, " "))
-      .join(EOL)}`;
+    return `${item.toString()}${item.stack ? EOL : ""}${
+      item.stack
+        ?.split(EOL)
+        // Pad each stacktrace line.
+        .map((line) => line.padStart(2, " "))
+        .join(EOL)
+    }`;
   }
 
   if (typeof item === "object" && item !== null) {
@@ -398,9 +402,9 @@ function addIndent(text: string, indent: number, startFromLine = 0) {
 const NUM_REGEX = /^-?\d+(\.\d+)?$/;
 function isNumber(value: unknown) {
   return (
-    typeof value === "number" ||
-    typeof value === "bigint" ||
-    (typeof value === "string" && NUM_REGEX.test(value))
+    typeof value === "number"
+    || typeof value === "bigint"
+    || (typeof value === "string" && NUM_REGEX.test(value))
   );
 }
 
@@ -570,10 +574,9 @@ class ConsoleUtils {
     // If any of the previous steps set converted, replace the specifier in
     // target with the converted value.
     if (converted !== null) {
-      target =
-        target.slice(0, specifierIndex) +
-        converted +
-        target.slice(specifierIndex + 2);
+      target = target.slice(0, specifierIndex)
+        + converted
+        + target.slice(specifierIndex + 2);
     }
 
     if (!hasFormatSpecifiers(target)) {
@@ -645,15 +648,15 @@ class ConsoleUtils {
     let stackTrace = options?.stackTrace;
     let stackTraceLines: string[] | null = null;
     if (
-      !stackTrace &&
-      (logLevel === "trace" || severity <= GLib.LogLevelFlags.LEVEL_WARNING)
+      !stackTrace
+      && (logLevel === "trace" || severity <= GLib.LogLevelFlags.LEVEL_WARNING)
     ) {
       stackTrace = new Error().stack;
       if (stackTrace) {
         const currentFile = stackTrace.match(/^[^@]*@(.*):\d+:\d+$/m)?.at(1);
         if (currentFile) {
-          const index =
-            stackTrace.lastIndexOf(currentFile) + currentFile.length;
+          const index = stackTrace.lastIndexOf(currentFile)
+            + currentFile.length;
 
           stackTraceLines = stackTrace.substring(index).split(EOL);
           // Remove the remainder of the first line
@@ -668,15 +671,19 @@ class ConsoleUtils {
 
     if (logLevel === LogLevel.Trace) {
       if (stackTraceLines.length) {
-        formattedOutput += `${EOL}${addIndent(
-          stackTraceLines.join(EOL),
-          this.indent,
-        )}`;
+        formattedOutput += `${EOL}${
+          addIndent(
+            stackTraceLines.join(EOL),
+            this.indent,
+          )
+        }`;
       } else {
-        formattedOutput += `${EOL}${addIndent(
-          "No stack trace available",
-          this.indent,
-        )}`;
+        formattedOutput += `${EOL}${
+          addIndent(
+            "No stack trace available",
+            this.indent,
+          )
+        }`;
       }
     }
 
@@ -873,8 +880,8 @@ class StacktraceResolver {
         const org = StacktraceResolver.sourcmapReader.getOriginalPosition(l, c);
         if (org && org.file) {
           if (org.file.startsWith(StacktraceResolver.map.wd)) {
-            org.file =
-              "./" + org.file.substring(StacktraceResolver.map.wd.length + 1);
+            org.file = "./"
+              + org.file.substring(StacktraceResolver.map.wd.length + 1);
           }
 
           if (org.symbolName == null) {
