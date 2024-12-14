@@ -1,6 +1,6 @@
 {
   "name": "@reactgjs/react-gtk",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "bin": {
     "react-gtk": "./bin/react-gtk.sh"
   },
@@ -17,12 +17,14 @@
       "import": "./dist/esm/cli.mjs",
       "require": "./dist/cjs/cli.cjs"
     },
-    "./polyfills/esm/*.mjs": "./polyfills/esm/*.mjs"
+    "./polyfills/esm/*.mjs": "./polyfills/esm/*.mjs",
+    "./runtime/esm/*.mjs": "./runtime/esm/*.mjs"
   },
   "files": [
     "bin",
     "dist",
     "polydills",
+    "runtime",
     "cli.js",
     "gapp:env.d.ts",
     "LICENSE",
@@ -39,7 +41,13 @@
     "test:tsc": "tsc --noEmit",
     "build": "node ./scripts/build.cjs"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "gtk",
+    "gtk3",
+    "gjs",
+    "gnome"
+  ],
   "repository": {
     "url": "https://github.com/react-gjs/react-gtk"
   },
