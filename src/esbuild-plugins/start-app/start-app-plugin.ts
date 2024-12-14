@@ -48,9 +48,17 @@ export const startAppPlugin = (params: {
           .addTransformer(formatChildOutputLine)
           .start();
 
+        const onProcessKilled = async () => {
+          // @ts-expect-error
+          process.kill(-child.pid);
+        };
+
+        process.on("SIGINT", onProcessKilled);
+
         const onExit = async () => {
           await program.esbuildCtx.cancel();
           await program.esbuildCtx.dispose();
+          process.off("exit", onProcessKilled);
         };
 
         child.on("exit", onExit);
