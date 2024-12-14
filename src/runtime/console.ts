@@ -1,3 +1,4 @@
+import Gio from "gi://Gio";
 import GLib from "gi://GLib?version=2.0";
 import { SourceMap, SourceMapReader } from "./helpers/sourcemap-reader";
 
@@ -106,7 +107,7 @@ function makeIndent(indent: number, indentSize = 2) {
   if (indent < 0) {
     indent = 0;
   }
-  return Array.from({ length: indent * indentSize }, () => " ").join("");
+  return "͏ ".repeat(indent * indentSize);
 }
 
 type TypedArray =
@@ -143,11 +144,13 @@ function fmtError(err: Error | GLib.Error): string {
 
 function fmtKey(key: unknown): string {
   switch (typeof key) {
-    case "bigint":
-    case "string":
     case "number":
     case "boolean":
       return String(key);
+    case "bigint":
+      return `${key}n`;
+    case "string":
+      return JSON.stringify(key);
     case "function":
       return `[Function ${key.name}]`;
     case "symbol":
@@ -299,7 +302,7 @@ function fmtObject(obj: object, ctx: FmtContext): string {
   }
 
   if (obj instanceof Error) {
-    return fmtError(obj);
+    return addIndent(fmtError(obj), ((ctx.depth + 1) * 2) + 1, 1);
   }
   if (obj instanceof GLib.Error) {
     return fmtError(obj);
@@ -324,11 +327,13 @@ function fmt(
   ctx: FmtContext = { depth: 1, parentRefs: new Map(), currentLocation: "" },
 ): string {
   switch (typeof item) {
-    case "bigint":
-    case "string":
     case "number":
     case "boolean":
       return String(item);
+    case "bigint":
+      return `${item}n`;
+    case "string":
+      return JSON.stringify(item);
     case "function":
       return `[Function ${item.name}]`;
     case "symbol":
@@ -463,7 +468,7 @@ type PrinterOptions = {
 };
 
 class ConsoleUtils {
-  private static indent = 0;
+  private static groupIndent = 0;
   private static counters = new Map<unknown, number>();
   private static timers = new Map<unknown, number>();
   static pretty = true;
@@ -480,15 +485,15 @@ class ConsoleUtils {
   }
 
   static clearIndent() {
-    this.indent = 0;
+    this.groupIndent = 0;
   }
 
   static enterGroup() {
-    this.indent++;
+    this.groupIndent++;
   }
 
   static leaveGroup() {
-    this.indent = Math.max(0, this.indent - 1);
+    this.groupIndent = Math.max(0, this.groupIndent - 1);
   }
 
   static startTimer(label: unknown, time: number) {
@@ -505,14 +510,18 @@ class ConsoleUtils {
     return startTime;
   }
 
-  static logger(logLevel: LogLevel, args: unknown[]) {
+  static logger(
+    logLevel: LogLevel,
+    args: unknown[],
+    options: PrinterOptions = {},
+  ) {
     if (args.length === 0) {
-      this.printer(logLevel, []);
+      this.print(logLevel, [], options);
       return;
     }
 
     if (args.length === 1) {
-      this.printer(logLevel, fmtArgs(args));
+      this.print(logLevel, fmtArgs(args), options);
       return undefined;
     }
 
@@ -520,17 +529,17 @@ class ConsoleUtils {
 
     // If first does not contain any format specifiers, don't call Formatter
     if (typeof first !== "string" || !hasFormatSpecifiers(first)) {
-      this.printer(logLevel, fmtArgs(args));
+      this.print(logLevel, fmtArgs(args), options);
       return undefined;
     }
 
     // Otherwise, perform print the result of Formatter.
-    this.printer(logLevel, this.formatter([first, ...rest]));
+    this.print(logLevel, this.sprintf([first, ...rest]), options);
 
     return undefined;
   }
 
-  static formatter(args: unknown[]): unknown[] {
+  static sprintf(args: unknown[]): unknown[] {
     if (args.length === 1) return args;
 
     // The initial formatting string is the first arg
@@ -587,121 +596,44 @@ class ConsoleUtils {
 
     if (result.length === 1) return result;
 
-    return this.formatter(result);
+    return this.sprintf(result);
   }
 
-  static printer(
+  static print(
     logLevel: LogLevel,
     args: unknown[],
     options: PrinterOptions = {},
   ) {
-    let severity;
-
-    switch (logLevel) {
-      case LogLevel.Log:
-      case LogLevel.Dir:
-      case LogLevel.Dirxml:
-      case LogLevel.Trace:
-      case LogLevel.Group:
-      case LogLevel.GroupCollapsed:
-      case LogLevel.TimeLog:
-      case LogLevel.TimeEnd:
-        severity = GLib.LogLevelFlags.LEVEL_MESSAGE;
-        break;
-      case LogLevel.Debug:
-        severity = GLib.LogLevelFlags.LEVEL_DEBUG;
-        break;
-      case LogLevel.Count:
-      case LogLevel.Info:
-        severity = GLib.LogLevelFlags.LEVEL_INFO;
-        break;
-      case LogLevel.Warn:
-      case LogLevel.CountReset:
-      case LogLevel.ReportWarning:
-        severity = GLib.LogLevelFlags.LEVEL_WARNING;
-        break;
-      case LogLevel.Error:
-      case LogLevel.Assert:
-        severity = GLib.LogLevelFlags.LEVEL_CRITICAL;
-        break;
-      default:
-        severity = GLib.LogLevelFlags.LEVEL_MESSAGE;
-    }
-
-    const output = args
-      .map((a) => {
-        if (a === null) return "null";
-        else if (typeof a === "object") return formatOptimally(a);
-        else if (typeof a === "undefined") return "undefined";
-        else if (typeof a === "bigint") return `${a}n`;
-        else return String(a);
-      })
-      .join(" ");
-
-    let formattedOutput = output; // addIndent(, this.indent);
-    const extraFields: {
-      CODE_FUNC?: string;
-      CODE_FILE?: string;
-      CODE_LINE?: string;
-    } = {};
-
-    let stackTrace = options?.stackTrace;
-    let stackTraceLines: string[] | null = null;
-    if (
-      !stackTrace
-      && (logLevel === "trace" || severity <= GLib.LogLevelFlags.LEVEL_WARNING)
-    ) {
-      stackTrace = new Error().stack;
-      if (stackTrace) {
-        const currentFile = stackTrace.match(/^[^@]*@(.*):\d+:\d+$/m)?.at(1);
-        if (currentFile) {
-          const index = stackTrace.lastIndexOf(currentFile)
-            + currentFile.length;
-
-          stackTraceLines = stackTrace.substring(index).split(EOL);
-          // Remove the remainder of the first line
-          stackTraceLines.shift();
-        }
-      }
-    }
-
-    if (stackTraceLines == null) {
-      stackTraceLines = [];
-    }
+    let formattedOutput = addIndent(
+      addLogPrefix(logLevel, args.map(String).join(" ")),
+      this.groupIndent * 2,
+      0,
+    );
+    let stackTraceLines = options?.stackTrace
+      ? StacktraceResolver
+        .mapStackTrace(options.stackTrace)
+        .split(EOL)
+      : [];
 
     if (logLevel === LogLevel.Trace) {
       if (stackTraceLines.length) {
         formattedOutput += `${EOL}${
           addIndent(
             stackTraceLines.join(EOL),
-            this.indent,
+            (this.groupIndent * 2) + 2,
           )
         }`;
       } else {
         formattedOutput += `${EOL}${
           addIndent(
             "No stack trace available",
-            this.indent,
+            (this.groupIndent * 2) + 2,
           )
         }`;
       }
     }
 
-    if (stackTraceLines.length) {
-      const [stackLine] = stackTraceLines;
-      const match = stackLine?.match(/^([^@]*)@(.*):(\d+):\d+$/);
-
-      if (match) {
-        const [_, func, file, line] = match;
-
-        if (func) extraFields.CODE_FUNC = func;
-        if (file) extraFields.CODE_FILE = file;
-        if (line) extraFields.CODE_LINE = line;
-      }
-    }
-
-    const logContent = addLogPrefix(logLevel, formattedOutput);
-    print(logContent);
+    print(formattedOutput);
   }
 }
 
@@ -756,8 +688,8 @@ const Console = {
 
   trace(...data: unknown[]) {
     if (data.length === 0) data = ["Trace"];
-
-    ConsoleUtils.logger(LogLevel.Trace, data);
+    const stackTrace = new Error("trace").stack?.split(EOL).slice(1).join(EOL);
+    ConsoleUtils.logger(LogLevel.Trace, data, { stackTrace });
   },
 
   warn(...data: unknown[]) {
@@ -766,7 +698,7 @@ const Console = {
 
   dir(item: unknown, options: never) {
     const object = fmt(item);
-    ConsoleUtils.printer(LogLevel.Dir, [object], options);
+    ConsoleUtils.print(LogLevel.Dir, [object], options);
   },
 
   dirxml(...data: unknown[]) {
@@ -784,8 +716,8 @@ const Console = {
   },
 
   group(...data: unknown[]) {
-    ConsoleUtils.enterGroup();
     ConsoleUtils.logger(LogLevel.Group, data);
+    ConsoleUtils.enterGroup();
   },
 
   groupCollapsed(...data: unknown[]) {
@@ -812,7 +744,7 @@ const Console = {
     const msg = `${label}: ${durationMs.toFixed(3)} ms`;
     data.unshift(msg);
 
-    ConsoleUtils.printer(LogLevel.TimeLog, data);
+    ConsoleUtils.print(LogLevel.TimeLog, data);
   },
 
   timeEnd(label: unknown) {
@@ -824,7 +756,7 @@ const Console = {
     const ts = imports.gi.GLib.get_monotonic_time();
     const durationMs = (ts - startTime) / 1000;
     const msg = `${label}: ${durationMs.toFixed(3)} ms`;
-    ConsoleUtils.printer(LogLevel.TimeEnd, [msg]);
+    ConsoleUtils.print(LogLevel.TimeEnd, [msg]);
   },
 
   profile() {},
@@ -849,18 +781,28 @@ type AppSourceMaps = SourceMap & {
   wd: string;
 };
 
+declare global {
+  const __SOURCE_MAPS_ENABLED: boolean;
+}
+
 class StacktraceResolver {
   static sourcmapReader?: SourceMapReader;
   static map: AppSourceMaps;
 
   static {
-    import(`${imports.package.moduledir}/main.js.map`)
-      .then((main: { map: string }) => {
-        const map = JSON.parse(main.map) as AppSourceMaps;
+    if (__SOURCE_MAPS_ENABLED) {
+      try {
+        const file = Gio.File.new_for_uri(
+          `${imports.package.moduledir}/main.js.map`,
+        );
+        const [bytes] = file.load_bytes(null);
+        const arr = bytes.toArray();
+        const content = new TextDecoder().decode(arr);
+        const map = JSON.parse(content) as AppSourceMaps;
         StacktraceResolver.map = map;
         StacktraceResolver.sourcmapReader = new SourceMapReader(map, map.root);
-      })
-      .catch((error) => {});
+      } catch {}
+    }
   }
 
   static mapStackTrace(stack: string) {

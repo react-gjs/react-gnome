@@ -10,8 +10,8 @@ class ExternalImport {
   importName: string;
 
   constructor(public path: string) {
-    this.importName =
-      "_" + path.replace(/[^a-zA-Z]/g, "") + "_" + generateUniqueName(8);
+    this.importName = "_" + path.replace(/[^a-zA-Z]/g, "") + "_"
+      + generateUniqueName(8);
   }
 
   toImportStatement() {
@@ -202,12 +202,11 @@ export const reactGtkPlugin = (
           ...externalImports.map((e) => e.toImportStatement()),
         ];
 
-        const gtkInit =
-          (program.config.giVersions?.Gtk as string) === "4.0"
-            ? // eslint-disable-next-line quotes
-              /* js */ `Gtk.init();`
-            : // eslint-disable-next-line quotes
-              /* js */ `Gtk.init(null);`;
+        const gtkInit = (program.config.giVersions?.Gtk as string) === "4.0"
+          // eslint-disable-next-line quotes
+          ? /* js */ `Gtk.init();`
+          // eslint-disable-next-line quotes
+          : /* js */ `Gtk.init(null);`;
 
         await fs.writeFile(
           build.initialOptions.outfile!,
@@ -219,6 +218,8 @@ ${leftPad(gtkInit, 2, " ")}
 ${leftPad(bundle, 2, " ")}
 };
 `,
+            "const __SOURCE_MAPS_ENABLED = "
+            + (program.config.sourcemap ? "true" : "false") + ";",
           ].join("\n"),
         );
 
@@ -235,7 +236,7 @@ ${leftPad(bundle, 2, " ")}
           map.wd = program.cwd;
           await fs.writeFile(
             build.initialOptions.outfile! + ".map",
-            `export const map = ${JSON.stringify(JSON.stringify(map))};`,
+            JSON.stringify(map),
           );
         }
       });

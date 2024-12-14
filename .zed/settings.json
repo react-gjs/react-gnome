@@ -1,0 +1,63 @@
+{
+  "languages": {
+    "JavaScript": {
+      "language_servers": ["vtsls"],
+      "format_on_save": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      },
+      "formatter": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      }
+    },
+    "TypeScript": {
+      "language_servers": ["vtsls"],
+      "format_on_save": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      },
+      "formatter": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      }
+    },
+    "TSX": {
+      "language_servers": ["vtsls"],
+      "format_on_save": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      },
+      "formatter": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      }
+    },
+    "CSS": {
+      "format_on_save": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      },
+      "formatter": {
+        "external": {
+          "command": "yarn",
+          "arguments": ["--silent", "dprint", "fmt", "--stdin", "{buffer_path}"]
+        }
+      }
+    }
+  }
+}
