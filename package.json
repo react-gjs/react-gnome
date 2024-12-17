@@ -23,7 +23,7 @@
   "files": [
     "bin",
     "dist",
-    "polydills",
+    "polyfills",
     "runtime",
     "cli.js",
     "gapp:env.d.ts",
@@ -68,6 +68,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
+    "path-gjsify": "^1.0.0",
     "rimraf": "^4.4.1",
     "tar": "^6.2.0",
     "termx-markup": "~2.0.2",
