@@ -6,11 +6,11 @@ import {
   Renderer,
   Span,
   Window,
-} from "@reactgjs/renderer";
-import "@reactgjs/react-gtk";
+} from "@reactgjs/react-gtk";
 import env from "gapp:env";
 
-new Renderer({ appId: env.appId }).start(
+function App() {
+  return (
     <Window
       minWidth={800}
       minHeight={600}
@@ -20,6 +20,9 @@ new Renderer({ appId: env.appId }).start(
         <Markup>
           <Span fontSize={32}>Sample React GTK App</Span>
         </Markup>
-    </Window>,
-);
+    </Window>
+  );
+}
+
+new Renderer({ appId: env.appId }).start(<App />);
 `.trim() + "\n";
