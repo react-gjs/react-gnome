@@ -183,7 +183,9 @@ class Formatter {
         }),
         2,
       );
-      return `${str}\n\n${causedByGrey("Caused by:")}\n${causeFmtd}`;
+      return `${str}${EOL}${EOL}${
+        causedByGrey("Caused by:")
+      }${EOL}${causeFmtd}`;
     }
 
     return str;
@@ -351,7 +353,7 @@ class Formatter {
     if (obj instanceof Error || obj instanceof GLib.Error) {
       return addIndent(
         Formatter.error(obj, ctx),
-        ((ctx.depth + 1) * 2) + 1,
+        ctx.depth * 2,
         1,
       );
     }
@@ -451,7 +453,6 @@ enum LogLevel {
   CountReset = "countReset",
   Info = "info",
   Warn = "warn",
-  ReportWarning = "reportWarning",
   Error = "error",
   Assert = "assert",
 }
@@ -495,6 +496,9 @@ class ConsoleUtils {
   private static groupIndent = 0;
   private static counters = new Map<unknown, number>();
   private static timers = new Map<unknown, number>();
+  private static logListeners: Array<
+    (logType: LogLevel, message: string) => {}
+  > = [];
   static pretty = __MODE__ === "development";
 
   static incrementCounter(label: string) {
@@ -532,6 +536,19 @@ class ConsoleUtils {
     const startTime = this.timers.get(label);
     this.timers.delete(label);
     return startTime;
+  }
+
+  static addLogListener(listener: (logType: LogLevel, message: string) => {}) {
+    this.logListeners.push(listener);
+  }
+
+  static removeLogListener(
+    listener: (logType: LogLevel, message: string) => {},
+  ) {
+    const index = this.logListeners.indexOf(listener);
+    if (index !== -1) {
+      this.logListeners.splice(index, 1);
+    }
   }
 
   static logger(
@@ -681,9 +698,6 @@ class ConsoleUtils {
           break;
         case LogLevel.Warn:
         case LogLevel.CountReset:
-        case LogLevel.ReportWarning:
-          severity = GLib.LogLevelFlags.LEVEL_WARNING;
-          break;
         case LogLevel.Error:
         case LogLevel.Assert:
           severity = GLib.LogLevelFlags.LEVEL_CRITICAL;
@@ -696,6 +710,14 @@ class ConsoleUtils {
       GLib.log_structured("ReactGTK", severity, {
         MESSAGE: formattedOutput,
       });
+    }
+
+    for (const listener of this.logListeners) {
+      try {
+        listener(logLevel, formattedOutput);
+      } catch (err) {
+        print(`Error in log listener: ${String(err)}`);
+      }
     }
   }
 }
@@ -834,6 +856,25 @@ const Console = {
 
   mapStackTrace(stackTrace: string) {
     return StacktraceResolver.mapStackTrace(stackTrace);
+  },
+
+  formatStackTrace(stackTrace: string, indent?: number) {
+    let fmtd = stackTraceCyan(stackTrace);
+    if (indent != null) {
+      fmtd = fmtd
+        .split(EOL)
+        .map(line => line.trimStart())
+        .join(EOL);
+      fmtd = addIndent(fmtd, indent);
+    }
+    return fmtd;
+  },
+
+  onLogPrinted(cb: (logType: LogLevel, message: string) => {}) {
+    ConsoleUtils.addLogListener(cb);
+    return () => {
+      ConsoleUtils.removeLogListener(cb);
+    };
   },
 };
 

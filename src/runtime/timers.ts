@@ -1,5 +1,3 @@
-import { registerPolyfills } from "./shared/polyfill-global";
-
 declare const __console_proxy: Console;
 
 const EOL = "\n";
@@ -28,27 +26,18 @@ function runWithErrorHandler(cb: Function, type: string, stack?: string) {
   }
 }
 
-registerPolyfills("queueMicrotask")(() => {
-  let onNextMicrotask: Array<() => void> | undefined;
+function __setTimeout_proxy(cb: Function, time: number) {
+  const stack = new Error().stack?.split(EOL).slice(1).join(EOL);
+  setTimeout(() => {
+    runWithErrorHandler(cb, "setTimeout", stack);
+  }, time);
+}
 
-  function queueMicrotask(task: () => void) {
-    const stack = new Error().stack?.split(EOL).slice(1).join(EOL);
+function __setInterval_proxy(cb: Function, time: number) {
+  const stack = new Error().stack?.split(EOL).slice(1).join(EOL);
+  setInterval(() => {
+    runWithErrorHandler(cb, "setInterval", stack);
+  }, time);
+}
 
-    if (onNextMicrotask) {
-      onNextMicrotask.push(task);
-    }
-
-    onNextMicrotask = [task];
-
-    imports.mainloop.idle_add(() => {
-      if (!onNextMicrotask) return;
-      const tasks = onNextMicrotask;
-      onNextMicrotask = undefined;
-      for (const task of tasks!) {
-        runWithErrorHandler(task, "queueMicrotask", stack);
-      }
-    }, -2000);
-  }
-
-  return { queueMicrotask };
-});
+export { __setInterval_proxy, __setTimeout_proxy };

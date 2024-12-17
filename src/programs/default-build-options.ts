@@ -8,6 +8,8 @@ const defaultBuildOptions = {
   bundle: true,
   define: {
     console: "__console_proxy",
+    setTimeout: "__setTimeout_proxy",
+    setInterval: "__setInterval_proxy",
   },
 } as const satisfies Partial<BuildOptions>;
 

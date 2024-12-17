@@ -32,7 +32,7 @@ async function buildInitBundle(scriptsFilepaths: string[], program: Program) {
         .join("\n")
     }`.trim()
     + dedent`
-      const modules = [${modules.map((m) => m.name + ",")}];
+      const modules = [${modules.map((m) => m.name).join(", ")}];
       for (const module of modules) {
         const entries = Object.entries(module);
         for (const [key, value] of entries) {
@@ -41,6 +41,8 @@ async function buildInitBundle(scriptsFilepaths: string[], program: Program) {
           }
           Object.defineProperty(globalThis, key, {
             value: value,
+            writable: false,
+            configurable: false,
           });
         }
       }
@@ -93,7 +95,16 @@ async function buildInitBundle(scriptsFilepaths: string[], program: Program) {
   });
 
   if (result.errors.length > 0) {
-    throw new Error(result.errors[0]!.text);
+    throw new AggregateError(
+      result.errors.map(e =>
+        `[${e.pluginName}] ${e.text}${e.detail ? `\n${String(e.detail)}` : ""}${
+          e.location
+            ? `\n  ${e.location.file}:${e.location.line}`
+            : ""
+        }`
+      ),
+      "Failed to build the bundle containing the runtime injection code.",
+    );
   }
 
   const [out] = result.outputFiles;

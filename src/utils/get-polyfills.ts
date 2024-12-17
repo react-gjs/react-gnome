@@ -147,7 +147,16 @@ registerPolyfills(...p${i}keys)(() => {
   });
 
   if (result.errors.length > 0) {
-    throw new Error(result.errors[0]!.text);
+    throw new AggregateError(
+      result.errors.map(e =>
+        `[${e.pluginName}] ${e.text}${e.detail ? `\n${String(e.detail)}` : ""}${
+          e.location
+            ? `\n  ${e.location.file}:${e.location.line}`
+            : ""
+        }`
+      ),
+      "Failed to build the bundle containing the polyfills code.",
+    );
   }
 
   const [out] = result.outputFiles;
