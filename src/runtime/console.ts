@@ -2,6 +2,13 @@ import Gio from "gi://Gio";
 import GLib from "gi://GLib?version=2.0";
 import { SourceMap, SourceMapReader } from "./helpers/sourcemap-reader";
 
+type AppSourceMaps = SourceMap & {
+  rowOffset: number;
+  colOffset: number;
+  root: string;
+  wd: string;
+};
+
 declare global {
   const __MODE__: "development" | "production";
   const __SOURCE_MAPS_ENABLED__: boolean;
@@ -11,7 +18,7 @@ const EOL = "\n";
 
 const COLOR = {
   // info labels colors
-  Red: "\u001b[38;5;160m",
+  Red: "\u001b[38;5;196m",
   Blue: "\u001b[38;5;39m",
   Purple: "\u001b[38;5;93m",
   Yellow: "\u001b[38;5;220m",
@@ -25,6 +32,11 @@ const COLOR = {
   BracketMagenta: "\u001b[38;5;165m",
   BracketGrey: "\u001b[38;5;251m",
   Key: "\u001b[38;5;252m",
+
+  // error formatting
+  RedMsg: "\u001b[38;5;160m",
+  CyanStack: "\u001b[38;5;117m",
+  CausedByGrey: "\u001b[38;5;247m",
 
   Reset: "\u001b[0m",
 };
@@ -89,6 +101,21 @@ function keyClr(text: string) {
   return `${COLOR.Key}${text}${COLOR.Reset}`;
 }
 
+function errMessageRed(text: string) {
+  if (!ConsoleUtils.pretty) return text;
+  return `${COLOR.RedMsg}${text}${COLOR.Reset}`;
+}
+
+function stackTraceCyan(text: string) {
+  if (!ConsoleUtils.pretty) return text;
+  return `${COLOR.CyanStack}${text}${COLOR.Reset}`;
+}
+
+function causedByGrey(text: string) {
+  if (!ConsoleUtils.pretty) return text;
+  return `${COLOR.CausedByGrey}${text}${COLOR.Reset}`;
+}
+
 const BRACKET_COLORS = [
   bracketBlue,
   bracketYellow,
@@ -140,227 +167,246 @@ type FmtContext = {
   currentLocation: string;
 };
 
-function fmtError(err: Error | GLib.Error): string {
-  const trace = StacktraceResolver.mapStackTrace(err.stack?.trim() ?? "");
-  return `${err.name}: ${err.message}${EOL}${
-    err.stack ? addIndent(trace, 2) : "No stack trace available"
-  }`;
-}
+class Formatter {
+  static error(err: Error | GLib.Error, ctx: FmtContext): string {
+    const trace = StacktraceResolver.mapStackTrace(err.stack?.trim() ?? "");
+    const msg = errMessageRed(`${err.name}: ${err.message}`);
+    const str = `${msg}${EOL}${
+      err.stack ? stackTraceCyan(trace) : "No stack trace available"
+    }`;
 
-function fmtKey(key: unknown): string {
-  switch (typeof key) {
-    case "number":
-    case "boolean":
-      return String(key);
-    case "bigint":
-      return `${key}n`;
-    case "string":
-      return JSON.stringify(key);
-    case "function":
-      return `[Function ${key.name}]`;
-    case "symbol":
-      return `[Symbol ${key.toString()}]`;
-    case "undefined":
-      return "undefined";
-    case "object": {
-      if (key === null) return "null";
-      return "Object";
+    if ("cause" in err && err.cause != null) {
+      const causeFmtd = addIndent(
+        Formatter.auto(err.cause, {
+          ...ctx,
+          depth: 1,
+        }),
+        2,
+      );
+      return `${str}\n\n${causedByGrey("Caused by:")}\n${causeFmtd}`;
+    }
+
+    return str;
+  }
+
+  static key(key: unknown): string {
+    switch (typeof key) {
+      case "number":
+      case "boolean":
+        return String(key);
+      case "bigint":
+        return `${key}n`;
+      case "string":
+        return JSON.stringify(key);
+      case "function":
+        return `[Function ${key.name}]`;
+      case "symbol":
+        return `[Symbol ${key.toString()}]`;
+      case "undefined":
+        return "undefined";
+      case "object": {
+        if (key === null) return "null";
+        return "Object";
+      }
     }
   }
-}
 
-function fmtMap(map: Map<unknown, unknown>, ctx: FmtContext): string {
-  const indent = makeIndent(ctx.depth);
+  static map(map: Map<unknown, unknown>, ctx: FmtContext): string {
+    const indent = makeIndent(ctx.depth);
 
-  ctx.parentRefs.set(map, ctx.currentLocation);
+    ctx.parentRefs.set(map, ctx.currentLocation);
 
-  let fmtd = `Map${bracket("<", ctx.depth)}${EOL}`;
-  for (let [key, value] of map) {
-    key = fmtKey(key);
-    const nextCtx: FmtContext = {
-      parentRefs: ctx.parentRefs,
-      depth: ctx.depth + 1,
-      currentLocation: `${ctx.currentLocation}.${key}`,
-    };
-    const fmtv = fmt(value, nextCtx);
-    fmtd += `${indent}${keyClr(String(key))}: ${fmtv},${EOL}`;
-  }
-  fmtd += `${makeIndent(ctx.depth - 1)}${bracket(">", ctx.depth)}`;
-
-  ctx.parentRefs.delete(map);
-
-  return fmtd;
-}
-
-function fmtSet(set: Set<unknown>, ctx: FmtContext): string {
-  const indent = makeIndent(ctx.depth);
-
-  ctx.parentRefs.set(set, ctx.currentLocation);
-
-  let fmtd = `Set${bracket("<", ctx.depth)}${EOL}`;
-  for (const value of set) {
-    const nextCtx: FmtContext = {
-      parentRefs: ctx.parentRefs,
-      depth: ctx.depth + 1,
-      currentLocation: `${ctx.currentLocation}.<SetEntry>`,
-    };
-    const fmtv = fmt(value, nextCtx);
-    fmtd += `${indent}${fmtv},${EOL}`;
-  }
-  fmtd += `${makeIndent(ctx.depth - 1)}${bracket(">", ctx.depth)}`;
-
-  ctx.parentRefs.delete(set);
-
-  return fmtd;
-}
-
-function fmtArray(arr: Array<unknown> | TypedArray, ctx: FmtContext): string {
-  const indent = makeIndent(ctx.depth);
-
-  ctx.parentRefs.set(arr, ctx.currentLocation);
-
-  const entries: string[] = [];
-  for (let i = 0; i < arr.length; i++) {
-    const value = arr[i];
-    const nextCtx: FmtContext = {
-      parentRefs: ctx.parentRefs,
-      depth: ctx.depth + 1,
-      currentLocation: `${ctx.currentLocation}[${i}]`,
-    };
-    const fmtv = fmt(value, nextCtx);
-    entries.push(fmtv);
-  }
-  let fmtd = bracket("[", ctx.depth);
-  const totalEntriesLen = entries.reduce((sum, e) => sum + e.length, 0);
-  if (totalEntriesLen < 28) {
-    fmtd += `${entries.join(", ")}${bracket("]", ctx.depth)}`;
-  } else {
-    fmtd += `${EOL}${
-      entries
-        .map((e) => `${indent}${e}`)
-        .join(
-          `,${EOL}`,
-        )
-    },${EOL}${makeIndent(ctx.depth - 1)}${bracket("]", ctx.depth)}`;
-  }
-
-  ctx.parentRefs.delete(arr);
-
-  return fmtd;
-}
-
-function fmtTypedArray(arr: TypedArray, ctx: FmtContext): string {
-  const typedArrayName = arr.constructor.name;
-  return `${typedArrayName} ${fmtArray(arr, ctx)}`;
-}
-
-function fmtPlainObject(obj: Record<any, unknown>, ctx: FmtContext): string {
-  const indent = makeIndent(ctx.depth);
-
-  ctx.parentRefs.set(obj, ctx.currentLocation);
-
-  let fmtd = "";
-  if ("constructor" in obj && obj.constructor.name !== "Object") {
-    fmtd += `${obj.constructor.name} `;
-    // @ts-expect-error
-  } else if (obj[Symbol.toStringTag] === "GIRepositoryNamespace") {
-    // @ts-expect-error
-    fmtd += `[${obj[Symbol.toStringTag]} ${obj.__name__}] `;
-  }
-
-  fmtd += `${bracket("{", ctx.depth)}${EOL}`;
-  const keys = Object.keys(obj);
-  if (keys.length > 0) {
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]!;
-      const value = obj[key];
+    let fmtd = `Map${bracket("<", ctx.depth)}${EOL}`;
+    for (let [key, value] of map) {
+      key = Formatter.key(key);
       const nextCtx: FmtContext = {
         parentRefs: ctx.parentRefs,
         depth: ctx.depth + 1,
         currentLocation: `${ctx.currentLocation}.${key}`,
       };
-      const fmtv = fmt(value, nextCtx);
+      const fmtv = Formatter.auto(value, nextCtx);
       fmtd += `${indent}${keyClr(String(key))}: ${fmtv},${EOL}`;
     }
-    fmtd += `${makeIndent(ctx.depth - 1)}${bracket("}", ctx.depth)}`;
-  } else {
-    fmtd = fmtd.substring(0, fmtd.length - 1);
-    fmtd += bracket("}", ctx.depth);
+    fmtd += `${makeIndent(ctx.depth - 1)}${bracket(">", ctx.depth)}`;
+
+    ctx.parentRefs.delete(map);
+
+    return fmtd;
   }
 
-  ctx.parentRefs.delete(obj);
+  static set(set: Set<unknown>, ctx: FmtContext): string {
+    const indent = makeIndent(ctx.depth);
 
-  return fmtd;
-}
+    ctx.parentRefs.set(set, ctx.currentLocation);
 
-function fmtObject(obj: object, ctx: FmtContext): string {
-  if (ctx.parentRefs.has(obj)) {
-    const ref = ctx.parentRefs.get(obj);
-    return `## Recursive reference [${ref}] ##`;
+    let fmtd = `Set${bracket("<", ctx.depth)}${EOL}`;
+    for (const value of set) {
+      const nextCtx: FmtContext = {
+        parentRefs: ctx.parentRefs,
+        depth: ctx.depth + 1,
+        currentLocation: `${ctx.currentLocation}.<SetEntry>`,
+      };
+      const fmtv = Formatter.auto(value, nextCtx);
+      fmtd += `${indent}${fmtv},${EOL}`;
+    }
+    fmtd += `${makeIndent(ctx.depth - 1)}${bracket(">", ctx.depth)}`;
+
+    ctx.parentRefs.delete(set);
+
+    return fmtd;
   }
 
-  if ("toConsolePrint" in obj && typeof obj.toConsolePrint === "function") {
-    const objStr = obj.toConsolePrint();
-    if (typeof objStr === "string") {
-      return addIndent(objStr, ctx.depth, 1);
+  static array(arr: Array<unknown> | TypedArray, ctx: FmtContext): string {
+    const indent = makeIndent(ctx.depth);
+
+    ctx.parentRefs.set(arr, ctx.currentLocation);
+
+    const entries: string[] = [];
+    for (let i = 0; i < arr.length; i++) {
+      const value = arr[i];
+      const nextCtx: FmtContext = {
+        parentRefs: ctx.parentRefs,
+        depth: ctx.depth + 1,
+        currentLocation: `${ctx.currentLocation}[${i}]`,
+      };
+      const fmtv = Formatter.auto(value, nextCtx);
+      entries.push(fmtv);
+    }
+    let fmtd = bracket("[", ctx.depth);
+    const totalEntriesLen = entries.reduce((sum, e) => sum + e.length, 0);
+    if (totalEntriesLen < 28) {
+      fmtd += `${entries.join(", ")}${bracket("]", ctx.depth)}`;
+    } else {
+      fmtd += `${EOL}${
+        entries
+          .map((e) => `${indent}${e}`)
+          .join(
+            `,${EOL}`,
+          )
+      },${EOL}${makeIndent(ctx.depth - 1)}${bracket("]", ctx.depth)}`;
+    }
+
+    ctx.parentRefs.delete(arr);
+
+    return fmtd;
+  }
+
+  static typedArray(arr: TypedArray, ctx: FmtContext): string {
+    const typedArrayName = arr.constructor.name;
+    return `${typedArrayName} ${Formatter.array(arr, ctx)}`;
+  }
+
+  static plainObject(obj: Record<any, unknown>, ctx: FmtContext): string {
+    const indent = makeIndent(ctx.depth);
+
+    ctx.parentRefs.set(obj, ctx.currentLocation);
+
+    let fmtd = "";
+    if ("constructor" in obj && obj.constructor.name !== "Object") {
+      fmtd += `${obj.constructor.name} `;
+      // @ts-expect-error
+    } else if (obj[Symbol.toStringTag] === "GIRepositoryNamespace") {
+      // @ts-expect-error
+      fmtd += `[${obj[Symbol.toStringTag]} ${obj.__name__}] `;
+    }
+
+    fmtd += `${bracket("{", ctx.depth)}${EOL}`;
+    const keys = Object.keys(obj);
+    if (keys.length > 0) {
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i]!;
+        const value = obj[key];
+        const nextCtx: FmtContext = {
+          parentRefs: ctx.parentRefs,
+          depth: ctx.depth + 1,
+          currentLocation: `${ctx.currentLocation}.${key}`,
+        };
+        const fmtv = Formatter.auto(value, nextCtx);
+        fmtd += `${indent}${keyClr(String(key))}: ${fmtv},${EOL}`;
+      }
+      fmtd += `${makeIndent(ctx.depth - 1)}${bracket("}", ctx.depth)}`;
+    } else {
+      fmtd = fmtd.substring(0, fmtd.length - 1);
+      fmtd += bracket("}", ctx.depth);
+    }
+
+    ctx.parentRefs.delete(obj);
+
+    return fmtd;
+  }
+
+  static object(obj: object, ctx: FmtContext): string {
+    if (ctx.parentRefs.has(obj)) {
+      const ref = ctx.parentRefs.get(obj);
+      return `## Recursive reference [${ref}] ##`;
+    }
+
+    if ("toConsolePrint" in obj && typeof obj.toConsolePrint === "function") {
+      const objStr = obj.toConsolePrint();
+      if (typeof objStr === "string") {
+        return addIndent(objStr, ctx.depth, 1);
+      }
+    }
+
+    if (obj instanceof Error || obj instanceof GLib.Error) {
+      return addIndent(
+        Formatter.error(obj, ctx),
+        ((ctx.depth + 1) * 2) + 1,
+        1,
+      );
+    }
+    if (obj instanceof Map) {
+      return Formatter.map(obj, ctx);
+    }
+    if (obj instanceof Set) {
+      return Formatter.set(obj, ctx);
+    }
+    if (isTypedArray(obj)) {
+      return Formatter.typedArray(obj, ctx);
+    }
+    if (isArray(obj)) {
+      return Formatter.array(obj, ctx);
+    }
+    return Formatter.plainObject(obj as any, ctx);
+  }
+
+  /**
+   * Automatically detect the value type and format it accordingly.
+   */
+  static auto(
+    item: unknown,
+    ctx: FmtContext = { depth: 1, parentRefs: new Map(), currentLocation: "" },
+  ): string {
+    switch (typeof item) {
+      case "number":
+      case "boolean":
+        return String(item);
+      case "bigint":
+        return `${item}n`;
+      case "string":
+        if (ctx.depth === 1) {
+          return item;
+        }
+        return JSON.stringify(item);
+      case "function":
+        return `[Function ${item.name}]`;
+      case "symbol":
+        return `[Symbol ${item.toString()}]`;
+      case "undefined":
+        return "undefined";
+      case "object": {
+        if (item === null) return "null";
+        return Formatter.object(item, ctx);
+      }
     }
   }
-
-  if (obj instanceof Error) {
-    return addIndent(fmtError(obj), ((ctx.depth + 1) * 2) + 1, 1);
-  }
-  if (obj instanceof GLib.Error) {
-    return fmtError(obj);
-  }
-  if (obj instanceof Map) {
-    return fmtMap(obj, ctx);
-  }
-  if (obj instanceof Set) {
-    return fmtSet(obj, ctx);
-  }
-  if (isTypedArray(obj)) {
-    return fmtTypedArray(obj, ctx);
-  }
-  if (isArray(obj)) {
-    return fmtArray(obj, ctx);
-  }
-  return fmtPlainObject(obj as any, ctx);
 }
 
-function fmt(
-  item: unknown,
-  ctx: FmtContext = { depth: 1, parentRefs: new Map(), currentLocation: "" },
-): string {
-  switch (typeof item) {
-    case "number":
-    case "boolean":
-      return String(item);
-    case "bigint":
-      return `${item}n`;
-    case "string":
-      return JSON.stringify(item);
-    case "function":
-      return `[Function ${item.name}]`;
-    case "symbol":
-      return `[Symbol ${item.toString()}]`;
-    case "undefined":
-      return "undefined";
-    case "object": {
-      if (item === null) return "null";
-      return fmtObject(item, ctx);
-    }
-  }
-}
-
-function fmtArgs(args: unknown[]) {
+function formatArgs(args: unknown[]) {
   args = args.slice();
   for (let i = 0; i < args.length; i++) {
     const value = args[i];
-    if (value instanceof Error) {
-      args[i] = fmtError(value);
-    } else if (typeof value === "object" && value !== null) {
-      args[i] = fmt(value);
-    }
+    args[i] = Formatter.auto(value);
   }
   return args;
 }
@@ -371,33 +417,6 @@ function fmtArgs(args: unknown[]) {
  */
 function hasFormatSpecifiers(str: string) {
   return specifierTest.test(str);
-}
-
-/**
- * @param {any} item an item to format
- * @returns {string}
- */
-function formatOptimally(item: unknown) {
-  // Handle optimal error formatting.
-  if (item instanceof Error || item instanceof GLib.Error) {
-    return `${item.toString()}${item.stack ? EOL : ""}${
-      item.stack
-        ?.split(EOL)
-        // Pad each stacktrace line.
-        .map((line) => line.padStart(2, " "))
-        .join(EOL)
-    }`;
-  }
-
-  if (typeof item === "object" && item !== null) {
-    if (item.constructor?.name !== "Object") {
-      return `${item.constructor?.name} ${fmt(item)}`;
-    } else if (String(item) === "GIRepositoryNamespace") {
-      // @ts-expect-error
-      return `[${String(item)} ${item.__name__}]`;
-    }
-  }
-  return fmt(item);
 }
 
 function addIndent(text: string, indent: number, startFromLine = 0) {
@@ -526,7 +545,7 @@ class ConsoleUtils {
     }
 
     if (args.length === 1) {
-      this.print(logLevel, fmtArgs(args), options);
+      this.print(logLevel, formatArgs(args), options);
       return undefined;
     }
 
@@ -534,7 +553,7 @@ class ConsoleUtils {
 
     // If first does not contain any format specifiers, don't call Formatter
     if (typeof first !== "string" || !hasFormatSpecifiers(first)) {
-      this.print(logLevel, fmtArgs(args), options);
+      this.print(logLevel, formatArgs(args), options);
       return undefined;
     }
 
@@ -576,10 +595,10 @@ class ConsoleUtils {
         }
         break;
       case "%o":
-        converted = formatOptimally(current);
+        converted = Formatter.auto(current);
         break;
       case "%O":
-        converted = fmt(current);
+        converted = Formatter.auto(current);
         break;
       case "%c":
         converted = "";
@@ -594,7 +613,7 @@ class ConsoleUtils {
     }
 
     if (!hasFormatSpecifiers(target)) {
-      return [target, ...fmtArgs(args.slice(2))];
+      return [target, ...formatArgs(args.slice(2))];
     }
 
     const result = [target, ...args.slice(2)];
@@ -741,7 +760,7 @@ const Console = {
   },
 
   dir(item: unknown, options: never) {
-    const object = fmt(item);
+    const object = Formatter.auto(item);
     ConsoleUtils.print(LogLevel.Dir, [object], options);
   },
 
@@ -816,13 +835,6 @@ const Console = {
   mapStackTrace(stackTrace: string) {
     return StacktraceResolver.mapStackTrace(stackTrace);
   },
-};
-
-type AppSourceMaps = SourceMap & {
-  rowOffset: number;
-  colOffset: number;
-  root: string;
-  wd: string;
 };
 
 class StacktraceResolver {
