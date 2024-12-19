@@ -38,6 +38,7 @@ const COLOR = {
   CyanStack: "\u001b[38;5;117m",
   CausedByGrey: "\u001b[38;5;247m",
 
+  Dim: "\u001b[38;5;241m",
   Reset: "\u001b[0m",
 };
 
@@ -114,6 +115,11 @@ function stackTraceCyan(text: string) {
 function causedByGrey(text: string) {
   if (!ConsoleUtils.pretty) return text;
   return `${COLOR.CausedByGrey}${text}${COLOR.Reset}`;
+}
+
+function dim(text: string) {
+  if (!ConsoleUtils.pretty) return text;
+  return `${COLOR.Dim}${text}${COLOR.Reset}`;
 }
 
 const BRACKET_COLORS = [
@@ -304,12 +310,10 @@ class Formatter {
     ctx.parentRefs.set(obj, ctx.currentLocation);
 
     let fmtd = "";
-    if ("constructor" in obj && obj.constructor.name !== "Object") {
-      fmtd += `${obj.constructor.name} `;
-      // @ts-expect-error
-    } else if (obj[Symbol.toStringTag] === "GIRepositoryNamespace") {
-      // @ts-expect-error
-      fmtd += `[${obj[Symbol.toStringTag]} ${obj.__name__}] `;
+
+    const consturctor = Formatter.constructorName(obj);
+    if (consturctor) {
+      fmtd += dim(consturctor) + " ";
     }
 
     fmtd += `${bracket("{", ctx.depth)}${EOL}`;
@@ -338,38 +342,73 @@ class Formatter {
   }
 
   static object(obj: object, ctx: FmtContext): string {
-    if (ctx.parentRefs.has(obj)) {
-      const ref = ctx.parentRefs.get(obj);
-      return `## Recursive reference [${ref}] ##`;
-    }
-
-    if ("toConsolePrint" in obj && typeof obj.toConsolePrint === "function") {
-      const objStr = obj.toConsolePrint();
-      if (typeof objStr === "string") {
-        return addIndent(objStr, ctx.depth, 1);
+    try {
+      if (ctx.parentRefs.has(obj)) {
+        let ref = ctx.parentRefs.get(obj) ?? "";
+        if (ref?.length == 0) ref = "$";
+        return `## Recursive reference to: ${ref} ##`;
       }
-    }
 
-    if (obj instanceof Error || obj instanceof GLib.Error) {
-      return addIndent(
-        Formatter.error(obj, ctx),
-        ctx.depth * 2,
-        1,
-      );
+      if (this.excedesDepth(ctx)) {
+        if (obj instanceof Error || obj instanceof GLib.Error) {
+          return `Error<...>`;
+        }
+        if (obj instanceof Map) {
+          return `Map<...>`;
+        }
+        if (obj instanceof Set) {
+          return `Set<...>`;
+        }
+        if (isTypedArray(obj)) {
+          return `TypedArray<...>`;
+        }
+        if (isArray(obj)) {
+          return `Array<...>`;
+        }
+
+        const consturctor = Formatter.constructorName(obj);
+        if (consturctor) {
+          return consturctor + "<...>";
+        }
+
+        return `Object<...>`;
+      } else {
+        if (
+          "toConsolePrint" in obj && typeof obj.toConsolePrint === "function"
+        ) {
+          const objStr = obj.toConsolePrint();
+          if (typeof objStr === "string") {
+            return addIndent(objStr, ctx.depth, 1);
+          }
+        }
+
+        if (obj instanceof Error || obj instanceof GLib.Error) {
+          return addIndent(
+            Formatter.error(obj, ctx),
+            ctx.depth * 2,
+            1,
+          );
+        }
+        if (obj instanceof Map) {
+          return Formatter.map(obj, ctx);
+        }
+        if (obj instanceof Set) {
+          return Formatter.set(obj, ctx);
+        }
+        if (isTypedArray(obj)) {
+          return Formatter.typedArray(obj, ctx);
+        }
+        if (isArray(obj)) {
+          return Formatter.array(obj, ctx);
+        }
+        return Formatter.plainObject(obj as any, ctx);
+      }
+    } catch (err) {
+      setTimeout(() => {
+        Console.error(err);
+      }, 0);
+      return "## Failed to print the object due to an error ##";
     }
-    if (obj instanceof Map) {
-      return Formatter.map(obj, ctx);
-    }
-    if (obj instanceof Set) {
-      return Formatter.set(obj, ctx);
-    }
-    if (isTypedArray(obj)) {
-      return Formatter.typedArray(obj, ctx);
-    }
-    if (isArray(obj)) {
-      return Formatter.array(obj, ctx);
-    }
-    return Formatter.plainObject(obj as any, ctx);
   }
 
   /**
@@ -400,6 +439,21 @@ class Formatter {
         if (item === null) return "null";
         return Formatter.object(item, ctx);
       }
+    }
+  }
+
+  private static excedesDepth(ctx: FmtContext) {
+    return ConsoleUtils.maxObjectDepth > 0
+      && ctx.depth > ConsoleUtils.maxObjectDepth;
+  }
+
+  private static constructorName(obj: object) {
+    if ("constructor" in obj && obj.constructor.name !== "Object") {
+      return obj.constructor.name;
+      // @ts-expect-error
+    } else if (obj[Symbol.toStringTag] === "GIRepositoryNamespace") {
+      // @ts-expect-error
+      return `[${obj[Symbol.toStringTag]} ${obj.__name__}]`;
     }
   }
 }
@@ -499,6 +553,7 @@ class ConsoleUtils {
   private static logListeners: Array<
     (logType: LogLevel, message: string) => {}
   > = [];
+  static maxObjectDepth = 0;
   static pretty = __MODE__ === "development";
 
   static incrementCounter(label: string) {
@@ -854,6 +909,10 @@ const Console = {
     ConsoleUtils.pretty = !!pretty;
   },
 
+  setMaxDepth(depth: number) {
+    ConsoleUtils.maxObjectDepth = Math.max(0, Math.round(depth));
+  },
+
   mapStackTrace(stackTrace: string) {
     return StacktraceResolver.mapStackTrace(stackTrace);
   },
@@ -868,6 +927,10 @@ const Console = {
       fmtd = addIndent(fmtd, indent);
     }
     return fmtd;
+  },
+
+  format(any: any): string {
+    return Formatter.auto(any);
   },
 
   onLogPrinted(cb: (logType: LogLevel, message: string) => {}) {

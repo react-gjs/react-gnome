@@ -27,6 +27,10 @@ declare global {
      */
     setPretty(pretty: boolean): void;
     /**
+     * Set the maximum depth of the objects printed in the console.
+     */
+    setMaxDepth(depth: number): void;
+    /**
      * Given a stack trace, returns that same stack trace with all the paths
      * replaced with the paths of the original source files in the project
      * (if source maps are available).
@@ -40,6 +44,11 @@ declare global {
      * it when given an error to print.
      */
     formatStackTrace(stackTrace: string, indent?: number): string;
+    /**
+     * Formats the given value in the same way the console would format it
+     * when given to print.
+     */
+    format(any: any): string;
     /**
      * Registers a listener callback that will be called whenever a log
      * message is printed out.
