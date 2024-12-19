@@ -1,8 +1,7 @@
 import path from "path";
 import { html, Output } from "termx-markup";
+import { getEntrypoint } from "../utils/get-entrypoint";
 import { getPlugins } from "../utils/get-plugins";
-import { getGlobalPolyfills } from "../utils/get-polyfills";
-import { getRuntimeInit } from "../utils/get-runtime-init";
 import { Program } from "./base";
 import { createBuildOptions } from "./default-build-options";
 
@@ -25,19 +24,15 @@ export class BundleProgram extends Program {
       Output.print(html` <span color="lightBlue"> Building... </span> `);
     }
 
-    const polyfills = await getGlobalPolyfills(this);
-    const initScript = await getRuntimeInit(this);
-
     await this.esbuildCtx.init(
-      createBuildOptions({
-        banner: { js: `${polyfills.bundle}\n${initScript.bundle}` },
-        entryPoints: [path.resolve(this.cwd, this.config.entrypoint)],
+      createBuildOptions(this, {
+        stdin: {
+          contents: getEntrypoint(this),
+          loader: "js",
+          resolveDir: this.cwd,
+        },
         outfile: path.resolve(this.cwd, this.config.outDir, "index.js"),
-        plugins: getPlugins(this, {
-          giRequirements: polyfills.requirements.concat(
-            initScript.requirements,
-          ),
-        }),
+        plugins: getPlugins(this),
         minify: this.config.minify ?? (this.isDev ? false : true),
         treeShaking: this.config.treeShake ?? (this.isDev ? false : true),
       }),

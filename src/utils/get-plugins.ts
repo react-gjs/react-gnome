@@ -14,7 +14,7 @@ export type AdditionalPlugins = {
 
 export const getPlugins = (
   program: Program,
-  options: ReactGtkEsbuildPluginOptions,
+  options?: ReactGtkEsbuildPluginOptions,
 ) => {
   const additionalPlugins = program.additionalPlugins();
 

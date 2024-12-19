@@ -29,7 +29,7 @@ export type ReactGtkEsbuildPluginOptions = {
 
 export const reactGtkPlugin = (
   program: Program,
-  options: ReactGtkEsbuildPluginOptions,
+  options?: ReactGtkEsbuildPluginOptions,
 ) => {
   const externalPackages = new Set(program.config.externalPackages ?? []);
   externalPackages.add("system");
@@ -41,7 +41,7 @@ export const reactGtkPlugin = (
       const gi = new GiImports(program.config.giVersions);
       const externalImports: ExternalImport[] = [];
 
-      for (const [name, version] of options.giRequirements ?? []) {
+      for (const [name, version] of options?.giRequirements ?? []) {
         gi.add(name, version);
       }
 

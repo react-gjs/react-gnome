@@ -46,3 +46,13 @@ export const registerPolyfills = <Names extends string>(
     }
   };
 };
+
+registerPolyfills.fromModule = (
+  module: Record<string, any>,
+) => {
+  const entries = Object.entries(module);
+  const names = entries.map(([name]) => name);
+  registerPolyfills(...names)(() => {
+    return module;
+  });
+};
