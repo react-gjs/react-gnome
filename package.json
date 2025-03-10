@@ -63,7 +63,7 @@
     "clify.js": "^1.0.0-beta.5",
     "dedent": "^1.5.3",
     "dilswer": "2.1.1",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.1",
     "fs-gjs": "^1.0.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
